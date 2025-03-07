@@ -1,9 +1,11 @@
 ---
-description:
-globs:
+description: 
+globs: 
+alwaysApply: false
 ---
 
 # Your rule content
 
-- You can @ files here
-- You can use markdown but dont have to
+- must use pnpm instead of npm
+- use next.js 14
+- use tailwindcss
