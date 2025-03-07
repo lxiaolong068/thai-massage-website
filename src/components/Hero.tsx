@@ -144,10 +144,10 @@ const Hero = () => {
             &quot;Revitalize your body and mind with the best massage therapy.&quot;
           </p>
           <div className="flex flex-row justify-center gap-3 sm:gap-8">
-            <Link href="/book" className="btn btn-primary text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
+            <Link href="/therapists" className="btn btn-primary text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
               BOOK NOW
             </Link>
-            <Link href="#contact" className="btn btn-outline text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
+            <Link href="/contact" className="btn btn-outline text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
               CONTACT US
             </Link>
           </div>

@@ -1,9 +1,16 @@
 import Link from 'next/link';
+import QRCodeContact from './QRCodeContact';
 
 const Footer = () => {
   return (
     <footer className="bg-dark text-white py-12">
       <div className="container">
+        {/* QR Code Contact Section - 移到上方 */}
+        <div className="mb-12 pb-8 border-b border-gray-800">
+          <h3 className="text-xl font-serif font-semibold mb-6 text-center">Connect With Us</h3>
+          <QRCodeContact />
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-serif font-semibold mb-4">The Victoria&apos;s Bangkok</h3>
@@ -38,22 +45,22 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="#services" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="/about" className="text-gray-300 hover:text-primary transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/#services" className="text-gray-300 hover:text-primary transition-colors">
                   Our Services
                 </Link>
               </li>
               <li>
-                <Link href="#prices" className="text-gray-300 hover:text-primary transition-colors">
-                  Prices
+                <Link href="/therapists" className="text-gray-300 hover:text-primary transition-colors">
+                  Therapists & Booking
                 </Link>
               </li>
               <li>
-                <Link href="#therapists" className="text-gray-300 hover:text-primary transition-colors">
-                  Our Therapists
-                </Link>
-              </li>
-              <li>
-                <Link href="#contact" className="text-gray-300 hover:text-primary transition-colors">
+                <Link href="/contact" className="text-gray-300 hover:text-primary transition-colors">
                   Contact Us
                 </Link>
               </li>

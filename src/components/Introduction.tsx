@@ -4,12 +4,12 @@ const Introduction = () => {
   return (
     <section className="py-16 md:py-24 bg-cream">
       <div className="container">
-        <h2 className="text-3xl md:text-4xl font-serif font-semibold text-center mb-4">Introduction</h2>
+        <h2 className="text-3xl md:text-4xl font-serif font-semibold text-center mb-4 text-black">Introduction</h2>
         
         {/* 黄色下划线装饰 */}
         <div className="w-24 h-1 bg-primary mx-auto mb-8"></div>
         
-        <p className="text-gray-600 italic text-center text-lg md:text-xl mb-12 max-w-3xl mx-auto">
+        <p className="text-black italic text-center text-lg md:text-xl mb-12 max-w-3xl mx-auto">
           &quot;Relax and rejuvenate with personalized massage therapy.&quot;
         </p>
         
@@ -21,7 +21,7 @@ const Introduction = () => {
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-md">
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-black leading-relaxed">
                 Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client&apos;s doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Victoria&apos;s outcall massage was more than just a service; it was a gateway to physical and mental renewal.
               </p>
             </div>

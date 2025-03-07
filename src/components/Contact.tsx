@@ -36,15 +36,15 @@ const Contact = () => {
   return (
     <section className="py-16 md:py-24 bg-light" id="contact">
       <div className="container">
-        <h2 className="section-title text-center mb-4">Contact Us</h2>
-        <p className="text-gray-600 text-center mb-12">
+        <h2 className="section-title text-center mb-4 text-black">Contact Us</h2>
+        <p className="text-black text-center mb-12">
           Book your massage session or inquire about our services
         </p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div>
-            <h3 className="text-2xl font-serif font-semibold mb-6">Get In Touch</h3>
-            <p className="text-gray-600 mb-8">
+            <h3 className="text-2xl font-serif font-semibold mb-6 text-black">Get In Touch</h3>
+            <p className="text-black mb-8">
               Have questions about our services or want to book a session? Fill out the form and we&apos;ll get back to you as soon as possible.
             </p>
             
@@ -58,7 +58,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold mb-1">Location</h4>
-                  <p className="text-gray-600">Bangkok, Thailand</p>
+                  <p className="text-black">Bangkok, Thailand</p>
                 </div>
               </div>
               
@@ -70,7 +70,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold mb-1">Phone</h4>
-                  <p className="text-gray-600">+66 XX XXX XXXX</p>
+                  <p className="text-black">+66 XX XXX XXXX</p>
                 </div>
               </div>
               
@@ -82,7 +82,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold mb-1">Email</h4>
-                  <p className="text-gray-600">info@victorias-bangkok.com</p>
+                  <p className="text-black">info@victorias-bangkok.com</p>
                 </div>
               </div>
               
@@ -94,7 +94,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold mb-1">Working Hours</h4>
-                  <p className="text-gray-600">Available 24/7</p>
+                  <p className="text-black">Available 24/7</p>
                 </div>
               </div>
             </div>
@@ -103,7 +103,7 @@ const Contact = () => {
           <div>
             <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
               <div className="mb-4">
-                <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Your Name</label>
+                <label htmlFor="name" className="block text-black font-medium mb-2">Your Name</label>
                 <input
                   type="text"
                   id="name"
@@ -116,7 +116,7 @@ const Contact = () => {
               </div>
               
               <div className="mb-4">
-                <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email Address</label>
+                <label htmlFor="email" className="block text-black font-medium mb-2">Email Address</label>
                 <input
                   type="email"
                   id="email"
@@ -129,7 +129,7 @@ const Contact = () => {
               </div>
               
               <div className="mb-4">
-                <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">Phone Number</label>
+                <label htmlFor="phone" className="block text-black font-medium mb-2">Phone Number</label>
                 <input
                   type="tel"
                   id="phone"
@@ -142,7 +142,7 @@ const Contact = () => {
               </div>
               
               <div className="mb-4">
-                <label htmlFor="service" className="block text-gray-700 font-medium mb-2">Select Service</label>
+                <label htmlFor="service" className="block text-black font-medium mb-2">Select Service</label>
                 <select
                   id="service"
                   name="service"
@@ -162,7 +162,7 @@ const Contact = () => {
               </div>
               
               <div className="mb-6">
-                <label htmlFor="message" className="block text-gray-700 font-medium mb-2">Your Message</label>
+                <label htmlFor="message" className="block text-black font-medium mb-2">Your Message</label>
                 <textarea
                   id="message"
                   name="message"

@@ -4,9 +4,9 @@ import About from '@/components/About';
 import Introduction from '@/components/Introduction';
 import Services from '@/components/Services';
 import Therapists from '@/components/Therapists';
-import Testimonials from '@/components/Testimonials';
+// import Testimonials from '@/components/Testimonials';
 import CallToAction from '@/components/CallToAction';
-import Contact from '@/components/Contact';
+// import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -19,9 +19,9 @@ export default function Home() {
         <Introduction />
         <Services />
         <Therapists />
-        <Testimonials />
+        {/* <Testimonials /> */}
         <CallToAction />
-        <Contact />
+        {/* <Contact /> */}
         <Footer />
       </div>
     </main>
