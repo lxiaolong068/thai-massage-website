@@ -5,7 +5,7 @@ import Introduction from '@/components/Introduction';
 import Services from '@/components/Services';
 import Therapists from '@/components/Therapists';
 // import Testimonials from '@/components/Testimonials';
-import CallToAction from '@/components/CallToAction';
+// import CallToAction from '@/components/CallToAction';
 // import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
@@ -20,7 +20,7 @@ export default function Home() {
         <Services />
         <Therapists />
         {/* <Testimonials /> */}
-        <CallToAction />
+        {/* <CallToAction /> */}
         {/* <Contact /> */}
         <Footer />
       </div>

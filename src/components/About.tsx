@@ -3,12 +3,12 @@ import Link from 'next/link';
 
 const About = () => {
   return (
-    <section className="py-16 md:py-24 bg-light" id="about">
+    <section className="section-container section-light" id="about">
       <div className="container">
         <div className="flex flex-col md:flex-row items-start gap-12">
           {/* 左侧标题、图片和按钮 */}
           <div className="md:w-2/5 mb-8 md:mb-0 relative">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-semibold mb-6 leading-tight text-black whitespace-normal">The victoria's outcall massage</h2>
+            <h2 className="title-lg text-3xl md:text-4xl leading-tight text-black whitespace-normal">The victoria&apos;s outcall massage</h2>
             
             {/* 图片放在标题下方 */}
             <div className="relative mb-8 rounded-lg overflow-hidden shadow-xl">
@@ -23,7 +23,7 @@ const About = () => {
             
             <Link 
               href="#" 
-              className="inline-flex items-center bg-primary text-dark font-medium px-6 py-3 rounded-full hover:bg-opacity-90 transition-all"
+              className="primary-button inline-flex items-center px-6"
             >
               LEARN MORE ABOUT US
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,7 +46,7 @@ const About = () => {
               {/* 卡片1 */}
               <div className="bg-cream rounded-lg p-6 shadow-md relative overflow-hidden">
                 <div className="flex items-start">
-                  <div className="bg-primary rounded-full p-3 mr-4 flex-shrink-0">
+                  <div className="icon-circle mr-4 flex-shrink-0">
                     <Image 
                       src="/images/icon-1.png" 
                       alt="The Victoria's Bangkok" 
@@ -55,9 +55,9 @@ const About = () => {
                     />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">The Victoria's Bangkok</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">The Victoria&apos;s Bangkok</h3>
                     <p className="text-gray-700">
-                      Thevictoria's Bangkok is a Professional outcall massage service in bangkok. All of our therapists are totally qualified and possess a diploma.
+                      Thevictoria&apos;s Bangkok is a Professional outcall massage service in bangkok. All of our therapists are totally qualified and possess a diploma.
                     </p>
                   </div>
                 </div>
@@ -66,7 +66,7 @@ const About = () => {
               {/* 卡片2 */}
               <div className="bg-cream rounded-lg p-6 shadow-md relative overflow-hidden">
                 <div className="flex items-start">
-                  <div className="bg-primary rounded-full p-3 mr-4 flex-shrink-0">
+                  <div className="icon-circle mr-4 flex-shrink-0">
                     <Image 
                       src="/images/icon-2.png" 
                       alt="Professional Outcall Massage Service" 
@@ -86,7 +86,7 @@ const About = () => {
               {/* 卡片3 */}
               <div className="bg-cream rounded-lg p-6 shadow-md relative overflow-hidden">
                 <div className="flex items-start">
-                  <div className="bg-primary rounded-full p-3 mr-4 flex-shrink-0">
+                  <div className="icon-circle mr-4 flex-shrink-0">
                     <Image 
                       src="/images/icon-3.png" 
                       alt="Vision and Mission" 

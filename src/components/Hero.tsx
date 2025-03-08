@@ -111,7 +111,7 @@ const Hero = () => {
       </div>
       
       {/* 轮播指示器 */}
-      <div className="absolute bottom-4 inset-x-0 flex justify-center gap-2 z-30">
+      <div className="absolute bottom-4 inset-x-0 flex-center gap-2 z-30">
         {sliderImages.map((_, index) => (
           <button
             key={index}
@@ -134,7 +134,7 @@ const Hero = () => {
       
       <div className="container relative z-30 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-semibold mb-2 sm:mb-6 leading-tight whitespace-nowrap sm:whitespace-normal">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl title-serif mb-2 sm:mb-6 leading-tight whitespace-nowrap sm:whitespace-normal">
             The victoria&apos;s outcall massage
           </h1>
           <p className="text-sm sm:text-base md:text-xl mb-1 sm:mb-3 text-gray-200">
@@ -143,7 +143,7 @@ const Hero = () => {
           <p className="text-sm sm:text-base md:text-xl mb-4 sm:mb-10 text-gray-200 max-w-2xl mx-auto">
             &quot;Revitalize your body and mind with the best massage therapy.&quot;
           </p>
-          <div className="flex flex-row justify-center gap-3 sm:gap-8">
+          <div className="flex-center gap-3 sm:gap-8">
             <Link href="/therapists" className="btn btn-primary text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
               BOOK NOW
             </Link>

@@ -56,6 +56,8 @@ thai-massage/
 │   │   └── ...             # 其他组件
 │   └── styles/             # 其他样式文件
 ├── scripts/                # 脚本文件
+│   ├── check-image-references.js  # 检查图片引用脚本
+│   ├── backup-unused-images.js    # 备份未使用图片脚本
 │   └── download-images.js  # 图片下载脚本
 ├── tailwind.config.js      # Tailwind配置
 ├── next.config.js          # Next.js配置
@@ -81,6 +83,65 @@ thai-massage/
 
 ### 5. 预约系统 (`src/app/book/page.tsx`)
 多步骤预约表单，包括服务选择、时间选择和个人信息填写。
+
+## 实用脚本工具
+
+项目包含几个实用的脚本工具，用于管理图片资源和项目维护：
+
+### 1. 检查图片引用 (`scripts/check-image-references.js`)
+
+这个脚本用于检查项目中的图片引用情况，帮助识别未使用的图片和缺失的图片。
+
+```bash
+node scripts/check-image-references.js
+```
+
+功能：
+- 扫描源代码中的所有图片引用
+- 检查引用的图片是否存在
+- 识别未使用的图片资源
+- 为缺失的图片创建占位图
+
+### 2. 备份未使用的图片 (`scripts/backup-unused-images.js`)
+
+这个脚本用于将未使用的图片移动到备份目录，减少项目体积的同时保留这些资源以备将来使用。
+
+```bash
+node scripts/backup-unused-images.js
+```
+
+功能：
+- 识别未被代码引用的图片
+- 将这些图片移动到 `public/images_backup` 目录
+- 保留原始文件名，便于将来恢复
+
+### 3. 下载图片资源 (`scripts/download-images.js`)
+
+这个脚本用于从网络下载项目所需的图片资源。
+
+```bash
+node scripts/download-images.js
+```
+
+功能：
+- 从预定义的URL列表下载图片
+- 自动保存到 `public/images` 目录
+- 跳过已存在的图片，避免重复下载
+
+### 4. 代码优化检查 (`scripts/optimize-code.js`)
+
+这个脚本用于检查和优化项目中的代码质量，帮助识别潜在的问题和改进机会。
+
+```bash
+node scripts/optimize-code.js
+```
+
+功能：
+- 检查未使用的导入和变量
+- 识别重复的样式类组合
+- 检测过大的组件文件
+- 发现未被使用的组件
+- 提供代码优化建议
 
 ## 开始使用
 
@@ -212,6 +273,8 @@ Vercel提供了内置的监控和分析工具：
 - 组件懒加载
 - 代码分割
 - 静态生成和增量静态再生成
+- 自定义Tailwind CSS组件，减少重复样式类
+- 代码优化检查工具，帮助识别和修复代码问题
 
 ## 故障排除
 

@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useSearchParams } from 'next/navigation';
 
 export default function TherapistsPage() {
+  // 获取URL参数
+  const searchParams = useSearchParams();
+  const therapistNameFromUrl = searchParams.get('name');
+
   // 按摩师数据
   const therapists = [
     {
@@ -101,6 +106,16 @@ export default function TherapistsPage() {
         : [...prev, id]
     );
   };
+
+  // 处理URL中的therapist参数
+  useEffect(() => {
+    if (therapistNameFromUrl) {
+      const therapist = therapists.find(t => t.name === therapistNameFromUrl);
+      if (therapist) {
+        selectTherapist(therapist.id);
+      }
+    }
+  }, [therapistNameFromUrl]);
 
   // 验证表单字段
   const validateField = (name: string, value: string) => {

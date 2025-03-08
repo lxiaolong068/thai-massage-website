@@ -53,6 +53,75 @@ body {
     @apply text-2xl sm:text-3xl md:text-4xl font-serif font-semibold mb-6;
   }
   
+  /* 新增自定义组件，解决重复样式类的问题 */
+  .section-container {
+    @apply py-16 md:py-24;
+  }
+  
+  .section-light {
+    @apply bg-light;
+  }
+  
+  .section-dark {
+    @apply bg-dark text-white;
+  }
+  
+  .section-cream {
+    @apply bg-cream;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg overflow-hidden shadow-md;
+  }
+  
+  .card-hover {
+    @apply transition-transform hover:scale-105;
+  }
+  
+  .title-serif {
+    @apply font-serif font-semibold;
+  }
+  
+  .title-lg {
+    @apply text-2xl font-serif font-semibold mb-4;
+  }
+  
+  .title-md {
+    @apply text-xl font-serif font-semibold mb-3;
+  }
+  
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+  
+  .flex-col-center {
+    @apply flex flex-col items-center;
+  }
+  
+  .grid-responsive {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-8;
+  }
+  
+  .primary-button {
+    @apply bg-primary text-dark font-medium px-8 py-3 rounded-full hover:bg-opacity-90 transition-all;
+  }
+  
+  .icon-circle {
+    @apply bg-primary bg-opacity-20 rounded-full p-4;
+  }
+  
+  .image-container {
+    @apply relative h-48;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
   /* Mobile optimizations */
   @media (max-width: 640px) {
     .container {

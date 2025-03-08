@@ -56,6 +56,8 @@ thai-massage/
 │   │   └── ...             # Other components
 │   └── styles/             # Other style files
 ├── scripts/                # Script files
+│   ├── check-image-references.js  # Image reference checking script
+│   ├── backup-unused-images.js    # Unused image backup script
 │   └── download-images.js  # Image download script
 ├── tailwind.config.js      # Tailwind configuration
 ├── next.config.js          # Next.js configuration
@@ -67,11 +69,11 @@ thai-massage/
 
 ## Component Description
 
-### 1. Home Component (`src/app/page.tsx`)
-The home component integrates multiple sub-components, including carousel, service introduction, massage therapist team, etc.
+### 1. Home Page Component (`src/app/page.tsx`)
+The home page component integrates multiple sub-components, including carousel, service introduction, massage therapist team, etc.
 
 ### 2. Carousel Component (`src/components/Hero.tsx`)
-Displays beautiful massage service images with automatic carousel and manual switching.
+Displays beautiful massage service images with automatic and manual carousel functionality.
 
 ### 3. Services Component (`src/components/Services.tsx`)
 Displays various massage services, detailed descriptions, and pricing information.
@@ -81,6 +83,74 @@ Displays information about professional massage therapists, their specialties, a
 
 ### 5. Booking System (`src/app/book/page.tsx`)
 Multi-step booking form, including service selection, time selection, and personal information.
+
+## Utility Scripts
+
+The project includes several utility scripts for managing image resources and project maintenance:
+
+### 1. Check Image References (`scripts/check-image-references.js`)
+
+This script checks image references in the project, helping to identify unused images and missing images.
+
+```bash
+node scripts/check-image-references.js
+```
+
+Features:
+- Scans all image references in the source code
+- Checks if referenced images exist
+- Identifies unused image resources
+- Creates placeholders for missing images
+
+### 2. Backup Unused Images (`scripts/backup-unused-images.js`)
+
+This script moves unused images to a backup directory, reducing project size while preserving these resources for future use.
+
+```bash
+node scripts/backup-unused-images.js
+```
+
+Features:
+- Identifies images not referenced in the code
+- Moves these images to the `public/images_backup` directory
+- Preserves original filenames for easy restoration
+
+### 3. Download Image Resources (`scripts/download-images.js`)
+
+This script downloads image resources needed for the project from the web.
+
+```bash
+node scripts/download-images.js
+```
+
+Features:
+- Downloads images from a predefined URL list
+- Automatically saves to the `public/images` directory
+- Skips existing images to avoid duplicate downloads
+
+### 4. Code Optimization Check (`scripts/optimize-code.js`)
+
+This script checks and optimizes code quality in the project, helping to identify potential issues and improvement opportunities.
+
+```bash
+node scripts/optimize-code.js
+```
+
+Features:
+- Checks for unused imports and variables
+- Identifies duplicate style class combinations
+- Detects oversized component files
+- Discovers unused components
+- Provides code optimization suggestions
+
+## Performance Optimization
+
+- Using Next.js image optimization features
+- Component lazy loading
+- Code splitting
+- Static generation and incremental static regeneration
+- Custom Tailwind CSS components to reduce duplicate style classes
+- Code optimization check tools to help identify and fix code issues
 
 ## Getting Started
 
@@ -112,106 +182,17 @@ pnpm dev
 
 4. Open your browser and visit [http://localhost:3000](http://localhost:3000)
 
-### Build for Production
+### Building for Production
 
 ```bash
 pnpm build
 ```
 
-### Run Production Version
+### Running in Production
 
 ```bash
 pnpm start
 ```
-
-## Vercel Deployment Guide
-
-Vercel is the best platform for deploying Next.js applications, offering seamless integration and automatic deployment.
-
-### Deployment Steps
-
-1. **Create a Vercel Account**
-   - Visit [Vercel website](https://vercel.com/) and register an account
-   - You can log in directly with your GitHub, GitLab, or Bitbucket account
-
-2. **Import Project**
-   - Click "Import Project" in the Vercel console
-   - Select "Import Git Repository"
-   - Authorize Vercel to access your GitHub/GitLab/Bitbucket account
-   - Select the thai-massage repository
-
-3. **Configure Project**
-   - Project name: Enter your desired project name, such as "thai-massage"
-   - Framework preset: Vercel will automatically detect Next.js
-   - Build command: Keep the default (`next build`)
-   - Output directory: Keep the default (`.next`)
-   - Environment variables: Add if needed
-
-4. **Deploy Project**
-   - Click the "Deploy" button
-   - Vercel will automatically build and deploy your project
-   - After deployment, you'll get a URL like `https://your-project-name.vercel.app`
-
-5. **Custom Domain** (Optional)
-   - Click "Domains" in the project settings
-   - Add your custom domain
-   - Follow Vercel's instructions to configure DNS records
-
-### Continuous Deployment
-
-Vercel supports continuous deployment, automatically rebuilding and deploying your project whenever you push changes to your Git repository.
-
-- **Preview Deployments**: When you create a Pull Request, Vercel automatically creates a preview deployment
-- **Production Deployments**: When you merge to the main branch, Vercel automatically updates the production environment
-
-### Monitoring and Analytics
-
-Vercel provides built-in monitoring and analytics tools:
-
-- **Analytics**: View website traffic and performance metrics
-- **Logs**: View deployment and runtime logs
-- **Speed Insights**: Analyze website loading speed and performance
-
-## SEO Optimization
-
-This project has been optimized for search engines with the following settings:
-
-- **Semantic HTML**: Using appropriate HTML tag structure
-- **Metadata Optimization**:
-  - Adding appropriate title and meta descriptions
-  - Supporting Open Graph protocol for social media sharing
-  - Adding canonical link tags
-- **Image Optimization**:
-  - Using Next.js Image component to automatically optimize images
-  - Adding appropriate alt text
-- **Responsive Design**: Ensuring good user experience on all devices
-- **Structured Data**: Adding JSON-LD structured data to improve search result display
-
-## Customization and Extension
-
-You can customize the website by modifying the following files:
-
-- `tailwind.config.js` - Customize colors, fonts, and other design variables
-- `src/app/globals.css` - Add custom global styles
-- `src/app/layout.tsx` - Modify website metadata and layout
-- `public/images/` - Replace image resources
-
-### Adding New Services
-
-1. Add new service items in `src/components/Services.tsx`
-2. Add corresponding images in the `public/images/` directory
-3. Update service options in the booking form if needed
-
-### Adding New Therapists
-
-Add new therapist information in the `therapists` array in the `src/components/Therapists.tsx` file.
-
-## Performance Optimization
-
-- Using Next.js image optimization features
-- Component lazy loading
-- Code splitting
-- Static generation and incremental static regeneration
 
 ## Troubleshooting
 
@@ -235,4 +216,4 @@ Contributions are welcome through issues and pull requests. For major changes, p
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/) 
+[MIT](https://choosealicense.com/licenses/mit/)

@@ -46,17 +46,17 @@ const Therapists = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24" id="therapists">
+    <section className="section-container" id="therapists">
       <div className="container">
         <h2 className="section-title text-center mb-4 text-black">Our Therapists</h2>
         <p className="text-white text-center mb-12 text-xl md:text-2xl font-medium">
           Meet our team of certified and experienced massage therapists
         </p>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid-responsive">
           {therapists.map((therapist) => (
-            <div key={therapist.id} className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105">
-              <div className="relative h-64">
+            <div key={therapist.id} className="card card-hover">
+              <div className="image-container">
                 <Image
                   src={therapist.image}
                   alt={`Therapist ${therapist.name}`}
@@ -66,23 +66,29 @@ const Therapists = () => {
               </div>
               <div className="p-6">
                 <h3 className="text-2xl font-semibold text-primary mb-2">{therapist.name}</h3>
-                <div className="text-gray-700">
+                <div className="text-gray-700 mb-4">
                   <p>Age: {therapist.age}</p>
                   <p>Measurements: {therapist.measurements}</p>
                   <p>Weight: {therapist.weight}</p>
                   <p>Height: {therapist.height}</p>
                   <p>Experience: {therapist.experience}</p>
                 </div>
+                <Link 
+                  href={`/therapists?name=${encodeURIComponent(therapist.name)}`}
+                  className="block w-full primary-button text-center py-2"
+                >
+                  Book Now
+                </Link>
               </div>
             </div>
           ))}
         </div>
         
         <div className="mt-12 bg-light p-8 rounded-lg">
-          <h3 className="text-2xl font-serif font-semibold mb-4 text-center text-black">Why Choose Our Therapists?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary bg-opacity-20 rounded-full p-4 mb-4">
+          <h3 className="title-lg text-center text-black">Why Choose Our Therapists?</h3>
+          <div className="grid-responsive">
+            <div className="flex-col-center text-center">
+              <div className="icon-circle mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8 text-primary">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -93,8 +99,8 @@ const Therapists = () => {
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary bg-opacity-20 rounded-full p-4 mb-4">
+            <div className="flex-col-center text-center">
+              <div className="icon-circle mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8 text-primary">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -105,8 +111,8 @@ const Therapists = () => {
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-primary bg-opacity-20 rounded-full p-4 mb-4">
+            <div className="flex-col-center text-center">
+              <div className="icon-circle mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8 text-primary">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -122,7 +128,7 @@ const Therapists = () => {
         <div className="mt-12 text-center">
           <Link 
             href="/therapists" 
-            className="inline-flex items-center bg-primary text-dark font-medium px-8 py-3 rounded-full hover:bg-opacity-90 transition-all"
+            className="primary-button inline-flex items-center"
           >
             View All Therapists & Book Now
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

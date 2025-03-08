@@ -6,6 +6,8 @@ const { execSync } = require('child_process');
 const rootDir = path.join(__dirname, '..');
 // 图片目录
 const imagesDir = path.join(rootDir, 'public/images');
+// 备份目录
+const backupDir = path.join(rootDir, 'public/images_backup');
 // 源代码目录
 const srcDir = path.join(rootDir, 'src');
 
@@ -64,7 +66,7 @@ const extractImageReferences = () => {
 
 // 主函数
 const main = () => {
-  console.log('Checking image references...');
+  console.log('Checking for unused images...');
   
   // 获取所有图片文件
   const imageFiles = getImageFiles();
@@ -74,51 +76,40 @@ const main = () => {
   const imageReferences = extractImageReferences();
   console.log(`Found ${imageReferences.length} image references in source code`);
   
-  // 检查引用的图片是否存在
-  const missingImages = imageReferences.filter(ref => !imageFiles.includes(ref));
-  
-  if (missingImages.length > 0) {
-    console.log('\nMissing images:');
-    missingImages.forEach(img => console.log(`- ${img}`));
-    
-    // 创建缺失的图片
-    console.log('\nCreating placeholder images for missing references...');
-    missingImages.forEach(img => {
-      const imgPath = path.join(imagesDir, img);
-      console.log(`Creating ${img}...`);
-      
-      try {
-        // 创建目录（如果不存在）
-        const dir = path.dirname(imgPath);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-        
-        // 创建一个1x1像素的PNG文件
-        const buffer = Buffer.from([
-          0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
-          0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-          0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00,
-          0x0C, 0x49, 0x44, 0x41, 0x54, 0x08, 0xD7, 0x63, 0xF8, 0xCF, 0xC0, 0x00,
-          0x00, 0x03, 0x01, 0x01, 0x00, 0x18, 0xDD, 0x8D, 0xB0, 0x00, 0x00, 0x00,
-          0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
-        ]);
-        fs.writeFileSync(imgPath, buffer);
-        console.log(`Created placeholder for ${img}`);
-      } catch (error) {
-        console.error(`Error creating placeholder for ${img}: ${error.message}`);
-      }
-    });
-  } else {
-    console.log('\nAll image references are valid!');
-  }
-  
   // 检查未使用的图片
   const unusedImages = imageFiles.filter(file => !imageReferences.includes(file));
   
   if (unusedImages.length > 0) {
-    console.log('\nUnused images:');
+    console.log(`\nFound ${unusedImages.length} unused images:`);
     unusedImages.forEach(img => console.log(`- ${img}`));
+    
+    // 创建备份目录
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+      console.log(`\nCreated backup directory: ${backupDir}`);
+    }
+    
+    // 移动未使用的图片到备份目录
+    console.log('\nMoving unused images to backup directory...');
+    let movedCount = 0;
+    
+    unusedImages.forEach(img => {
+      const srcPath = path.join(imagesDir, img);
+      const destPath = path.join(backupDir, img);
+      
+      try {
+        fs.copyFileSync(srcPath, destPath);
+        fs.unlinkSync(srcPath);
+        console.log(`Moved ${img} to backup directory`);
+        movedCount++;
+      } catch (error) {
+        console.error(`Error moving ${img}: ${error.message}`);
+      }
+    });
+    
+    console.log(`\nSuccessfully moved ${movedCount} unused images to backup directory.`);
+    console.log(`You can find them in: ${backupDir}`);
+    console.log('\nIf you need these images in the future, you can restore them from the backup directory.');
   } else {
     console.log('\nAll images are referenced in the code!');
   }

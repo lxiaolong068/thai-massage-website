@@ -7,18 +7,46 @@ import { usePathname } from 'next/navigation';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
+  // 监听滚动事件
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // 初始检查
+    handleScroll();
+    
+    // 清理事件监听
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
   return (
-    <header className="absolute top-0 left-0 w-full z-50 text-white">
+    <header 
+      className={`${
+        isScrolled 
+          ? 'fixed top-0 left-0 w-full bg-dark shadow-lg transition-all duration-300 ease-in-out' 
+          : 'absolute top-0 left-0 w-full'
+      } z-50 text-white`}
+    >
       <div className="container py-4 relative">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -38,7 +66,7 @@ const Header = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/#services" className={`hover:text-primary transition-colors ${pathname === '/#services' ? 'text-primary' : ''}`}>
+                <Link href="/services" className={`hover:text-primary transition-colors ${pathname === '/services' ? 'text-primary' : ''}`}>
                   Services
                 </Link>
               </li>
@@ -111,7 +139,7 @@ const Header = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/#services" className="hover:text-primary transition-colors">
+                <Link href="/services" className="hover:text-primary transition-colors">
                   Services
                 </Link>
               </li>

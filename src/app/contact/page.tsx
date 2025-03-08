@@ -6,7 +6,7 @@ export default function ContactPage() {
   return (
     <main className="relative">
       <Header />
-      <div className="relative z-10 pt-24 md:pt-28">
+      <div className="relative z-10">
         <Contact />
       </div>
       <Footer />
