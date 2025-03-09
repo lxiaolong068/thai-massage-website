@@ -8,7 +8,7 @@
 
 - **响应式设计**：完美适配手机、平板和桌面设备
 - **现代化UI设计**：精美的界面和流畅的用户体验
-- **多语言支持**：支持中文和英文界面
+- **多语言支持**：支持英文、中文、泰语和韩语界面
 - **丰富的组件**：
   - 动态轮播图展示
   - 服务项目和价格列表
@@ -25,6 +25,7 @@
 - [React 18](https://reactjs.org/) - 用于构建用户界面的JavaScript库
 - [TypeScript](https://www.typescriptlang.org/) - 提供类型安全的JavaScript超集
 - [Tailwind CSS](https://tailwindcss.com/) - 实用优先的CSS框架，用于快速构建自定义设计
+- [next-intl](https://next-intl-docs.vercel.app/) - Next.js的国际化解决方案
 - [ESLint](https://eslint.org/) - 代码质量工具，确保代码一致性
 - [pnpm](https://pnpm.io/) - 快速、节省磁盘空间的包管理器
 
@@ -39,11 +40,15 @@ thai-massage/
 │       └── ...             # 其他图片
 ├── src/                    # 源代码
 │   ├── app/                # Next.js App Router
-│   │   ├── book/           # 预约页面
-│   │   │   └── page.tsx    # 预约页面组件
+│   │   ├── [locale]/       # 国际化路由
+│   │   │   ├── page.tsx    # 多语言首页
+│   │   │   ├── about/      # 关于我们页面
+│   │   │   ├── services/   # 服务页面
+│   │   │   ├── therapists/ # 按摩师页面
+│   │   │   ├── contact/    # 联系页面
+│   │   │   └── book/       # 预约页面
 │   │   ├── globals.css     # 全局样式
-│   │   ├── layout.tsx      # 根布局
-│   │   └── page.tsx        # 首页
+│   │   └── page.tsx        # 重定向到默认语言页面
 │   ├── components/         # React组件
 │   │   ├── Header.tsx      # 页头导航组件
 │   │   ├── Footer.tsx      # 页脚组件
@@ -53,12 +58,24 @@ thai-massage/
 │   │   ├── Therapists.tsx  # 按摩师团队组件
 │   │   ├── Testimonials.tsx# 客户评价组件
 │   │   ├── Contact.tsx     # 联系表单组件
+│   │   ├── LanguageSwitcher.tsx # 语言切换组件
 │   │   └── ...             # 其他组件
+│   ├── i18n/               # 国际化相关文件
+│   │   ├── messages/       # 翻译文件
+│   │   │   ├── en.json     # 英文翻译
+│   │   │   ├── zh.json     # 中文翻译
+│   │   │   ├── th.json     # 泰语翻译
+│   │   │   └── ko.json     # 韩语翻译
+│   │   ├── i18n.ts         # 国际化配置
+│   │   ├── client.ts       # 客户端国际化工具
+│   │   └── server.ts       # 服务器端国际化工具
 │   └── styles/             # 其他样式文件
 ├── scripts/                # 脚本文件
 │   ├── check-image-references.js  # 检查图片引用脚本
 │   ├── backup-unused-images.js    # 备份未使用图片脚本
-│   └── download-images.js  # 图片下载脚本
+│   ├── download-images.js  # 图片下载脚本
+│   └── extract-translations.js # 提取翻译文本脚本
+├── middleware.ts           # Next.js中间件（处理国际化路由）
 ├── tailwind.config.js      # Tailwind配置
 ├── next.config.js          # Next.js配置
 ├── tsconfig.json           # TypeScript配置
@@ -69,7 +86,7 @@ thai-massage/
 
 ## 组件说明
 
-### 1. 首页组件 (`src/app/page.tsx`)
+### 1. 首页组件 (`src/app/[locale]/page.tsx`)
 首页组件整合了多个子组件，包括轮播图、服务介绍、按摩师团队等。
 
 ### 2. 轮播图组件 (`src/components/Hero.tsx`)
@@ -81,8 +98,45 @@ thai-massage/
 ### 4. 按摩师团队组件 (`src/components/Therapists.tsx`)
 展示专业按摩师的信息、专长和经验。
 
-### 5. 预约系统 (`src/app/book/page.tsx`)
+### 5. 预约系统 (`src/app/[locale]/book/page.tsx`)
 多步骤预约表单，包括服务选择、时间选择和个人信息填写。
+
+### 6. 语言切换组件 (`src/components/LanguageSwitcher.tsx`)
+允许用户在英文、中文、泰语和韩语之间切换网站语言。
+
+## 国际化实现
+
+本项目使用`next-intl`实现多语言支持，主要特点包括：
+
+### 1. 支持的语言
+- 英文 (en) - 默认语言
+- 中文 (zh)
+- 泰语 (th)
+- 韩语 (ko)
+
+### 2. 实现方式
+- 使用Next.js的动态路由`[locale]`参数实现多语言路由
+- 通过中间件自动检测用户浏览器语言设置
+- 提供直观的语言切换功能
+- 使用JSON格式存储各语言的翻译文本
+- 为不同语言版本提供适当的SEO元数据
+
+### 3. 翻译文件结构
+翻译文件按功能区域组织，存储在`src/i18n/messages/`目录下：
+```json
+{
+  "common": {
+    "navigation": { ... },
+    "buttons": { ... }
+  },
+  "home": { ... },
+  "services": { ... },
+  "about": { ... },
+  "contact": { ... },
+  "therapists": { ... },
+  "booking": { ... }
+}
+```
 
 ## 实用脚本工具
 
@@ -128,20 +182,18 @@ node scripts/download-images.js
 - 自动保存到 `public/images` 目录
 - 跳过已存在的图片，避免重复下载
 
-### 4. 代码优化检查 (`scripts/optimize-code.js`)
+### 4. 提取翻译文本 (`scripts/extract-translations.js`)
 
-这个脚本用于检查和优化项目中的代码质量，帮助识别潜在的问题和改进机会。
+这个脚本用于从源代码中提取需要翻译的文本，并生成翻译模板。
 
 ```bash
-node scripts/optimize-code.js
+node scripts/extract-translations.js
 ```
 
 功能：
-- 检查未使用的导入和变量
-- 识别重复的样式类组合
-- 检测过大的组件文件
-- 发现未被使用的组件
-- 提供代码优化建议
+- 扫描源代码中的所有需要翻译的文本
+- 生成翻译模板文件
+- 识别缺失的翻译
 
 ## 开始使用
 
@@ -242,6 +294,9 @@ Vercel提供了内置的监控和分析工具：
   - 添加适当的title和meta描述
   - 支持Open Graph协议，优化社交媒体分享
   - 添加规范链接标签
+- **多语言SEO**：
+  - 为每种语言提供适当的元数据
+  - 使用hreflang标签指示语言关系
 - **图片优化**：
   - 使用Next.js的Image组件自动优化图片
   - 添加适当的alt文本
@@ -254,18 +309,27 @@ Vercel提供了内置的监控和分析工具：
 
 - `tailwind.config.js` - 自定义颜色、字体和其他设计变量
 - `src/app/globals.css` - 添加自定义全局样式
-- `src/app/layout.tsx` - 修改网站的元数据和布局
+- `src/app/[locale]/layout.tsx` - 修改网站的元数据和布局
 - `public/images/` - 替换图片资源
+- `src/i18n/messages/` - 修改或添加翻译文本
 
 ### 添加新服务
 
 1. 在`src/components/Services.tsx`中添加新的服务项目
 2. 在`public/images/`目录中添加相应的图片
-3. 如果需要，更新预约表单中的服务选项
+3. 在翻译文件中添加相应的翻译文本
+4. 如果需要，更新预约表单中的服务选项
 
 ### 添加新按摩师
 
-在`src/components/Therapists.tsx`文件中的`therapists`数组中添加新的按摩师信息。
+1. 在`src/components/Therapists.tsx`文件中的`therapists`数组中添加新的按摩师信息
+2. 在翻译文件中添加相应的翻译文本
+
+### 添加新语言
+
+1. 在`src/i18n/config.ts`中的`locales`数组中添加新的语言代码
+2. 在`src/i18n/messages/`目录下创建新的语言翻译文件
+3. 确保所有需要翻译的文本都有对应的翻译
 
 ## 性能优化
 
@@ -275,6 +339,7 @@ Vercel提供了内置的监控和分析工具：
 - 静态生成和增量静态再生成
 - 自定义Tailwind CSS组件，减少重复样式类
 - 代码优化检查工具，帮助识别和修复代码问题
+- 翻译文件动态导入，减少初始加载时间
 
 ## 故障排除
 
@@ -291,6 +356,11 @@ Vercel提供了内置的监控和分析工具：
 3. **样式问题**
    - 确保Tailwind CSS正确配置
    - 检查类名是否正确应用
+
+4. **国际化问题**
+   - 检查翻译文件是否完整
+   - 确保所有组件都正确使用翻译API
+   - 检查中间件配置是否正确
 
 ## 贡献
 

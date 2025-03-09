@@ -1,20 +1,29 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
-const About = () => {
+interface AboutProps {
+  locale?: string;
+}
+
+const About: React.FC<AboutProps> = ({ locale = 'en' }) => {
+  const t = useTranslations('about');
+  
   return (
     <section className="section-container section-light" id="about">
       <div className="container">
         <div className="flex flex-col md:flex-row items-start gap-12">
           {/* 左侧标题、图片和按钮 */}
           <div className="md:w-2/5 mb-8 md:mb-0 relative">
-            <h2 className="title-lg text-3xl md:text-4xl leading-tight text-black whitespace-normal">The victoria&apos;s outcall massage</h2>
+            <h2 className="title-lg text-3xl md:text-4xl leading-tight text-black whitespace-normal">{t('title')}</h2>
             
             {/* 图片放在标题下方 */}
             <div className="relative mb-8 rounded-lg overflow-hidden shadow-xl">
               <Image
                 src="/images/victoria-massage.png"
-                alt="The victoria's outcall massage"
+                alt={t('imageAlt')}
                 width={600}
                 height={400}
                 className="w-full h-auto object-cover"
@@ -22,10 +31,10 @@ const About = () => {
             </div>
             
             <Link 
-              href="#" 
+              href={`/${locale}/contact`}
               className="primary-button inline-flex items-center px-6"
             >
-              LEARN MORE ABOUT US
+              {t('learnMoreButton')}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
@@ -49,15 +58,15 @@ const About = () => {
                   <div className="icon-circle mr-4 flex-shrink-0">
                     <Image 
                       src="/images/icon-1.png" 
-                      alt="The Victoria's Bangkok" 
+                      alt={t('card1.imageAlt')} 
                       width={40} 
                       height={40}
                     />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">The Victoria&apos;s Bangkok</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">{t('card1.title')}</h3>
                     <p className="text-gray-700">
-                      Thevictoria&apos;s Bangkok is a Professional outcall massage service in bangkok. All of our therapists are totally qualified and possess a diploma.
+                      {t('card1.description')}
                     </p>
                   </div>
                 </div>
@@ -69,15 +78,15 @@ const About = () => {
                   <div className="icon-circle mr-4 flex-shrink-0">
                     <Image 
                       src="/images/icon-2.png" 
-                      alt="Professional Outcall Massage Service" 
+                      alt={t('card2.imageAlt')} 
                       width={40} 
                       height={40}
                     />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">Professional Outcall Massage Service in Bangkok</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">{t('card2.title')}</h3>
                     <p className="text-gray-700">
-                      Skilled therapists, trained in a variety of techniques, stoodready to tailor each session to the unique needs of their clients. Whether seeking relief from the stresses of daily life, recovery from physical exertion, or simply a touch of pampering, visitors could find solace in the expert hands of these practitioners.
+                      {t('card2.description')}
                     </p>
                   </div>
                 </div>
@@ -89,15 +98,15 @@ const About = () => {
                   <div className="icon-circle mr-4 flex-shrink-0">
                     <Image 
                       src="/images/icon-3.png" 
-                      alt="Vision and Mission" 
+                      alt={t('card3.imageAlt')} 
                       width={40} 
                       height={40}
                     />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">Visions and Mission</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">{t('card3.title')}</h3>
                     <p className="text-gray-700">
-                      Experience ultimate relaxation with our professional massage therapists. We bring the spa to your home, offering personalized treatments that cater to your needs. Enjoy a serene atmosphere
+                      {t('card3.description')}
                     </p>
                   </div>
                 </div>

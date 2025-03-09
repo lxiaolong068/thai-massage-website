@@ -1,10 +1,28 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { createClientTranslator } from '@/i18n/client';
 
-const Hero = () => {
+type HeroProps = {
+  locale: string;
+};
+
+const Hero = ({ locale = 'en' }: HeroProps) => {
+  // 使用 useMemo 创建翻译器，这样它不会在每次渲染时重新创建
+  const translator = useMemo(() => {
+    console.log('Creating hero translator for locale:', locale);
+    // 不使用命名空间方式，而是直接访问完整的翻译树
+    return createClientTranslator(locale);
+  }, [locale]);
+  
+  // 翻译函数
+  const t = (key: string, defaultValue: string) => {
+    // 完整指定路径，避免命名空间嵌套问题
+    return translator.t(`home.hero.${key}`, {}, defaultValue);
+  };
+  
   // 轮播图片数组
   const sliderImages = [
     '/images/slider-1.jpg',
@@ -48,70 +66,56 @@ const Hero = () => {
   const prevSlide = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentImageIndex((prevIndex) => 
-        prevIndex === 0 ? sliderImages.length - 1 : prevIndex - 1
-      );
+      setCurrentImageIndex((prevIndex) => (prevIndex - 1 + sliderImages.length) % sliderImages.length);
       setIsTransitioning(false);
     }, 300);
   };
 
   return (
-    <section className="relative h-[400px] md:h-[500px] flex items-center pt-12">
-      {/* 轮播背景图片 */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
+    <section className="relative h-screen">
+      {/* 轮播图背景 */}
+      <div className="absolute inset-0 overflow-hidden">
         {sliderImages.map((image, index) => (
-          <div 
+          <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out ${
-              index === currentImageIndex 
-                ? 'opacity-100 z-10' 
-                : 'opacity-0 z-0'
-            } ${isTransitioning ? 'opacity-50' : ''}`}
+            className={`absolute inset-0 transition-opacity duration-300 ${
+              index === currentImageIndex
+                ? 'opacity-100'
+                : 'opacity-0'
+            } ${isTransitioning ? 'transition-opacity duration-300' : ''}`}
           >
-            <div className="relative w-full h-full">
-              <Image
-                src={image}
-                alt={`Slider image ${index + 1}`}
-                fill
-                sizes="100vw"
-                className="object-cover md:object-contain lg:object-cover"
-                style={{
-                  objectPosition: 'center center',
-                  maxHeight: '500px',
-                }}
-                quality={95}
-                priority={index === 0}
-              />
-            </div>
+            <Image
+              src={image}
+              alt={`Slider image ${index + 1}`}
+              fill
+              style={{ objectFit: 'cover' }}
+              priority={index === 0}
+              quality={90}
+            />
+            {/* 暗色叠加层，提高文字可读性 */}
+            <div className="absolute inset-0 bg-black bg-opacity-50"></div>
           </div>
         ))}
-        <div className="absolute inset-0 bg-black bg-opacity-50 z-20"></div>
       </div>
-      
-      {/* 轮播控制按钮 - 只在PC端显示 */}
-      <div className="hidden md:flex absolute inset-x-0 top-1/2 transform -translate-y-1/2 justify-between px-4 z-30">
-        <button 
-          onClick={prevSlide}
-          className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all focus:outline-none"
-          aria-label="Previous slide"
+
+      {/* 内容区域 */}
+      <div className="container relative z-10 h-full flex flex-col justify-center items-center text-center text-white">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+          {t('title', 'Experience Premium Thai Massage')}
+        </h1>
+        <p className="text-xl md:text-2xl mb-10 max-w-3xl">
+          {t('subtitle', 'Relaxation and healing at your doorstep')}
+        </p>
+        <Link
+          href="/therapists"
+          className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-full transition-colors duration-300 text-lg"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button 
-          onClick={nextSlide}
-          className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all focus:outline-none"
-          aria-label="Next slide"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+          {t('bookNow', 'Book Now')}
+        </Link>
       </div>
-      
-      {/* 轮播指示器 */}
-      <div className="absolute bottom-4 inset-x-0 flex-center gap-2 z-30">
+
+      {/* 轮播控制按钮 */}
+      <div className="absolute bottom-10 left-0 right-0 flex justify-center space-x-4">
         {sliderImages.map((_, index) => (
           <button
             key={index}
@@ -122,37 +126,55 @@ const Hero = () => {
                 setIsTransitioning(false);
               }, 300);
             }}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentImageIndex 
-                ? 'bg-primary w-4' 
-                : 'bg-white bg-opacity-50'
-            }`}
+            className={`w-3 h-3 rounded-full ${
+              index === currentImageIndex ? 'bg-primary' : 'bg-white bg-opacity-50'
+            } transition-colors duration-300`}
             aria-label={`Go to slide ${index + 1}`}
-          />
+          ></button>
         ))}
       </div>
-      
-      <div className="container relative z-30 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl title-serif mb-2 sm:mb-6 leading-tight whitespace-nowrap sm:whitespace-normal">
-            The victoria&apos;s outcall massage
-          </h1>
-          <p className="text-sm sm:text-base md:text-xl mb-1 sm:mb-3 text-gray-200">
-            Relax with The Victoria&apos;s Bangkok
-          </p>
-          <p className="text-sm sm:text-base md:text-xl mb-4 sm:mb-10 text-gray-200 max-w-2xl mx-auto">
-            &quot;Revitalize your body and mind with the best massage therapy.&quot;
-          </p>
-          <div className="flex-center gap-3 sm:gap-8">
-            <Link href="/therapists" className="btn btn-primary text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
-              BOOK NOW
-            </Link>
-            <Link href="/contact" className="btn btn-outline text-center text-sm sm:text-base md:text-lg py-1.5 sm:py-3 px-3 sm:px-10 rounded-full w-auto min-w-[120px] sm:min-w-[160px] font-medium">
-              CONTACT US
-            </Link>
-          </div>
-        </div>
-      </div>
+
+      {/* 左右箭头 */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-30 hover:bg-opacity-50 text-white p-2 rounded-full transition-all duration-300"
+        aria-label="Previous slide"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </button>
+      <button
+        onClick={nextSlide}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-30 hover:bg-opacity-50 text-white p-2 rounded-full transition-all duration-300"
+        aria-label="Next slide"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </button>
     </section>
   );
 };

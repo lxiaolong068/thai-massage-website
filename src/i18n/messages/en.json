@@ -1,0 +1,171 @@
+{
+  "metadata": {
+    "title": "The Victoria's Outcall Massage | Professional Thai Massage in Bangkok",
+    "description": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep with personalized massage therapy.",
+    "keywords": "Thai massage, Bangkok massage, outcall massage, professional massage, relaxation therapy, Thai therapists",
+    "ogTitle": "The Victoria's Outcall Massage | Professional Thai Massage in Bangkok",
+    "ogDescription": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep."
+  },
+  "common": {
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "therapists": "Therapists & Booking",
+      "contact": "Contact"
+    },
+    "buttons": {
+      "bookNow": "Book Now",
+      "learnMore": "Learn More",
+      "submit": "Submit",
+      "sendMessage": "Send Message"
+    }
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "message": "The page you are looking for does not exist.",
+    "backHome": "Return to Home"
+  },
+  "about": {
+    "title": "The Victoria's Outcall Massage",
+    "imageAlt": "The Victoria's Outcall Massage",
+    "learnMoreButton": "LEARN MORE ABOUT US",
+    "card1": {
+      "title": "The Victoria's Bangkok",
+      "description": "The Victoria's Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.",
+      "imageAlt": "The Victoria's Bangkok"
+    },
+    "card2": {
+      "title": "Professional Outcall Massage Service in Bangkok",
+      "description": "Skilled therapists, trained in a variety of techniques, stand ready to tailor each session to the unique needs of their clients. Whether seeking relief from the stresses of daily life, recovery from physical exertion, or simply a touch of pampering, visitors can find solace in the expert hands of these practitioners.",
+      "imageAlt": "Professional Outcall Massage Service"
+    },
+    "card3": {
+      "title": "Visions and Mission",
+      "description": "Experience ultimate relaxation with our professional massage therapists. We bring the spa to your home, offering personalized treatments that cater to your needs. Enjoy a serene atmosphere and rejuvenate your body and mind.",
+      "imageAlt": "Vision and Mission"
+    }
+  },
+  "services": {
+    "title": "Our Massage & Price",
+    "subtitle": "Discover premium massage services at unbeatable prices.",
+    "viewAll": "View All Services",
+    "traditional": {
+      "title": "Traditional Thai Massage",
+      "description": "Ancient techniques to relieve tension with authentic techniques."
+    },
+    "oil": {
+      "title": "Oil Massage",
+      "description": "Relaxing massage with aromatic oils to soothe your body and mind."
+    },
+    "aromatherapy": {
+      "title": "Aromatherapy Massage",
+      "description": "Therapeutic massage with essential oils for deep relaxation."
+    },
+    "foot": {
+      "title": "Foot Massage",
+      "description": "Reflexology techniques to revitalize your feet and body."
+    },
+    "neck": {
+      "title": "Neck & Shoulder Massage",
+      "description": "Focused massage to relieve tension in your neck and shoulders."
+    },
+    "deep": {
+      "title": "Deep Tissue Massage",
+      "description": "Intense massage targeting deep muscle layers for pain relief."
+    }
+  },
+  "therapists": {
+    "title": "Our Therapists",
+    "subtitle": "Meet our team of certified and experienced massage therapists",
+    "therapist": "Therapist",
+    "age": "Age",
+    "measurements": "Measurements",
+    "weight": "Weight",
+    "height": "Height",
+    "experience": "Experience",
+    "whyChoose": {
+      "title": "Why Choose Our Therapists?",
+      "certified": {
+        "title": "Certified Professionals",
+        "description": "All our therapists are certified and have years of experience in various massage techniques."
+      },
+      "personalized": {
+        "title": "Personalized Service",
+        "description": "Our therapists tailor each session to your specific needs and preferences."
+      },
+      "punctual": {
+        "title": "Punctual & Professional",
+        "description": "We respect your time and ensure our therapists arrive promptly for your scheduled session."
+      }
+    },
+    "viewAll": "View All Therapists & Book Now"
+  },
+  "contact": {
+    "getInTouch": "Get In Touch",
+    "feedbackIntro": "Have suggestions or feedback about our services? We'd love to hear from you. Your input helps us improve and provide better experiences for all our clients.",
+    "location": "Location",
+    "locationValue": "Bangkok, Thailand",
+    "phone": "Phone",
+    "phoneValue": "+66 XX XXX XXXX",
+    "email": "Email",
+    "emailValue": "info@victorias-bangkok.com",
+    "workingHours": "Working Hours",
+    "workingHoursValue": "Available 24/7",
+    "feedbackTitle": "Feedback & Suggestions",
+    "nameLabel": "Your Name",
+    "emailLabel": "Email Address",
+    "phoneLabel": "Phone Number (Optional)",
+    "subjectLabel": "Subject",
+    "selectSubject": "Select a subject",
+    "subjectOptions": {
+      "suggestion": "Suggestion",
+      "complaint": "Complaint",
+      "praise": "Praise",
+      "question": "General Question",
+      "other": "Other"
+    },
+    "messageLabel": "Your Message",
+    "messagePlaceholder": "Please share your feedback, suggestions, or concerns...",
+    "submitButton": "Submit Feedback",
+    "feedbackAlert": "Thank you for your feedback! We will consider your suggestions carefully."
+  },
+  "footer": {
+    "title": "The Victoria's Outcall Massage",
+    "address": "Sukhumvit Soi 13, Klongtoey Nua, Watthana, Bangkok, 10110",
+    "tel": "Tel",
+    "contactButton": "Contact Us Now",
+    "connectWithUs": "Connect With Us",
+    "qrCodes": {
+      "line": "Line QR Code",
+      "wechat": "WeChat QR Code",
+      "whatsapp": "WhatsApp QR Code",
+      "telegram": "Telegram QR Code"
+    },
+    "copyright": "© {year} The Victoria's Outcall Massage. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "home": {
+    "hero": {
+      "title": "Experience Premium Thai Massage",
+      "subtitle": "Relaxation and healing at your doorstep",
+      "bookNow": "Book Now"
+    },
+    "services": {
+      "title": "Our Services",
+      "viewAll": "View All Services"
+    },
+    "introduction": {
+      "title": "Welcome to Victoria's Thai Massage",
+      "description": "We bring the authentic Thai massage experience directly to you. Our skilled therapists are trained in traditional techniques that have been perfected over centuries.",
+      "subtitle": "Victoria's Outcall Massage: Gateway to Renewal",
+      "content": "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Victoria's outcall massage was more than just a service; it was a gateway to physical and mental renewal.",
+      "imageAlt": "Thai massage introduction"
+    },
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Hear from those who have experienced our services"
+    }
+  }
+} 

@@ -18,14 +18,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
-      </body>
-    </html>
-  );
+}) {
+  // 根布局只负责传递子组件，不添加任何额外的HTML结构
+  // HTML和body标签将由[locale]布局添加
+  return children;
 }

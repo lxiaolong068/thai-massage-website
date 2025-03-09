@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "title": "The Victoria's Outcall Massage | Professional Thai Massage in Bangkok",
+    "description": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep with personalized massage therapy.",
+    "keywords": ["Thai massage", "Bangkok massage", "outcall massage", "professional massage", "relaxation therapy", "Thai therapists"],
+    "ogTitle": "The Victoria's Outcall Massage | Professional Thai Massage in Bangkok",
+    "ogDescription": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep."
+  },
+  "common": {
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "therapists": "Therapists & Booking",
+      "contact": "Contact"
+    },
+    "buttons": {
+      "bookNow": "Book Now",
+      "learnMore": "Learn More",
+      "submit": "Submit",
+      "sendMessage": "Send Message"
+    }
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "message": "The page you are looking for does not exist.",
+    "backHome": "Return to Home"
+  },
+  "home": {
+    "hero": {
+      "title": "Experience Premium Thai Massage",
+      "subtitle": "Relaxation and healing at your doorstep",
+      "bookNow": "Book Now"
+    },
+    "services": {
+      "title": "Our Services",
+      "viewAll": "View All Services"
+    },
+    "introduction": {
+      "title": "Welcome to Victoria's Thai Massage",
+      "description": "We bring the authentic Thai massage experience directly to you. Our skilled therapists are trained in traditional techniques that have been perfected over centuries.",
+      "subtitle": "Victoria's Outcall Massage: Gateway to Renewal",
+      "content": "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Victoria's outcall massage was more than just a service; it was a gateway to physical and mental renewal.",
+      "imageAlt": "Thai massage introduction"
+    },
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Hear from those who have experienced our services"
+    }
+  }
+} 

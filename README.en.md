@@ -8,7 +8,7 @@ This is a Thai massage service website built with Next.js 14 and Tailwind CSS. T
 
 - **Responsive Design**: Perfectly adapts to mobile, tablet, and desktop devices
 - **Modern UI Design**: Beautiful interface with smooth user experience
-- **Multilingual Support**: Chinese and English interfaces
+- **Multilingual Support**: English, Chinese, Thai, and Korean interfaces
 - **Rich Components**:
   - Dynamic carousel display
   - Service items and price lists
@@ -25,6 +25,7 @@ This is a Thai massage service website built with Next.js 14 and Tailwind CSS. T
 - [React 18](https://reactjs.org/) - JavaScript library for building user interfaces
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript superset
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework for rapid custom designs
+- [next-intl](https://next-intl-docs.vercel.app/) - Internationalization solution for Next.js
 - [ESLint](https://eslint.org/) - Code quality tool for consistency
 - [pnpm](https://pnpm.io/) - Fast, disk space efficient package manager
 
@@ -39,11 +40,15 @@ thai-massage/
 │       └── ...             # Other images
 ├── src/                    # Source code
 │   ├── app/                # Next.js App Router
-│   │   ├── book/           # Booking page
-│   │   │   └── page.tsx    # Booking page component
+│   │   ├── [locale]/       # Internationalized routes
+│   │   │   ├── page.tsx    # Multilingual home page
+│   │   │   ├── about/      # About page
+│   │   │   ├── services/   # Services page
+│   │   │   ├── therapists/ # Therapists page
+│   │   │   ├── contact/    # Contact page
+│   │   │   └── book/       # Booking page
 │   │   ├── globals.css     # Global styles
-│   │   ├── layout.tsx      # Root layout
-│   │   └── page.tsx        # Home page
+│   │   └── page.tsx        # Redirect to default language
 │   ├── components/         # React components
 │   │   ├── Header.tsx      # Header navigation component
 │   │   ├── Footer.tsx      # Footer component
@@ -53,12 +58,24 @@ thai-massage/
 │   │   ├── Therapists.tsx  # Massage therapist team component
 │   │   ├── Testimonials.tsx# Customer testimonials component
 │   │   ├── Contact.tsx     # Contact form component
+│   │   ├── LanguageSwitcher.tsx # Language switcher component
 │   │   └── ...             # Other components
+│   ├── i18n/               # Internationalization files
+│   │   ├── messages/       # Translation files
+│   │   │   ├── en.json     # English translations
+│   │   │   ├── zh.json     # Chinese translations
+│   │   │   ├── th.json     # Thai translations
+│   │   │   └── ko.json     # Korean translations
+│   │   ├── i18n.ts         # i18n configuration
+│   │   ├── client.ts       # Client-side i18n utilities
+│   │   └── server.ts       # Server-side i18n utilities
 │   └── styles/             # Other style files
 ├── scripts/                # Script files
 │   ├── check-image-references.js  # Image reference checking script
 │   ├── backup-unused-images.js    # Unused image backup script
-│   └── download-images.js  # Image download script
+│   ├── download-images.js  # Image download script
+│   └── extract-translations.js # Translation extraction script
+├── middleware.ts           # Next.js middleware (handles i18n routing)
 ├── tailwind.config.js      # Tailwind configuration
 ├── next.config.js          # Next.js configuration
 ├── tsconfig.json           # TypeScript configuration
@@ -69,7 +86,7 @@ thai-massage/
 
 ## Component Description
 
-### 1. Home Page Component (`src/app/page.tsx`)
+### 1. Home Page Component (`src/app/[locale]/page.tsx`)
 The home page component integrates multiple sub-components, including carousel, service introduction, massage therapist team, etc.
 
 ### 2. Carousel Component (`src/components/Hero.tsx`)
@@ -81,8 +98,45 @@ Displays various massage services, detailed descriptions, and pricing informatio
 ### 4. Therapist Team Component (`src/components/Therapists.tsx`)
 Displays information about professional massage therapists, their specialties, and experience.
 
-### 5. Booking System (`src/app/book/page.tsx`)
+### 5. Booking System (`src/app/[locale]/book/page.tsx`)
 Multi-step booking form, including service selection, time selection, and personal information.
+
+### 6. Language Switcher Component (`src/components/LanguageSwitcher.tsx`)
+Allows users to switch between English, Chinese, Thai, and Korean language interfaces.
+
+## Internationalization Implementation
+
+This project uses `next-intl` for multilingual support with the following features:
+
+### 1. Supported Languages
+- English (en) - Default language
+- Chinese (zh)
+- Thai (th)
+- Korean (ko)
+
+### 2. Implementation Method
+- Uses Next.js dynamic routing with `[locale]` parameter for multilingual routes
+- Automatically detects user browser language settings via middleware
+- Provides intuitive language switching functionality
+- Stores translations in JSON format
+- Provides appropriate SEO metadata for different language versions
+
+### 3. Translation File Structure
+Translation files are organized by functional areas and stored in the `src/i18n/messages/` directory:
+```json
+{
+  "common": {
+    "navigation": { ... },
+    "buttons": { ... }
+  },
+  "home": { ... },
+  "services": { ... },
+  "about": { ... },
+  "contact": { ... },
+  "therapists": { ... },
+  "booking": { ... }
+}
+```
 
 ## Utility Scripts
 
@@ -128,20 +182,18 @@ Features:
 - Automatically saves to the `public/images` directory
 - Skips existing images to avoid duplicate downloads
 
-### 4. Code Optimization Check (`scripts/optimize-code.js`)
+### 4. Extract Translations (`scripts/extract-translations.js`)
 
-This script checks and optimizes code quality in the project, helping to identify potential issues and improvement opportunities.
+This script extracts text that needs to be translated from the source code and generates translation templates.
 
 ```bash
-node scripts/optimize-code.js
+node scripts/extract-translations.js
 ```
 
 Features:
-- Checks for unused imports and variables
-- Identifies duplicate style class combinations
-- Detects oversized component files
-- Discovers unused components
-- Provides code optimization suggestions
+- Scans all text that needs translation in the source code
+- Generates translation template files
+- Identifies missing translations
 
 ## Performance Optimization
 
@@ -151,6 +203,7 @@ Features:
 - Static generation and incremental static regeneration
 - Custom Tailwind CSS components to reduce duplicate style classes
 - Code optimization check tools to help identify and fix code issues
+- Dynamic import of translation files to reduce initial loading time
 
 ## Getting Started
 
@@ -194,6 +247,52 @@ pnpm build
 pnpm start
 ```
 
+## SEO Optimization
+
+This project has been optimized for search engines with the following settings:
+
+- **Semantic HTML**: Using appropriate HTML tag structure
+- **Metadata Optimization**:
+  - Adding appropriate titles and meta descriptions
+  - Supporting Open Graph protocol for social media sharing
+  - Adding canonical link tags
+- **Multilingual SEO**:
+  - Providing appropriate metadata for each language version
+  - Using hreflang tags to indicate language relationships
+- **Image Optimization**:
+  - Using Next.js Image component to automatically optimize images
+  - Adding appropriate alt text
+- **Responsive Design**: Ensuring good user experience on all devices
+- **Structured Data**: Adding JSON-LD structured data to enhance search result display
+
+## Customization and Extension
+
+You can customize the website by modifying the following files:
+
+- `tailwind.config.js` - Customize colors, fonts, and other design variables
+- `src/app/globals.css` - Add custom global styles
+- `src/app/[locale]/layout.tsx` - Modify website metadata and layout
+- `public/images/` - Replace image resources
+- `src/i18n/messages/` - Modify or add translation texts
+
+### Adding New Services
+
+1. Add new service items in `src/components/Services.tsx`
+2. Add corresponding images in the `public/images/` directory
+3. Add corresponding translations in the translation files
+4. If needed, update service options in the booking form
+
+### Adding New Therapists
+
+1. Add new therapist information in the `therapists` array in `src/components/Therapists.tsx`
+2. Add corresponding translations in the translation files
+
+### Adding New Languages
+
+1. Add the new language code to the `locales` array in `src/i18n/config.ts`
+2. Create a new language translation file in the `src/i18n/messages/` directory
+3. Ensure all text that needs translation has corresponding translations
+
 ## Troubleshooting
 
 ### Common Issues
@@ -209,6 +308,11 @@ pnpm start
 3. **Style Issues**
    - Ensure Tailwind CSS is correctly configured
    - Check if class names are correctly applied
+
+4. **Internationalization Issues**
+   - Check if translation files are complete
+   - Ensure all components correctly use the translation API
+   - Check if middleware configuration is correct
 
 ## Contributing
 

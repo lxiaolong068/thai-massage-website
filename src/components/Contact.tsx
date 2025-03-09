@@ -2,8 +2,16 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
-const Contact = () => {
+type ContactProps = {
+  locale?: string;
+};
+
+const Contact = ({ locale = 'en' }: ContactProps) => {
+  const t = useTranslations('contact');
+  const commonT = useTranslations('common');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,7 +32,7 @@ const Contact = () => {
     e.preventDefault();
     // 在实际应用中，这里会处理表单提交逻辑
     console.log('Feedback submitted:', formData);
-    alert('感谢您的反馈！我们会认真考虑您的建议。');
+    alert(t('feedbackAlert'));
     setFormData({
       name: '',
       email: '',
@@ -36,39 +44,14 @@ const Contact = () => {
 
   return (
     <>
-      {/* 顶部横幅 - 修复黑边问题 */}
-      <section className="relative h-[500px] mb-0">
-        {/* 背景图片和遮罩 */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <Image
-            src="/images/cta-bg.jpg"
-            alt="Contact Us"
-            fill
-            className="object-cover object-center"
-            priority
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-        </div>
-        
-        {/* 标题内容 */}
-        <div className="container relative z-10 h-full flex-col-center text-white">
-          <h1 className="text-4xl md:text-5xl title-serif mb-4 text-center">
-            Contact Us
-          </h1>
-          <p className="text-lg text-center max-w-2xl mx-auto">
-            We value your feedback and are committed to providing the best service possible
-          </p>
-        </div>
-      </section>
-      
       {/* 联系表单部分 */}
       <section className="section-container section-light" id="contact">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h3 className="title-lg text-black">Get In Touch</h3>
+              <h3 className="title-lg text-black">{t('getInTouch')}</h3>
               <p className="text-black mb-8">
-                Have suggestions or feedback about our services? We&apos;d love to hear from you. Your input helps us improve and provide better experiences for all our clients.
+                {t('feedbackIntro')}
               </p>
               
               <div className="space-y-6">
@@ -80,8 +63,8 @@ const Contact = () => {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-1">Location</h4>
-                    <p className="text-black">Bangkok, Thailand</p>
+                    <h4 className="text-lg font-semibold mb-1">{t('location')}</h4>
+                    <p className="text-black">{t('locationValue')}</p>
                   </div>
                 </div>
                 
@@ -92,8 +75,8 @@ const Contact = () => {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-1">Phone</h4>
-                    <p className="text-black">+66 XX XXX XXXX</p>
+                    <h4 className="text-lg font-semibold mb-1">{t('phone')}</h4>
+                    <p className="text-black">{t('phoneValue')}</p>
                   </div>
                 </div>
                 
@@ -104,8 +87,8 @@ const Contact = () => {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-1">Email</h4>
-                    <p className="text-black">info@victorias-bangkok.com</p>
+                    <h4 className="text-lg font-semibold mb-1">{t('email')}</h4>
+                    <p className="text-black">{t('emailValue')}</p>
                   </div>
                 </div>
                 
@@ -116,8 +99,8 @@ const Contact = () => {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-1">Working Hours</h4>
-                    <p className="text-black">Available 24/7</p>
+                    <h4 className="text-lg font-semibold mb-1">{t('workingHours')}</h4>
+                    <p className="text-black">{t('workingHoursValue')}</p>
                   </div>
                 </div>
               </div>
@@ -125,10 +108,10 @@ const Contact = () => {
             
             <div>
               <form onSubmit={handleSubmit} className="card p-8">
-                <h3 className="title-lg text-black text-center">Feedback & Suggestions</h3>
+                <h3 className="title-lg text-black text-center">{t('feedbackTitle')}</h3>
                 
                 <div className="mb-4">
-                  <label htmlFor="name" className="block text-black font-medium mb-2">Your Name</label>
+                  <label htmlFor="name" className="block text-black font-medium mb-2">{t('nameLabel')}</label>
                   <input
                     type="text"
                     id="name"
@@ -141,7 +124,7 @@ const Contact = () => {
                 </div>
                 
                 <div className="mb-4">
-                  <label htmlFor="email" className="block text-black font-medium mb-2">Email Address</label>
+                  <label htmlFor="email" className="block text-black font-medium mb-2">{t('emailLabel')}</label>
                   <input
                     type="email"
                     id="email"
@@ -154,7 +137,7 @@ const Contact = () => {
                 </div>
                 
                 <div className="mb-4">
-                  <label htmlFor="phone" className="block text-black font-medium mb-2">Phone Number (Optional)</label>
+                  <label htmlFor="phone" className="block text-black font-medium mb-2">{t('phoneLabel')}</label>
                   <input
                     type="tel"
                     id="phone"
@@ -166,7 +149,7 @@ const Contact = () => {
                 </div>
                 
                 <div className="mb-4">
-                  <label htmlFor="subject" className="block text-black font-medium mb-2">Subject</label>
+                  <label htmlFor="subject" className="block text-black font-medium mb-2">{t('subjectLabel')}</label>
                   <select
                     id="subject"
                     name="subject"
@@ -175,24 +158,24 @@ const Contact = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-black"
                     required
                   >
-                    <option value="">Select a subject</option>
-                    <option value="suggestion">Suggestion</option>
-                    <option value="complaint">Complaint</option>
-                    <option value="praise">Praise</option>
-                    <option value="question">General Question</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('selectSubject')}</option>
+                    <option value="suggestion">{t('subjectOptions.suggestion')}</option>
+                    <option value="complaint">{t('subjectOptions.complaint')}</option>
+                    <option value="praise">{t('subjectOptions.praise')}</option>
+                    <option value="question">{t('subjectOptions.question')}</option>
+                    <option value="other">{t('subjectOptions.other')}</option>
                   </select>
                 </div>
                 
                 <div className="mb-6">
-                  <label htmlFor="message" className="block text-black font-medium mb-2">Your Message</label>
+                  <label htmlFor="message" className="block text-black font-medium mb-2">{t('messageLabel')}</label>
                   <textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     rows={4}
-                    placeholder="Please share your feedback, suggestions, or concerns..."
+                    placeholder={t('messagePlaceholder')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-black"
                     required
                   ></textarea>
@@ -202,7 +185,7 @@ const Contact = () => {
                   type="submit"
                   className="w-full primary-button py-3"
                 >
-                  Submit Feedback
+                  {t('submitButton')}
                 </button>
               </form>
             </div>

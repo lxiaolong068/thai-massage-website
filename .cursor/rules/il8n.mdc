@@ -1,0 +1,519 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 泰式按摩网站国际化 (i18n) 开发规范
+
+## 1. 国际化架构概述
+
+本项目使用 Next.js 14 和 next-intl 3.22+ 实现多语言支持，目前支持四种语言：英文 (en)、中文 (zh)、泰语 (th) 和韩语 (ko)。国际化实现采用基于路径的方式，通过 URL 路径中的语言代码区分不同语言版本（例如 `/en/about`、`/zh/services`）。
+
+## 2. 目录结构和文件组织
+
+### 2.1 国际化相关文件
+
+```
+src/
+├── i18n/
+│   ├── config.ts           # 语言配置（支持的语言、默认语言等）
+│   ├── i18n.ts             # next-intl 配置
+│   ├── navigation.ts       # 本地化导航工具
+│   ├── client.ts           # 客户端国际化工具
+│   ├── server.ts           # 服务器端国际化工具
+│   ├── utils.ts            # 国际化工具函数
+│   └── messages/           # 翻译文件目录
+│       ├── en.json         # 英文翻译
+│       ├── zh.json         # 中文翻译
+│       ├── th.json         # 泰语翻译
+│       └── ko.json         # 韩语翻译
+├── app/
+│   ├── [locale]/           # 多语言路由
+│   │   ├── layout.tsx      # 多语言布局
+│   │   ├── page.tsx        # 多语言首页
+│   │   └── ...             # 其他页面
+│   ├── about/              # 默认路由（重定向到带语言前缀的路由）
+│   ├── services/           # 默认路由（重定向到带语言前缀的路由）
+│   ├── therapists/         # 默认路由（重定向到带语言前缀的路由）
+│   └── ...                 # 其他默认路由
+├── middleware.ts           # 国际化中间件配置
+```
+
+### 2.2 翻译文件结构
+
+翻译文件使用嵌套的 JSON 结构，按功能模块组织：
+
+```json
+{
+  "metadata": {
+    "title": "网站标题",
+    "description": "网站描述"
+  },
+  "common": {
+    "navigation": {
+      "home": "首页",
+      "about": "关于我们"
+    },
+    "buttons": {
+      "bookNow": "立即预约"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "标题文本"
+    }
+  }
+}
+```
+
+## 3. 开发指南
+
+### 3.1 路由和重定向策略
+
+为确保所有 URL 都包含语言前缀，我们采用以下策略：
+
+1. **中间件配置**：
+   ```typescript
+   // middleware.ts
+   import createMiddleware from 'next-intl/middleware';
+   
+   const locales = ['en', 'zh', 'th', 'ko'];
+   const defaultLocale = 'en';
+   
+   export default createMiddleware({
+     locales,
+     defaultLocale,
+     localeDetection: true,
+     // 确保所有路由都有语言前缀
+     localePrefix: 'always'
+   });
+   
+   export const config = {
+     matcher: ['/((?!api|_next|images|favicon.ico).*)']
+   };
+   ```
+
+2. **默认路由重定向**：
+   为所有主要页面创建默认路由，重定向到带有默认语言前缀的路径：
+   ```typescript
+   // src/app/therapists/page.tsx
+   import { redirect } from 'next/navigation';
+   import { defaultLocale } from '@/i18n/config';
+   
+   export default function DefaultTherapistsPage() {
+     // 重定向到带有默认语言前缀的路径
+     redirect(`/${defaultLocale}/therapists`);
+   }
+   ```
+
+3. **路径配置**：
+   在 navigation.ts 中定义所有路径，确保 Link 组件可以正确处理：
+   ```typescript
+   // src/i18n/navigation.ts
+   export const pathnames = {
+     '/': '/',
+     '/about': '/about',
+     '/services': '/services',
+     '/therapists': '/therapists',
+     '/contact': '/contact',
+     '/test': '/test',
+     '/server-test': '/server-test',
+     '/privacy-policy': '/privacy-policy',
+     '/terms-of-service': '/terms-of-service',
+   };
+   ```
+
+### 3.2 服务器组件中的国际化
+
+在服务器组件中使用国际化时，请遵循以下指南：
+
+1. **页面组件必须接收 locale 参数**：
+
+```typescript
+// ✅ 正确方式
+export default function AboutPage({
+  params: { locale }
+}: {
+  params: { locale: string }
+}) {
+  return (
+    // 组件内容
+  );
+}
+```
+
+2. **获取服务器组件中的翻译**：
+
+```typescript
+// 在服务器组件中获取翻译
+import { getTranslations } from 'next-intl/server';
+
+export default async function ServerComponent({
+  params: { locale }
+}: {
+  params: { locale: string }
+}) {
+  const t = await getTranslations('namespace');
+  
+  return <h1>{t('title')}</h1>;
+}
+```
+
+### 3.3 客户端组件中的国际化
+
+在客户端组件中使用国际化时，请遵循以下指南：
+
+1. **添加 'use client' 指令**：
+
+```typescript
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
+
+export default function ClientComponent() {
+  const t = useTranslations('namespace');
+  const pathname = usePathname();
+  
+  return (
+    <>
+      <h1>{t('title')}</h1>
+      <Link href="/about">关于我们</Link>
+    </>
+  );
+}
+```
+
+2. **使用 next-intl 的 Link 组件**：
+
+```typescript
+'use client';
+
+import { Link } from '@/i18n/navigation';
+
+export default function ClientNavigation() {
+  return <Link href="/about">关于我们</Link>;
+}
+```
+
+3. **确保客户端组件被 NextIntlClientProvider 包装**：
+
+这通常在 `[locale]/layout.tsx` 中完成：
+
+```typescript
+import { NextIntlClientProvider } from 'next-intl';
+
+export default function Layout({ children, params: { locale } }) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      {children}
+    </NextIntlClientProvider>
+  );
+}
+```
+
+4. **⚠️ 一致使用 next-intl 的标准翻译钩子**：
+
+```typescript
+// ✅ 正确方式：使用 next-intl 的 useTranslations 钩子
+import { useTranslations } from 'next-intl';
+
+const Component = () => {
+  const t = useTranslations('namespace');
+  
+  return <div>{t('key')}</div>;
+};
+
+// ❌ 错误方式：使用自定义翻译方法
+import { createClientTranslator } from '@/i18n/client';
+
+const Component = ({ locale }) => {
+  const translator = createClientTranslator(locale);
+  const t = (key) => translator.t(`namespace.${key}`);
+  
+  return <div>{t('key')}</div>;
+};
+```
+
+5. **⚠️ 避免在翻译键中使用默认值**：
+
+```typescript
+// ✅ 正确方式：直接使用翻译键
+<h2>{t('title')}</h2>
+
+// ❌ 错误方式：在翻译函数中提供默认值
+<h2>{t('title', 'Default Title')}</h2>
+```
+
+6. **⚠️ 对于多个命名空间，创建单独的翻译函数**：
+
+```typescript
+// ✅ 推荐方式：为不同命名空间创建单独的翻译函数
+import { useTranslations } from 'next-intl';
+
+const Component = () => {
+  const t = useTranslations('services');
+  const commonT = useTranslations('common');
+  
+  return (
+    <div>
+      <h2>{t('title')}</h2>
+      <button>{commonT('buttons.submit')}</button>
+    </div>
+  );
+};
+
+// ❌ 错误方式：在组件内混合不同的翻译方法
+const Component = () => {
+  const t = useTranslations('services');
+  
+  return (
+    <div>
+      <h2>{t('title')}</h2>
+      <button>{useTranslations('common')('buttons.submit')}</button>
+    </div>
+  );
+};
+```
+
+### 3.4 国际化配置
+
+1. **i18n.ts 配置文件**必须使用最新的 API：
+
+```typescript
+import { getRequestConfig } from 'next-intl/server';
+
+export default getRequestConfig(async ({ requestLocale }) => {
+  // 获取请求的语言
+  let locale = await requestLocale;
+  
+  // 确保它是有效的语言代码
+  if (!locale || !locales.includes(locale as any)) {
+    locale = defaultLocale;
+  }
+  
+  return {
+    locale,
+    messages: (await import(`./messages/${locale}.json`)).default,
+    timeZone: 'Asia/Bangkok'
+  };
+});
+```
+
+2. **中间件配置**：
+
+```typescript
+import createMiddleware from 'next-intl/middleware';
+
+const locales = ['en', 'zh', 'th', 'ko'];
+const defaultLocale = 'en';
+
+export default createMiddleware({
+  locales,
+  defaultLocale,
+  localeDetection: true,
+  localePrefix: 'always'
+});
+
+export const config = {
+  matcher: ['/((?!api|_next|images|favicon.ico).*)']
+};
+```
+
+## 4. 使用静态渲染的国际化
+
+如果需要使用国际化静态渲染页面，必须使用 `setRequestLocale`：
+
+```typescript
+import { setRequestLocale } from 'next-intl/server';
+
+export default function Page({
+  params: { locale }
+}: {
+  params: { locale: string }
+}) {
+  // 设置请求语言，启用静态渲染
+  setRequestLocale(locale);
+  
+  return (
+    // 页面内容
+  );
+}
+```
+
+## 5. 翻译管理
+
+### 5.1 添加新翻译
+
+1. 在所有语言文件中添加相同的键，确保结构一致
+2. 使用 `extract-translations.js` 脚本提取和管理翻译
+
+```bash
+pnpm extract-translations
+```
+
+### 5.2 翻译键命名约定
+
+- 使用点分隔的驼峰命名
+- 按功能模块组织，从一般到具体
+- 示例：`common.buttons.submit`、`home.hero.title`
+
+## 6. 常见问题和解决方案
+
+### 6.1 导入错误
+
+**问题**：在服务器组件中导入客户端组件（例如 `import { Link } from '@/i18n/navigation'`）。
+
+**解决方案**：在服务器组件中使用 Next.js 内置的 `Link` 组件，并传递正确的 locale 参数。
+
+### 6.2 API 弃用警告
+
+**问题**：使用已弃用的 API（例如 `getRequestConfig` 中的 `locale` 参数）。
+
+**解决方案**：更新到最新的 API，使用 `requestLocale` 并确保返回 `locale` 字段。
+
+### 6.3 语言切换问题
+
+**问题**：语言切换后页面内容不更新。
+
+**解决方案**：确保所有组件正确接收和使用 `locale` 参数，并且所有语言文件中存在翻译键。
+
+### 6.4 ⚠️ 翻译键显示问题
+
+**问题**：页面显示翻译键名称（例如 "services.title"）而不是实际翻译内容。
+
+**解决方案**：
+1. 确保使用 next-intl 的标准翻译钩子 `useTranslations`，而不是自定义翻译方法
+2. 检查翻译文件中是否存在相应的翻译键
+3. 确保组件正确接收 `locale` 参数并将其传递给子组件
+4. 验证 `NextIntlClientProvider` 是否正确配置并包装客户端组件
+
+### 6.5 ⚠️ 自定义翻译方法问题
+
+**问题**：使用自定义翻译方法（例如 `createClientTranslator`）可能导致翻译不一致或加载问题。
+
+**解决方案**：
+1. 一致使用 next-intl 的标准翻译钩子 `useTranslations`
+2. 移除自定义翻译方法和默认值
+3. 确保翻译文件中包含所有必要的翻译键
+
+### 6.6 ⚠️ 多命名空间翻译问题
+
+**问题**：需要在单个组件中使用来自多个命名空间的翻译。
+
+**解决方案**：
+1. 在组件顶部为每个需要的命名空间创建单独的翻译函数
+2. 使用有意义的变量名区分不同命名空间的翻译函数（例如 `t` 和 `commonT`）
+3. 避免在 JSX 中直接调用 `useTranslations` 钩子
+
+```typescript
+// ✅ 推荐方式
+const t = useTranslations('services');
+const commonT = useTranslations('common');
+
+return (
+  <>
+    <h2>{t('title')}</h2>
+    <button>{commonT('buttons.submit')}</button>
+  </>
+);
+```
+
+### 6.7 ⚠️ 无语言前缀 URL 访问问题
+
+**问题**：直接访问无语言前缀的 URL（如 `/therapists`）导致国际化上下文缺失错误。
+
+**解决方案**：
+1. 在中间件中设置 `localePrefix: 'always'` 确保所有路由都有语言前缀
+2. 为所有主要页面创建默认路由重定向，将无语言前缀的 URL 重定向到带有默认语言前缀的 URL
+3. 确保所有内部链接使用 `next-intl/navigation` 提供的 Link 组件
+
+```typescript
+// 默认路由重定向示例
+import { redirect } from 'next/navigation';
+import { defaultLocale } from '@/i18n/config';
+
+export default function DefaultTherapistsPage() {
+  redirect(`/${defaultLocale}/therapists`);
+}
+```
+
+## 7. 测试和验证
+
+### 7.1 国际化测试清单
+
+- [ ] 检查所有页面在所有支持的语言中是否正确显示
+- [ ] 验证语言切换功能是否正常工作
+- [ ] 确认所有动态内容（例如日期、数字）是否根据语言正确格式化
+- [ ] 测试 URL 路由是否正确处理语言参数
+- [ ] 验证 SEO 元数据是否根据语言正确生成
+- [ ] ⚠️ **检查是否存在显示翻译键名称而不是翻译内容的情况**
+- [ ] ⚠️ **验证所有组件是否使用标准翻译方法**
+- [ ] ⚠️ **测试直接访问无语言前缀的 URL 是否正确重定向**
+
+### 7.2 自动化测试
+
+为国际化功能编写自动化测试，确保：
+
+1. 所有语言路由正确加载
+2. 语言切换功能正常工作
+3. 翻译键不缺失
+4. 无语言前缀的 URL 正确重定向
+
+## 8. 更新和维护
+
+### 8.1 依赖更新
+
+定期更新 next-intl 和其他国际化相关依赖：
+
+```bash
+pnpm update next-intl
+```
+
+### 8.2 API 变更监控
+
+监控 next-intl 和 Next.js 更新日志，特别是关于国际化 API 变更的部分。
+
+## 9. 最佳实践
+
+1. **避免硬编码文本**：所有面向用户的文本都应使用翻译函数
+2. **保持翻译文件同步**：确保所有语言文件包含相同的键
+3. **使用类型检查**：利用 TypeScript 的类型检查功能验证翻译键
+4. **添加回退机制**：为缺失的翻译提供合理的回退
+5. **优化加载性能**：考虑按需加载翻译文件以减少初始加载时间
+6. **⚠️ 标准化翻译方法**：在整个项目中使用一致的翻译方法，最好是 next-intl 的标准钩子
+7. **⚠️ 避免混合不同的翻译实现**：除非有特殊要求，否则不要混合不同的翻译方法
+8. **⚠️ 定期检查翻译显示**：在开发过程中定期切换语言，确保所有内容正确显示
+9. **⚠️ 命名空间翻译函数命名约定**：使用多个命名空间时，为每个命名空间创建单独的翻译函数并使用有意义的变量名：
+   - 主命名空间：`const t = useTranslations('namespace');`
+   - 通用命名空间：`const commonT = useTranslations('common');`
+   - 特定功能命名空间：`const formT = useTranslations('forms');`
+10. **⚠️ 确保所有 URL 都有语言前缀**：使用中间件配置和默认路由重定向确保所有 URL 都有语言前缀
+
+## 10. ⚠️ 组件开发工作流
+
+为确保正确实现国际化功能，请遵循以下组件开发工作流：
+
+1. **设计阶段**：
+   - 确定组件需要的翻译键
+   - 在所有语言文件中添加相应的翻译
+
+2. **实现阶段**：
+   - 添加 `'use client'` 指令（如果是客户端组件）
+   - 使用 `useTranslations` 钩子获取翻译
+   - 如果组件需要来自多个命名空间的翻译，为每个命名空间创建单独的翻译函数
+   - 使用有意义的变量名区分不同命名空间的翻译函数
+   - 避免在 JSX 中直接调用 `useTranslations` 钩子
+   - 确保组件使用 `next-intl/navigation` 提供的 Link 组件
+
+3. **测试阶段**：
+   - 在所有支持的语言中测试组件
+   - 检查是否存在显示翻译键名称的情况
+   - 验证链接是否包含正确的语言代码
+   - 测试直接访问无语言前缀的 URL 是否正确重定向
+
+4. **集成阶段**：
+   - 确保父组件正确传递 `locale` 参数给子组件
+   - 验证组件在页面中的显示
+
+遵循这些指南和工作流将确保您的项目的国际化功能稳定可靠，避免常见问题并提高开发效率。

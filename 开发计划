@@ -1,0 +1,494 @@
+# 泰式按摩网站国际化开发计划 (i18n)
+
+## 需求分析与目标
+
+* **目标语言**: 
+  - 英文 (默认语言)
+  - 中文
+  - 泰语
+  - 韩语
+* **关键功能**:
+  - 自动检测用户浏览器语言并显示相应语言
+  - 提供直观的语言切换功能
+  - 保持用户语言选择偏好
+  - 确保所有静态文本和动态内容都能正确翻译
+  - 适应不同语言的文本长度和排版要求
+  
+## 技术方案设计
+
+### 1. 技术选型
+
+对比几种主流的Next.js国际化方案:
+
+| 方案 | 优势 | 劣势 | 适用场景 |
+|------|------|------|----------|
+| **next-intl** | 轻量级、对App Router支持更好、类型安全 | 生态系统相对较小 | 现代Next.js应用 |
+| **next-i18next** | 成熟稳定、生态完善 | 对App Router支持较弱 | 传统Next.js应用 |
+| **next-translate** | 简单易用 | 功能相对有限 | 小型项目 |
+
+**推荐方案**: 使用 `next-intl` 作为本项目的国际化解决方案，理由如下:
+- 与Next.js 14及App Router完全兼容
+- 提供TypeScript支持，确保类型安全
+- 提供服务器组件和客户端组件的统一API
+- 性能优化，避免不必要的重渲染
+- 支持国际化URL路由
+
+### 2. 详细实施步骤
+
+#### 2.1 安装依赖
+
+```bash
+pnpm add next-intl
+```
+
+#### 2.2 项目配置
+
+1. **创建国际化配置文件** (src/i18n/config.ts):
+
+```typescript
+import { getRequestConfig } from 'next-intl/server';
+ 
+export default getRequestConfig(async ({ locale }) => {
+  return {
+    messages: (
+      await import(`./messages/${locale}.json`)
+    ).default
+  };
+});
+```
+
+2. **配置中间件** (middleware.ts):
+
+```typescript
+import createMiddleware from 'next-intl/middleware';
+ 
+export default createMiddleware({
+  // 支持的语言列表
+  locales: ['en', 'zh', 'th', 'ko'],
+  // 默认语言
+  defaultLocale: 'en',
+  // 检测并记住用户的语言偏好
+  localeDetection: true
+});
+ 
+export const config = {
+  // 匹配需要国际化的路径
+  matcher: ['/((?!api|_next|.*\\..*).*)']
+};
+```
+
+3. **修改Next.js配置** (next.config.js):
+
+```javascript
+const withNextIntl = require('next-intl/plugin')('./src/i18n/config.ts');
+ 
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  /* 现有配置保留 */
+  images: {
+    domains: ['images.unsplash.com', 'cdn-icons-png.flaticon.com'],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+  reactStrictMode: true,
+  swcMinify: true,
+};
+
+module.exports = withNextIntl(nextConfig);
+```
+
+#### 2.3 创建翻译文件
+
+在 `src/i18n/messages` 目录下创建各语言的翻译文件:
+
+1. **建立合理的翻译文件结构**:
+
+```
+src/i18n/
+  └── messages/
+      ├── en.json     # 英文翻译
+      ├── zh.json     # 中文翻译
+      ├── th.json     # 泰语翻译
+      └── ko.json     # 韩语翻译
+```
+
+2. **翻译文件内容组织**:
+   - 按功能区域或页面组织翻译内容，例如:
+
+```json
+{
+  "common": {
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "therapists": "Therapists & Booking",
+      "contact": "Contact"
+    },
+    "buttons": {
+      "bookNow": "Book Now",
+      "learnMore": "Learn More",
+      "submit": "Submit",
+      "sendMessage": "Send Message"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Experience Premium Thai Massage",
+      "subtitle": "Relaxation and healing at your doorstep"
+    },
+    "services": {
+      "title": "Our Services",
+      "viewAll": "View All Services"
+    }
+  },
+  "services": {...},
+  "about": {...},
+  "contact": {...},
+  "therapists": {...},
+  "booking": {...}
+}
+```
+
+#### 2.4 改造应用结构
+
+1. **更新根布局** (src/app/[locale]/layout.tsx):
+
+```typescript
+import { NextIntlClientProvider } from 'next-intl';
+import { notFound } from 'next/navigation';
+import { Inter } from 'next/font/google';
+import '../globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
+
+// 定义支持的语言
+const locales = ['en', 'zh', 'th', 'ko'];
+
+export default async function LocaleLayout({
+  children,
+  params: { locale }
+}) {
+  // 验证语言参数
+  if (!locales.includes(locale)) notFound();
+
+  // 导入翻译文本
+  let messages;
+  try {
+    messages = (await import(`../../i18n/messages/${locale}.json`)).default;
+  } catch (error) {
+    notFound();
+  }
+
+  return (
+    <html lang={locale}>
+      <body className="antialiased">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+2. **创建国际化路由结构**:
+   将现有 `src/app/` 下的页面移至 `src/app/[locale]/` 目录，实现路由国际化
+
+```
+src/app/
+  └── [locale]/
+      ├── page.tsx         # 首页
+      ├── about/
+      │   └── page.tsx     # 关于页面
+      ├── services/
+      │   └── page.tsx     # 服务页面
+      ├── therapists/
+      │   └── page.tsx     # 按摩师页面
+      ├── contact/
+      │   └── page.tsx     # 联系页面
+      └── book/
+          └── page.tsx     # 预约页面
+```
+
+#### 2.5 组件中使用翻译
+
+1. **服务器组件中使用** (例如 page.tsx):
+
+```typescript
+import { useTranslations } from 'next-intl';
+
+export default function HomePage() {
+  const t = useTranslations('home');
+  
+  return (
+    <main>
+      <h1>{t('hero.title')}</h1>
+      <p>{t('hero.subtitle')}</p>
+      {/* 其他内容 */}
+    </main>
+  );
+}
+```
+
+2. **客户端组件中使用** (例如 Header.tsx):
+
+```typescript
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { usePathname } from 'next-intl/client';
+import Link from 'next-intl/link';
+
+export default function Header() {
+  const t = useTranslations('common.navigation');
+  const pathname = usePathname();
+  
+  return (
+    <header>
+      <nav>
+        <ul>
+          <li>
+            <Link href="/" className={pathname === '/' ? 'active' : ''}>
+              {t('home')}
+            </Link>
+          </li>
+          <li>
+            <Link href="/about" className={pathname === '/about' ? 'active' : ''}>
+              {t('about')}
+            </Link>
+          </li>
+          {/* 其他导航项 */}
+        </ul>
+      </nav>
+    </header>
+  );
+}
+```
+
+#### 2.6 实现语言切换组件
+
+创建一个专用的 `LanguageSwitcher.tsx` 组件:
+
+```typescript
+'use client';
+
+import { useLocale } from 'next-intl';
+import { usePathname, useRouter } from 'next-intl/client';
+import { useTransition } from 'react';
+
+export default function LanguageSwitcher() {
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  const handleLocaleChange = (e) => {
+    const newLocale = e.target.value;
+    startTransition(() => {
+      router.replace(pathname, { locale: newLocale });
+    });
+  };
+
+  return (
+    <div className="relative">
+      <select
+        value={locale}
+        onChange={handleLocaleChange}
+        className="appearance-none bg-transparent border border-white/30 rounded px-2 py-1 text-sm text-white/90 focus:outline-none focus:ring-1 focus:ring-primary"
+        disabled={isPending}
+      >
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+        <option value="th">ไทย</option>
+        <option value="ko">한국어</option>
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+        <svg className="h-4 w-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+      {isPending && (
+        <span className="ml-2 text-xs text-white/70">Changing...</span>
+      )}
+    </div>
+  );
+}
+```
+
+将此组件添加到 Header 组件中:
+
+```typescript
+import LanguageSwitcher from './LanguageSwitcher';
+
+// 在Header组件内
+return (
+  <header>
+    <div className="container flex items-center justify-between">
+      <Logo />
+      <nav>
+        {/* 导航项 */}
+      </nav>
+      <LanguageSwitcher />
+    </div>
+  </header>
+);
+```
+
+### 3. 特殊处理
+
+#### 3.1 格式化日期和时间
+
+使用 `next-intl` 的内置格式化工具:
+
+```typescript
+import { useFormatter } from 'next-intl';
+
+export default function FormattedDate({ date }) {
+  const format = useFormatter();
+  
+  return (
+    <time dateTime={date.toISOString()}>
+      {format.dateTime(date, {
+        dateStyle: 'long',
+        timeStyle: 'short'
+      })}
+    </time>
+  );
+}
+```
+
+#### 3.2 处理多语言SEO
+
+更新元数据生成方法，支持多语言:
+
+```typescript
+// src/app/[locale]/layout.tsx 中
+export async function generateMetadata({ params: { locale } }) {
+  const messages = (await import(`../../i18n/messages/${locale}.json`)).default;
+  
+  return {
+    title: messages.metadata.title,
+    description: messages.metadata.description,
+    keywords: messages.metadata.keywords,
+    openGraph: {
+      title: messages.metadata.ogTitle,
+      description: messages.metadata.ogDescription,
+      // 其他OG属性
+    }
+  };
+}
+```
+
+#### 3.3 处理富文本和HTML内容
+
+对于包含HTML标签的翻译文本:
+
+```typescript
+import { useTranslations } from 'next-intl';
+
+export default function RichTextContent() {
+  const t = useTranslations('about');
+  
+  return (
+    <div dangerouslySetInnerHTML={{ __html: t.raw('richContent') }} />
+  );
+}
+```
+
+### 4. 翻译工作流
+
+1. **初始翻译提取**:
+   - 使用脚本从现有组件中提取所有硬编码的文本
+   - 创建初始的英文翻译文件
+
+2. **翻译流程**:
+   - 英文翻译作为源头
+   - 利用专业翻译服务或熟悉相关行业的翻译人员
+   - 对于泰语和韩语，确保聘请母语人士校对
+
+3. **翻译质量保证**:
+   - 进行人工审核，确保翻译准确且符合行业术语
+   - 特别关注按摩服务术语的准确翻译
+   - 注意文化差异，确保内容在目标文化中得体有效
+
+## 实施路线图
+
+### 阶段一: 基础设置 (1周)
+- [x] 安装依赖
+- [x] 配置next-intl
+- [x] 创建基本的国际化路由结构
+- [x] 实现语言切换器
+
+### 阶段二: 内容国际化 (2-3周)
+- [x] 提取所有静态文本到翻译文件
+- [x] 完成英文和中文翻译
+- [x] 改造现有组件使用翻译API
+- [x] 测试英文和中文版本
+
+### 阶段三: 扩展语言支持 (1-2周)
+- [x] 完成泰语和韩语翻译
+- [x] 进行多语言测试
+- [x] 处理特殊格式和布局问题
+
+### 阶段四: 优化和完善 (1周)
+- [x] SEO优化
+- [x] 性能优化
+- [x] 自动化测试
+- [x] 文档编写
+
+## 测试方案
+
+### 单元测试
+
+推荐的单元测试内容：
+
+1. **语言切换器功能测试**:
+   - 测试语言切换后URL正确变更
+   - 测试切换过程中UI状态正确
+
+2. **翻译功能测试**:
+   - 测试翻译键是否正确解析
+   - 测试包含插值的翻译文本
+
+3. **格式化功能测试**:
+   - 测试日期和时间在不同语言中的正确格式化
+   - 测试货币格式在不同语言中的显示
+
+单元测试使用Jest和React Testing Library实现。
+
+### 集成测试
+
+集成测试对于多语言功能非常重要，推荐使用Playwright实现：
+
+1. **多语言路由导航测试**:
+   - 测试不同语言下页面导航是否正确
+   - 测试语言偏好持久化是否有效
+
+2. **内容呈现测试**:
+   - 测试各页面在不同语言下是否正确呈现内容
+   - 测试各组件在不同语言下的布局是否合理
+
+3. **SEO测试**:
+   - 测试页面元数据在不同语言下是否正确
+   - 测试结构化数据在不同语言下是否有效
+
+## 总结与建议
+
+1. **性能考虑**:
+   - 采用动态导入翻译文件，减少初始加载时间
+   - 考虑使用静态导出，提高页面加载速度
+
+2. **可维护性**:
+   - 使用命名空间组织翻译内容，使其易于维护
+   - 构建自动化工具，检测缺失的翻译
+
+3. **用户体验增强**:
+   - 添加语言切换动画，提升用户体验
+   - 保存用户语言偏好，下次访问时自动使用
+   - 考虑添加基于地理位置的默认语言选择
+
+4. **未来扩展**:
+   - 设计支持轻松添加新语言的架构
+   - 考虑内容管理系统(CMS)集成，简化内容更新 

@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "title": "The Victoria's 출장 마사지 | 방콕의 전문 태국 마사지",
+    "description": "방콕에서 프리미엄 태국 마사지 서비스를 경험하세요. 저희의 전문 테라피스트들이 개인 맞춤형 마사지 테라피로 휴식과 활력을 당신의 집 앞까지 가져다 드립니다.",
+    "keywords": "태국 마사지, 방콕 마사지, 출장 마사지, 전문 마사지, 휴식 테라피, 태국 테라피스트",
+    "ogTitle": "The Victoria's 출장 마사지 | 방콕의 전문 태국 마사지",
+    "ogDescription": "방콕에서 프리미엄 태국 마사지 서비스를 경험하세요. 저희의 전문 테라피스트들이 휴식과 활력을 당신의 집 앞까지 가져다 드립니다."
+  },
+  "common": {
+    "navigation": {
+      "home": "홈",
+      "about": "소개",
+      "services": "서비스",
+      "therapists": "테라피스트 & 예약",
+      "contact": "연락처"
+    },
+    "buttons": {
+      "bookNow": "지금 예약",
+      "learnMore": "더 알아보기",
+      "submit": "제출",
+      "sendMessage": "메시지 보내기"
+    }
+  },
+  "notFound": {
+    "title": "404 - 페이지를 찾을 수 없음",
+    "message": "찾고 계신 페이지가 존재하지 않습니다.",
+    "backHome": "홈으로 돌아가기"
+  },
+  "services": {
+    "title": "마사지 서비스 및 가격",
+    "subtitle": "합리적인 가격으로 프리미엄 마사지 서비스를 경험하세요.",
+    "viewAll": "모든 서비스 보기",
+    "traditional": {
+      "title": "전통 태국 마사지",
+      "description": "정통 기법으로 긴장을 완화하는 고대 기술."
+    },
+    "oil": {
+      "title": "오일 마사지",
+      "description": "향기로운 오일로 몸과 마음을 진정시키는 릴렉싱 마사지."
+    },
+    "aromatherapy": {
+      "title": "아로마테라피 마사지",
+      "description": "깊은 휴식을 위한 에센셜 오일을 사용한 치료 마사지."
+    },
+    "foot": {
+      "title": "발 마사지",
+      "description": "발과 몸에 활력을 불어넣는 반사구 기술."
+    },
+    "neck": {
+      "title": "목과 어깨 마사지",
+      "description": "목과 어깨의 긴장을 완화하는 집중 마사지."
+    },
+    "deep": {
+      "title": "딥 티슈 마사지",
+      "description": "통증 완화를 위해 깊은 근육층을 대상으로 하는 강렬한 마사지."
+    }
+  },
+  "therapists": {
+    "title": "저희 테라피스트",
+    "subtitle": "인증받고 경험이 풍부한 마사지 테라피스트 팀을 만나보세요",
+    "therapist": "테라피스트",
+    "age": "나이",
+    "measurements": "신체 치수",
+    "weight": "체중",
+    "height": "신장",
+    "experience": "경력",
+    "whyChoose": {
+      "title": "왜 저희 테라피스트를 선택해야 할까요?",
+      "certified": {
+        "title": "인증된 전문가",
+        "description": "저희 모든 테라피스트는 인증을 받았으며 다양한 마사지 기술에 대한 수년간의 경험을 가지고 있습니다."
+      },
+      "personalized": {
+        "title": "맞춤형 서비스",
+        "description": "저희 테라피스트는 고객의 특정 요구와 선호도에 맞게 각 세션을 맞춤화합니다."
+      },
+      "punctual": {
+        "title": "시간 엄수 및 전문성",
+        "description": "저희는 고객의 시간을 존중하며 예약된 세션에 테라피스트가 정시에 도착하도록 보장합니다."
+      }
+    },
+    "viewAll": "모든 테라피스트 보기 및 지금 예약"
+  },
+  "contact": {
+    "getInTouch": "연락하기",
+    "feedbackIntro": "저희 서비스에 대한 제안이나 피드백이 있으신가요? 저희는 여러분의 의견을 듣고 싶습니다. 여러분의 의견은 저희가 개선하고 모든 고객에게 더 나은 경험을 제공하는 데 도움이 됩니다.",
+    "location": "위치",
+    "locationValue": "방콕, 태국",
+    "phone": "전화",
+    "phoneValue": "+66 XX XXX XXXX",
+    "email": "이메일",
+    "emailValue": "info@victorias-bangkok.com",
+    "workingHours": "영업 시간",
+    "workingHoursValue": "24시간 이용 가능",
+    "feedbackTitle": "피드백 및 제안",
+    "nameLabel": "이름",
+    "emailLabel": "이메일 주소",
+    "phoneLabel": "전화번호 (선택사항)",
+    "subjectLabel": "주제",
+    "selectSubject": "주제 선택",
+    "subjectOptions": {
+      "suggestion": "제안",
+      "complaint": "불만",
+      "praise": "칭찬",
+      "question": "일반 질문",
+      "other": "기타"
+    },
+    "messageLabel": "메시지",
+    "messagePlaceholder": "피드백, 제안 또는 우려 사항을 공유해 주세요...",
+    "submitButton": "피드백 제출",
+    "feedbackAlert": "피드백을 주셔서 감사합니다! 귀하의 제안을 신중히 고려하겠습니다."
+  },
+  "footer": {
+    "title": "The Victoria's 출장 마사지",
+    "address": "수쿰빗 소이 13, 클롱토이 누아, 왓타나, 방콕, 10110",
+    "tel": "전화",
+    "contactButton": "지금 연락하기",
+    "connectWithUs": "저희와 연결하세요",
+    "qrCodes": {
+      "line": "라인 QR 코드",
+      "wechat": "위챗 QR 코드",
+      "whatsapp": "왓츠앱 QR 코드",
+      "telegram": "텔레그램 QR 코드"
+    },
+    "copyright": "© {year} The Victoria's 출장 마사지. 모든 권리 보유.",
+    "privacyPolicy": "개인정보 처리방침",
+    "termsOfService": "서비스 이용약관"
+  },
+  "home": {
+    "hero": {
+      "title": "프리미엄 태국 마사지 경험",
+      "subtitle": "당신의 집 앞에서 휴식과 치유를",
+      "bookNow": "지금 예약"
+    },
+    "services": {
+      "title": "저희 서비스",
+      "viewAll": "모든 서비스 보기"
+    },
+    "introduction": {
+      "title": "Victoria's 태국 마사지에 오신 것을 환영합니다",
+      "description": "저희는 정통 태국 마사지 경험을 직접 여러분께 제공합니다. 저희의 숙련된 테라피스트들은 수세기에 걸쳐 완성된 전통 기술을 훈련받았습니다.",
+      "subtitle": "Victoria's 출장 마사지: 재생의 관문",
+      "content": "저희 서비스는 탁월한 품질과 전문 테라피스트로 유명합니다. 각 세션은 고객의 개별 요구에 맞게 맞춤화되어 깊은 휴식과 활력을 주는 경험을 보장하며, 테라피스트들은 그들의 전문 지식과 관리를 고객의 집 앞까지 가져옵니다. 가정에서 받는 서비스의 편리함과 럭셔리함이 인기 있는 선택이 되었습니다. 전체적인 웰빙에 중점을 둔 Victoria's 출장 마사지는 단순한 서비스 이상이었습니다; 그것은 신체적, 정신적 재생의 관문이었습니다.",
+      "imageAlt": "태국 마사지 소개"
+    },
+    "testimonials": {
+      "title": "고객 후기",
+      "subtitle": "저희 서비스를 경험한 분들의 이야기를 들어보세요"
+    }
+  }
+} 

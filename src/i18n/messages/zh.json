@@ -1,0 +1,171 @@
+{
+  "metadata": {
+    "title": "维多利亚上门按摩 | 曼谷专业泰式按摩",
+    "description": "体验曼谷优质泰式按摩服务。我们的专业按摩师将放松和恢复活力的体验直接带到您的门前，提供个性化的按摩疗法。",
+    "keywords": "泰式按摩, 曼谷按摩, 上门按摩, 专业按摩, 放松疗法, 泰国按摩师",
+    "ogTitle": "维多利亚上门按摩 | 曼谷专业泰式按摩",
+    "ogDescription": "体验曼谷优质泰式按摩服务。我们的专业按摩师将放松和恢复活力的体验直接带到您的门前。"
+  },
+  "common": {
+    "navigation": {
+      "home": "首页",
+      "about": "关于我们",
+      "services": "服务项目",
+      "therapists": "按摩师与预约",
+      "contact": "联系我们"
+    },
+    "buttons": {
+      "bookNow": "立即预约",
+      "learnMore": "了解更多",
+      "submit": "提交",
+      "sendMessage": "发送消息"
+    }
+  },
+  "notFound": {
+    "title": "404 - 页面未找到",
+    "message": "您正在寻找的页面不存在。",
+    "backHome": "返回首页"
+  },
+  "about": {
+    "title": "维多利亚上门按摩",
+    "imageAlt": "维多利亚上门按摩",
+    "learnMoreButton": "了解更多关于我们",
+    "card1": {
+      "title": "维多利亚曼谷",
+      "description": "维多利亚曼谷是曼谷的专业上门按摩服务。我们所有的按摩师都经过全面培训并持有专业证书。",
+      "imageAlt": "维多利亚曼谷"
+    },
+    "card2": {
+      "title": "曼谷专业上门按摩服务",
+      "description": "我们的技术娴熟的按摩师接受了各种技术的培训，随时准备根据客户的独特需求定制每次按摩。无论是寻求缓解日常生活的压力，恢复体力消耗，还是简单地享受一点宠爱，访客都能在这些专业人士的专业手中找到慰藉。",
+      "imageAlt": "专业上门按摩服务"
+    },
+    "card3": {
+      "title": "愿景与使命",
+      "description": "通过我们的专业按摩师体验终极放松。我们将水疗带到您家中，提供满足您需求的个性化治疗。享受宁静的氛围，让您的身心焕然一新。",
+      "imageAlt": "愿景与使命"
+    }
+  },
+  "services": {
+    "title": "我们的按摩服务与价格",
+    "subtitle": "以优惠的价格体验高级按摩服务。",
+    "viewAll": "查看所有服务",
+    "traditional": {
+      "title": "传统泰式按摩",
+      "description": "使用正宗技术的古老按摩方法，缓解身体紧张。"
+    },
+    "oil": {
+      "title": "精油按摩",
+      "description": "使用芳香精油的放松按摩，舒缓您的身心。"
+    },
+    "aromatherapy": {
+      "title": "芳香疗法按摩",
+      "description": "使用精油的治疗按摩，带来深度放松。"
+    },
+    "foot": {
+      "title": "足部按摩",
+      "description": "反射区按摩技术，为您的双脚和身体注入活力。"
+    },
+    "neck": {
+      "title": "颈肩按摩",
+      "description": "专注于缓解颈部和肩部紧张的按摩。"
+    },
+    "deep": {
+      "title": "深层组织按摩",
+      "description": "针对深层肌肉的强力按摩，缓解疼痛。"
+    }
+  },
+  "therapists": {
+    "title": "我们的按摩师",
+    "subtitle": "认识我们经过认证和经验丰富的按摩师团队",
+    "therapist": "按摩师",
+    "age": "年龄",
+    "measurements": "三围",
+    "weight": "体重",
+    "height": "身高",
+    "experience": "经验",
+    "whyChoose": {
+      "title": "为什么选择我们的按摩师？",
+      "certified": {
+        "title": "专业认证",
+        "description": "我们所有的按摩师都经过认证，并在各种按摩技术方面拥有多年经验。"
+      },
+      "personalized": {
+        "title": "个性化服务",
+        "description": "我们的按摩师根据您的特定需求和偏好定制每次按摩。"
+      },
+      "punctual": {
+        "title": "准时专业",
+        "description": "我们尊重您的时间，确保我们的按摩师准时到达您预约的时间。"
+      }
+    },
+    "viewAll": "查看所有按摩师并立即预约"
+  },
+  "contact": {
+    "getInTouch": "联系我们",
+    "feedbackIntro": "对我们的服务有建议或反馈？我们很乐意听取您的意见。您的反馈有助于我们改进并为所有客户提供更好的体验。",
+    "location": "地址",
+    "locationValue": "泰国曼谷",
+    "phone": "电话",
+    "phoneValue": "+66 XX XXX XXXX",
+    "email": "电子邮箱",
+    "emailValue": "info@victorias-bangkok.com",
+    "workingHours": "工作时间",
+    "workingHoursValue": "24/7全天候服务",
+    "feedbackTitle": "反馈与建议",
+    "nameLabel": "您的姓名",
+    "emailLabel": "电子邮箱地址",
+    "phoneLabel": "电话号码（可选）",
+    "subjectLabel": "主题",
+    "selectSubject": "请选择主题",
+    "subjectOptions": {
+      "suggestion": "建议",
+      "complaint": "投诉",
+      "praise": "赞扬",
+      "question": "一般问题",
+      "other": "其他"
+    },
+    "messageLabel": "您的留言",
+    "messagePlaceholder": "请分享您的反馈、建议或疑虑...",
+    "submitButton": "提交反馈",
+    "feedbackAlert": "感谢您的反馈！我们会认真考虑您的建议。"
+  },
+  "footer": {
+    "title": "维多利亚上门按摩",
+    "address": "曼谷市瓦塔纳区克隆托伊努阿素坤逸13巷，邮编10110",
+    "tel": "电话",
+    "contactButton": "立即联系我们",
+    "connectWithUs": "与我们联系",
+    "qrCodes": {
+      "line": "Line二维码",
+      "wechat": "微信二维码",
+      "whatsapp": "WhatsApp二维码",
+      "telegram": "Telegram二维码"
+    },
+    "copyright": "© {year} 维多利亚上门按摩。保留所有权利。",
+    "privacyPolicy": "隐私政策",
+    "termsOfService": "服务条款"
+  },
+  "home": {
+    "hero": {
+      "title": "体验高级泰式按摩",
+      "subtitle": "放松与治愈，尽在您的门前",
+      "bookNow": "立即预约"
+    },
+    "services": {
+      "title": "我们的服务",
+      "viewAll": "查看所有服务"
+    },
+    "introduction": {
+      "title": "欢迎来到维多利亚泰式按摩",
+      "description": "我们将正宗的泰式按摩体验直接带给您。我们的技术娴熟的按摩师接受了传统技术的培训，这些技术已经经过几个世纪的完善。",
+      "subtitle": "维多利亚上门按摩：焕然一新的门户",
+      "content": "我们的服务以卓越的品质和专业的按摩师而闻名。每次按摩都会根据客户的个人需求量身定制，确保深度放松和焕发活力的体验，按摩师将他们的专业知识和关怀直接带到客户家门口。家庭服务的便利性和奢华使其成为热门选择。以整体健康为重点，维多利亚上门按摩不仅仅是一项服务；它是身心更新的门户。",
+      "imageAlt": "泰式按摩介绍"
+    },
+    "testimonials": {
+      "title": "客户评价",
+      "subtitle": "听听那些体验过我们服务的人怎么说"
+    }
+  }
+} 

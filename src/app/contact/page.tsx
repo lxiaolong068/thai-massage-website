@@ -1,15 +1,7 @@
-import Contact from '@/components/Contact';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { redirect } from 'next/navigation';
+import { defaultLocale } from '@/i18n/config';
 
-export default function ContactPage() {
-  return (
-    <main className="relative">
-      <Header />
-      <div className="relative z-10">
-        <Contact />
-      </div>
-      <Footer />
-    </main>
-  );
+export default function DefaultContactPage() {
+  // 重定向到带有默认语言前缀的路径
+  redirect(`/${defaultLocale}/contact`);
 } 

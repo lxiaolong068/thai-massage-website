@@ -1,13 +1,26 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
-const Services = () => {
+type ServicesProps = {
+  locale?: string;
+};
+
+const Services = ({ locale = 'en' }: ServicesProps) => {
+  // 使用 next-intl 的 useTranslations 钩子获取翻译
+  const t = useTranslations('services');
+  const commonT = useTranslations('common');
+  
   return (
     <section className="section-container section-light" id="services">
       <div className="container">
-        <h2 className="section-title text-center mb-4 text-black">Our Massage & Price</h2>
+        <h2 className="section-title text-center mb-4 text-black">
+          {t('title')}
+        </h2>
         <p className="text-gray-800 text-center mb-12">
-          &quot;Discover premium massage services at unbeatable prices.&quot;
+          {t('subtitle')}
         </p>
         
         <div className="grid-responsive">
@@ -16,15 +29,15 @@ const Services = () => {
             <div className="image-container">
               <Image
                 src="/images/traditional-thai-new.jpg"
-                alt="Traditional Thai Massage"
+                alt={t('traditional.title')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="p-6">
-              <h3 className="title-md text-black">Traditional Thai Massage</h3>
+              <h3 className="title-md text-black">{t('traditional.title')}</h3>
               <p className="text-gray-800 mb-4">
-                Ancient techniques to relieve tension with authentic techniques.
+                {t('traditional.description')}
               </p>
               <div className="flex flex-col space-y-2 text-sm">
                 <div className="flex-between text-gray-900">
@@ -48,15 +61,15 @@ const Services = () => {
             <div className="image-container">
               <Image
                 src="/images/neck-shoulder-new.jpg"
-                alt="Neck & Shoulder Massage"
+                alt={t('neck.title')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="p-6">
-              <h3 className="title-md text-black">Neck & Shoulder</h3>
+              <h3 className="title-md text-black">{t('neck.title')}</h3>
               <p className="text-gray-800 mb-4">
-                A soothing neck and shoulder massage to relieve tension and restore balance, inspired by traditional Thai techniques.
+                {t('neck.description')}
               </p>
               <div className="flex flex-col space-y-2 text-sm">
                 <div className="flex-between text-gray-900">
@@ -80,15 +93,15 @@ const Services = () => {
             <div className="image-container">
               <Image
                 src="/images/oil-massage-new.jpg"
-                alt="Oil Massage"
+                alt={t('oil.title')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="p-6">
-              <h3 className="title-md text-black">Oil Massage</h3>
+              <h3 className="title-md text-black">{t('oil.title')}</h3>
               <p className="text-gray-800 mb-4">
-                A relaxing oil massage that nourishes the skin and eases muscle stiffness with smooth, flowing Thai-inspired strokes.
+                {t('oil.description')}
               </p>
               <div className="flex flex-col space-y-2 text-sm">
                 <div className="flex-between text-gray-900">
@@ -112,15 +125,15 @@ const Services = () => {
             <div className="image-container">
               <Image
                 src="/images/aromatherapy-massage.jpg"
-                alt="Aromatherapy Massage"
+                alt={t('aromatherapy.title')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="p-6">
-              <h3 className="title-md text-black">Aromatherapy Massage</h3>
+              <h3 className="title-md text-black">{t('aromatherapy.title')}</h3>
               <p className="text-gray-800 mb-4">
-                An aromatherapy massage blending essential oils with gentle Thai techniques to calm the mind and rejuvenate the body.
+                {t('aromatherapy.description')}
               </p>
               <div className="flex flex-col space-y-2 text-sm">
                 <div className="flex-between text-gray-900">
@@ -144,15 +157,15 @@ const Services = () => {
             <div className="image-container">
               <Image
                 src="/images/deep-tissue-new.jpg"
-                alt="Deep Tissue Massage"
+                alt={t('deep.title')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="p-6">
-              <h3 className="title-md text-black">Deep Tissue Massage</h3>
+              <h3 className="title-md text-black">{t('deep.title')}</h3>
               <p className="text-gray-800 mb-4">
-                A deep tissue massage using firm Thai-inspired pressure to target knots and release chronic tension in muscles.
+                {t('deep.description')}
               </p>
               <div className="flex flex-col space-y-2 text-sm">
                 <div className="flex-between text-gray-900">
@@ -176,15 +189,15 @@ const Services = () => {
             <div className="image-container">
               <Image
                 src="/images/foot-massage.jpg"
-                alt="Foot Massage"
+                alt={t('foot.title')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="p-6">
-              <h3 className="title-md text-black">Foot Massage</h3>
+              <h3 className="title-md text-black">{t('foot.title')}</h3>
               <p className="text-gray-800 mb-4">
-                A revitalizing foot massage rooted in Thai traditions, easing fatigue and stimulating circulation with expert pressure.
+                {t('foot.description')}
               </p>
               <div className="flex flex-col space-y-2 text-sm">
                 <div className="flex-between text-gray-900">
@@ -204,13 +217,13 @@ const Services = () => {
           </div>
         </div>
         
-        {/* View All Services 按钮 */}
+        {/* Book Now 按钮 */}
         <div className="mt-12 text-center">
           <Link 
-            href="/services" 
+            href={`/${locale}/therapists`} 
             className="primary-button inline-flex items-center"
           >
-            View All Services
+            {commonT('buttons.bookNow')}
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>

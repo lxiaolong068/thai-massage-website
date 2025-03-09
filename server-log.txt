@@ -1,0 +1,27 @@
+
+> thai-massage@0.1.0 dev /Users/brucelee/Documents/GitHub/thai-massage
+> next dev
+
+  ▲ Next.js 14.2.24
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 1003ms
+ ○ Compiling /en ...
+ ✓ Compiled /en in 832ms (798 modules)
+Loading translations for en...
+Loading translations for zh...
+Loading translations for th...
+Loading translations for ko...
+Creating header translator for locale: en
+Creating hero translator for locale: en
+Translations for en loaded successfully
+Translations for zh loaded successfully
+Translations for th loaded successfully
+Translations for ko loaded successfully
+All translations preloaded
+ GET /en 500 in 959ms
+ ✓ Compiled in 138ms (348 modules)
+ ✓ Compiled in 109ms (348 modules)
+ ✓ Compiled in 71ms (348 modules)
+[?25h
