@@ -1,8 +1,10 @@
 import { useTranslations } from 'next-intl';
-import { useLocale } from '../hooks/useLocale';
 
-export default function ExampleComponent() {
-  const locale = useLocale();
+type ExampleComponentProps = {
+  locale?: string;
+};
+
+export default function ExampleComponent({ locale = 'en' }: ExampleComponentProps) {
   const t = useTranslations('ExampleComponent');
 
   return (

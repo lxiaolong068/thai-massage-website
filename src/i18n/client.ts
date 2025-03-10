@@ -3,14 +3,17 @@
 
 import { createTranslator } from 'next-intl';
 
+// 定义翻译消息类型
+type TranslationMessages = Record<string, any>;
+
 // 创建以语言为键，翻译对象为值的缓存
-const translationsCache: Record<string, any> = {};
+const translationsCache: Record<string, TranslationMessages> = {};
 
 // 语言加载状态跟踪
-const loadingPromises: Record<string, Promise<any>> = {};
+const loadingPromises: Record<string, Promise<TranslationMessages>> = {};
 
 // 预加载所有翻译，提前返回翻译对象
-export async function preloadTranslations() {
+export async function preloadTranslations(): Promise<void> {
   const locales = ['en', 'zh', 'th', 'ko'];
   await Promise.all(locales.map(locale => loadTranslations(locale)));
   console.log('All translations preloaded');
@@ -20,13 +23,13 @@ export async function preloadTranslations() {
 preloadTranslations().catch(err => console.error('Failed to preload translations:', err));
 
 // 获取翻译对象，如果不存在则加载
-export async function loadTranslations(locale: string) {
+export async function loadTranslations(locale: string): Promise<TranslationMessages> {
   if (translationsCache[locale]) {
     return translationsCache[locale];
   }
   
   // 如果已经有加载进行中的相同语言，复用承诺避免重复加载
-  if (loadingPromises[locale]) {
+  if (locale in loadingPromises) {
     return loadingPromises[locale];
   }
   
@@ -44,7 +47,7 @@ export async function loadTranslations(locale: string) {
       if (locale !== 'en') {
         return loadTranslations('en');
       }
-      return {};
+      return {} as TranslationMessages;
     } finally {
       // 完成后清除加载中标记
       delete loadingPromises[locale];
@@ -57,7 +60,7 @@ export async function loadTranslations(locale: string) {
 }
 
 // 直接从缓存获取翻译，无需等待加载
-export function getTranslations(locale: string) {
+export function getTranslations(locale: string): TranslationMessages {
   if (!translationsCache[locale]) {
     // 如果尚未加载，立即触发加载但返回空对象
     loadTranslations(locale);
@@ -87,8 +90,13 @@ function deepGet(obj: any, path: string, defaultValue?: any): any {
   return current !== undefined ? current : defaultValue;
 }
 
+// 定义翻译器类型
+type ClientTranslator = {
+  t: (key: string, params?: Record<string, any>, defaultValue?: string) => string;
+};
+
 // 创建同步翻译函数
-export function createClientTranslator(locale: string, namespace?: string) {
+export function createClientTranslator(locale: string, namespace?: string): ClientTranslator {
   // 获取翻译消息对象
   const allMessages = getTranslations(locale);
   
