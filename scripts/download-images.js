@@ -42,39 +42,39 @@ const images = [
     description: 'Foot Massage'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/intro.png',
-    filename: 'intro-new.png',
-    description: 'New introduction image'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/intro.png',
+    filename: 'intro.png',
+    description: 'Introduction image'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/G-1.jpg',
-    filename: 'slider-1.jpg',
-    description: 'Slider image 1'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/G-1.jpg',
+    filename: 'gallery-1.jpg',
+    description: 'Gallery image 1'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/G-5.jpg',
-    filename: 'slider-2.jpg',
-    description: 'Slider image 2'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/G-5.jpg',
+    filename: 'gallery-5.jpg',
+    description: 'Gallery image 5'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/G-3.jpg',
-    filename: 'slider-3.jpg',
-    description: 'Slider image 3'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/G-3.jpg',
+    filename: 'gallery-3.jpg',
+    description: 'Gallery image 3'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/G-2.jpg',
-    filename: 'slider-4.jpg',
-    description: 'Slider image 4'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/G-2.jpg',
+    filename: 'gallery-2.jpg',
+    description: 'Gallery image 2'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/G-4.jpg',
-    filename: 'slider-5.jpg',
-    description: 'Slider image 5'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/G-4.jpg',
+    filename: 'gallery-4.jpg',
+    description: 'Gallery image 4'
   },
   {
-    url: 'https://www.thevictorias-th.com/wp-content/uploads/2024/09/The-victoriasoucall-massage.png',
-    filename: 'victoria-massage.png',
-    description: 'Victoria outcall massage image'
+    url: 'https://www.thetopsecret-th.com/wp-content/uploads/2024/09/The-topsecretoucall-massage.png',
+    filename: 'topsecret-massage.png',
+    description: 'Top Secret outcall massage image'
   },
   {
     url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874',

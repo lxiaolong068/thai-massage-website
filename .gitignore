@@ -36,11 +36,6 @@ yarn-error.log*
 .env.development
 .env.test
 
-# 允许提交示例和模板环境文件
-!.env.example
-!.env.development
-!.env.production
-
 # vercel
 .vercel
 

@@ -26,7 +26,7 @@ const Introduction = ({ locale = 'en' }: IntroductionProps) => {
     <section className="section-container section-cream">
       <div className="container">
         <h2 className="title-lg text-3xl md:text-4xl text-center text-black">
-          {t('title', "Welcome to Victoria's Thai Massage")}
+          {t('title', "Welcome to Top Secret Thai Massage")}
         </h2>
         
         {/* 黄色下划线装饰 */}
@@ -41,13 +41,13 @@ const Introduction = ({ locale = 'en' }: IntroductionProps) => {
           <div className="md:w-1/2 order-2 md:order-1">
             <div className="bg-cream border-l-4 border-primary pl-6 py-2 mb-6">
               <h3 className="title-md md:text-2xl text-primary">
-                {t('subtitle', "Victoria's Outcall Massage: Gateway to Renewal")}
+                {t('subtitle', "Top Secret Outcall Massage: Gateway to Renewal")}
               </h3>
             </div>
             
             <div className="card p-8">
               <p className="text-black leading-relaxed">
-                {t('content', "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Victoria's outcall massage was more than just a service; it was a gateway to physical and mental renewal.")}
+                {t('content', "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Top Secret outcall massage was more than just a service; it was a gateway to physical and mental renewal.")}
               </p>
             </div>
           </div>

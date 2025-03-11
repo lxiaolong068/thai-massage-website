@@ -17,14 +17,14 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
   // 返回元数据
   return {
-    title: 'The Victoria\'s Outcall Massage | Professional Thai Massage in Bangkok',
+    title: 'The Top Secret Outcall Massage | Professional Thai Massage in Bangkok',
     description: 'Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep with personalized massage therapy.',
     keywords: 'Thai massage, Bangkok, relaxation, rejuvenation, professional massage',
     openGraph: {
-      title: 'The Victoria\'s Outcall Massage | Professional Thai Massage in Bangkok',
+      title: 'The Top Secret Outcall Massage | Professional Thai Massage in Bangkok',
       description: 'Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep with personalized massage therapy.',
-      url: 'https://victorias-bangkok.com',
-      siteName: 'The Victoria\'s Outcall Massage',
+      url: 'https://topsecret-bangkok.com',
+      siteName: 'The Top Secret Outcall Massage',
       locale: locale,
       type: 'website',
     },

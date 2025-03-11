@@ -41,8 +41,8 @@ VALUES
 -- 添加店铺设置翻译数据
 INSERT INTO "shop_settings_translations" (id, setting_id, locale, value)
 VALUES 
-('clsst1', 'clss1', 'en', 'Victoria\'s Thai Massage'),
-('clsst2', 'clss1', 'zh', '维多利亚泰式按摩'),
+('clsst1', 'clss1', 'en', 'Top Secret Thai Massage'),
+('clsst2', 'clss1', 'zh', '绝密泰式按摩'),
 ('clsst3', 'clss2', 'en', '123 Bangkok Street, Thailand'),
 ('clsst4', 'clss2', 'zh', '泰国曼谷街123号'),
 ('clsst5', 'clss3', 'en', '+66 123 456 789'),

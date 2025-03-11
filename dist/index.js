@@ -581,19 +581,19 @@ function main() {
                             translations: [
                                 {
                                     locale: 'en',
-                                    value: 'info@victorias-bangkok.com',
+                                    value: 'info@topsecret-bangkok.com',
                                 },
                                 {
                                     locale: 'zh',
-                                    value: 'info@victorias-bangkok.com',
+                                    value: 'info@topsecret-bangkok.com',
                                 },
                                 {
                                     locale: 'th',
-                                    value: 'info@victorias-bangkok.com',
+                                    value: 'info@topsecret-bangkok.com',
                                 },
                                 {
                                     locale: 'ko',
-                                    value: 'info@victorias-bangkok.com',
+                                    value: 'info@topsecret-bangkok.com',
                                 },
                             ],
                         },
