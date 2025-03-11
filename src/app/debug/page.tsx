@@ -1,5 +1,6 @@
-import { cache } from 'react';
-import { prisma } from '@/lib/prisma';
+'use client';
+
+import { useState, useEffect } from 'react';
 
 // 定义返回数据类型
 type DataResult = {
@@ -21,83 +22,52 @@ type DataResult = {
   error: string;
 };
 
-// 使用React的cache函数来缓存数据库查询
-const getData = cache(async (): Promise<DataResult> => {
-  try {
-    // 检查服务数据
-    const servicesCount = await prisma.service.count();
-    
-    // 检查按摩师数据
-    const therapistsCount = await prisma.therapist.count();
-    
-    // 检查用户数据
-    const usersCount = await prisma.user.count();
-    
-    // 检查预约数据
-    const bookingsCount = await prisma.booking.count();
-    
-    // 检查留言数据
-    const messagesCount = await prisma.message.count();
-    
-    // 检查店铺设置数据
-    const shopSettingsCount = await prisma.shopSetting.count();
-    
-    // 获取一些示例数据
-    let services: any[] = [];
-    let therapists: any[] = [];
-    
-    if (servicesCount > 0) {
-      services = await prisma.service.findMany({
-        take: 2,
-        include: {
-          translations: {
-            where: {
-              locale: 'zh',
-            },
-          },
-        },
-      });
-    }
-    
-    if (therapistsCount > 0) {
-      therapists = await prisma.therapist.findMany({
-        take: 2,
-        include: {
-          translations: {
-            where: {
-              locale: 'zh',
-            },
-          },
-        },
-      });
-    }
-    
-    return {
-      success: true,
-      counts: {
-        services: servicesCount,
-        therapists: therapistsCount,
-        users: usersCount,
-        bookings: bookingsCount,
-        messages: messagesCount,
-        shopSettings: shopSettingsCount,
-      },
-      examples: {
-        services,
-        therapists,
-      }
-    };
-  } catch (error) {
-    console.error('数据库查询出错:', error);
-    return {
-      success: false,
-      error: String(error),
-    };
-  }
-});
+export default function DebugPage() {
+  const [data, setData] = useState<DataResult | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function DebugPage() {
-  const data = await getData();
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/debug');
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        setData({
+          success: false,
+          error: String(error),
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">数据库调试信息</h1>
+        <div className="flex items-center justify-center p-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="ml-3">加载中...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">数据库调试信息</h1>
+        <div className="bg-red-100 text-red-700 p-4 rounded">
+          <h2 className="text-xl font-semibold mb-2">错误</h2>
+          <p>无法加载数据</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="p-8">

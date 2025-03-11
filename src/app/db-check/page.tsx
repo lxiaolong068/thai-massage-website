@@ -1,16 +1,6 @@
-import { cache } from 'react';
-import { PrismaClient, Prisma } from '@prisma/client/index';
+'use client';
 
-// 创建一个新的Prisma客户端实例，避免使用全局单例
-const createPrismaClient = () => {
-  return new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.POSTGRES_URL_NON_POOLING, // 使用非连接池URL
-      },
-    },
-  });
-};
+import { useState, useEffect } from 'react';
 
 // 定义返回数据类型
 type DataResult = {
@@ -23,67 +13,52 @@ type DataResult = {
   error: string;
 };
 
-// 使用React的cache函数来缓存数据库查询
-const getData = cache(async (): Promise<DataResult> => {
-  const prisma = createPrismaClient();
-  
-  try {
-    // 获取表信息
-    const tablesResult = await prisma.$queryRaw`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public'
-    `;
-    
-    const tables = Array.isArray(tablesResult) ? tablesResult : [];
-    
-    // 存储计数和示例数据
-    const counts: Record<string, number> = {};
-    const examples: Record<string, any[]> = {};
-    
-    // 对每个表执行查询
-    for (const table of tables) {
-      const tableName = table.table_name;
-      
+export default function DbCheckPage() {
+  const [data, setData] = useState<DataResult | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
       try {
-        // 构建安全的SQL查询 - 使用动态SQL
-        // 注意：我们需要使用Prisma.raw来安全地构建包含表名的SQL
-        const countQuery = Prisma.sql`SELECT COUNT(*) as count FROM "${Prisma.raw(tableName)}"`;
-        const countResult: any[] = await prisma.$queryRaw(countQuery);
-        
-        counts[tableName] = parseInt(countResult[0]?.count || '0');
-        
-        // 获取示例数据
-        if (counts[tableName] > 0) {
-          const sampleQuery = Prisma.sql`SELECT * FROM "${Prisma.raw(tableName)}" LIMIT 2`;
-          const sampleResult: any[] = await prisma.$queryRaw(sampleQuery);
-          
-          examples[tableName] = sampleResult;
-        }
-      } catch (err) {
-        console.error(`查询表 ${tableName} 时出错:`, err);
+        const response = await fetch('/api/db-check');
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        setData({
+          success: false,
+          error: String(error),
+        });
+      } finally {
+        setLoading(false);
       }
     }
-    
-    return {
-      success: true,
-      tables,
-      counts,
-      examples,
-    };
-  } catch (error) {
-    console.error('数据库查询出错:', error);
-    return {
-      success: false,
-      error: String(error),
-    };
-  } finally {
-    await prisma.$disconnect();
-  }
-});
 
-export default async function DbCheckPage() {
-  const data = await getData();
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">数据库检查</h1>
+        <div className="flex items-center justify-center p-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="ml-3">加载中...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">数据库检查</h1>
+        <div className="bg-red-100 text-red-700 p-4 rounded">
+          <h2 className="text-xl font-semibold mb-2">错误</h2>
+          <p>无法加载数据</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="p-8">
