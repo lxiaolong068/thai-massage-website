@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as bcrypt from 'bcrypt';
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
+    // 动态导入bcrypt
+    const bcrypt = await import('bcrypt');
+    
     const body = await request.json();
     const { email, password } = body;
 

@@ -1,5 +1,4 @@
 import { PrismaClient, BookingStatus, UserRole, MessageStatus } from '@prisma/client/index';
-import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -7,6 +6,9 @@ async function main() {
   console.log('开始添加示例数据...');
 
   try {
+    // 动态导入bcrypt
+    const bcrypt = await import('bcrypt');
+    
     // 清理现有数据
     console.log('正在清理现有数据...');
     await prisma.booking.deleteMany({});
