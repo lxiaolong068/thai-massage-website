@@ -34,8 +34,7 @@ yarn-error.log*
 .env
 .env.local
 .env.development
-.env.test.local
-.env.production.local
+.env.test
 
 # 允许提交示例和模板环境文件
 !.env.example
