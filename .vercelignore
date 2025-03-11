@@ -1,7 +1,39 @@
-# 忽略本地开发工具
+# 排除不必要的文件和目录
+.git
+.github
+.vscode
+node_modules
+.next
+out
+coverage
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.DS_Store
+*.pem
+Thumbs.db
+
+# 排除开发工具和测试文件
+jest.config.js
+jest.setup.js
+__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# 排除Prisma开发工具
 prisma/check-data.ts
 prisma/direct-query.ts
 prisma/test-connection.ts
+prisma/seed
 
 # 忽略测试文件
 **/__tests__/**
