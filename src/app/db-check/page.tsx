@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client/index';
 
 // 创建一个新的Prisma客户端实例，避免使用全局单例
 const createPrismaClient = () => {

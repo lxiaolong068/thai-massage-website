@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client/index';
 
 // 初始化Prisma客户端
 const prisma = new PrismaClient({

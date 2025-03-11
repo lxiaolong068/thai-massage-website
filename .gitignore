@@ -30,8 +30,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 允许提交示例和模板环境文件
+!.env.example
+!.env.development
+!.env.production
 
 # vercel
 .vercel
@@ -39,3 +48,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 日志文件
+*.log
+prisma-check.log
+
+# 临时文件
+/temp

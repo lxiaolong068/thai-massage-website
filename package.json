@@ -12,6 +12,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "download-images": "node scripts/download-images.js",
     "extract-translations": "node scripts/extract-translations.js",
     "seed": "ts-node prisma/seed/index.ts",

@@ -1,0 +1,16 @@
+# 忽略本地开发工具
+prisma/check-data.ts
+prisma/direct-query.ts
+prisma/test-connection.ts
+
+# 忽略测试文件
+**/__tests__/**
+**/test/**
+**/tests/**
+
+# 忽略开发脚本
+scripts/
+
+# 忽略临时文件
+temp/
+*.log 

@@ -241,6 +241,46 @@ pnpm build
 pnpm start
 ```
 
+## 环境配置
+
+本项目使用不同的环境配置文件来区分开发环境和生产环境。
+
+### 环境变量文件
+
+- `.env.example` - 环境变量模板，包含所有可能需要的环境变量
+- `.env.development` - 开发环境配置
+- `.env.production` - 生产环境配置
+- `.env` - 本地开发的主要环境变量文件（不应提交到版本控制）
+
+### 设置本地开发环境
+
+1. 复制环境变量模板创建本地环境配置：
+
+```bash
+cp .env.example .env
+```
+
+2. 编辑`.env`文件，填入实际的数据库连接信息和其他必要配置。
+
+### 必要的环境变量
+
+以下是项目运行所需的关键环境变量：
+
+#### 数据库连接（必需）
+
+```
+POSTGRES_URL=postgres://username:password@host:port/database?sslmode=require
+POSTGRES_PRISMA_URL=postgres://username:password@host:port/database?sslmode=require
+POSTGRES_URL_NON_POOLING=postgres://username:password@host:port/database?sslmode=require
+```
+
+#### 应用配置（必需）
+
+```
+NODE_ENV=development|production
+NEXT_PUBLIC_API_URL=http://localhost:3000/api|https://your-production-domain.com/api
+```
+
 ## Vercel部署说明
 
 Vercel是部署Next.js应用的最佳平台，提供了无缝集成和自动部署功能。
@@ -248,46 +288,97 @@ Vercel是部署Next.js应用的最佳平台，提供了无缝集成和自动部�
 ### 部署步骤
 
 1. **创建Vercel账户**
-   - 访问 [Vercel官网](https://vercel.com/) 并注册账户
-   - 可以使用GitHub、GitLab或Bitbucket账户直接登录
+   - 访问[Vercel](https://vercel.com/)并注册账户
+   - 将GitHub仓库连接到Vercel
 
-2. **导入项目**
-   - 在Vercel控制台中点击"Import Project"
-   - 选择"Import Git Repository"
-   - 授权Vercel访问您的GitHub/GitLab/Bitbucket账户
-   - 选择thai-massage仓库
+2. **配置项目**
+   - 选择导入你的Thai Massage项目仓库
+   - 配置构建设置（通常Vercel会自动检测Next.js项目）
+   - 设置环境变量（见下文）
 
-3. **配置项目**
-   - 项目名称：输入您想要的项目名称，如"thai-massage"
-   - 框架预设：Vercel会自动检测为Next.js
-   - 构建命令：保持默认（`next build`）
-   - 输出目录：保持默认（`.next`）
-   - 环境变量：如果需要，可以添加环境变量
+3. **设置环境变量**
+   - 在Vercel项目设置中，添加以下环境变量：
+
+   ```
+   # 数据库连接（必需）
+   POSTGRES_URL=postgres://username:password@host:port/database?sslmode=require
+   POSTGRES_PRISMA_URL=postgres://username:password@host:port/database?sslmode=require
+   POSTGRES_URL_NON_POOLING=postgres://username:password@host:port/database?sslmode=require
+   
+   # 应用配置（必需）
+   NODE_ENV=production
+   NEXT_PUBLIC_API_URL=https://your-vercel-domain.vercel.app/api
+   
+   # 如果使用Supabase（可选）
+   SUPABASE_URL=https://your-project-id.supabase.co
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_JWT_SECRET=your-jwt-secret
+   SUPABASE_ANON_KEY=your-anon-key
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
 
 4. **部署项目**
-   - 点击"Deploy"按钮
-   - Vercel会自动构建和部署您的项目
-   - 部署完成后，您会获得一个类似`https://your-project-name.vercel.app`的URL
+   - 点击"Deploy"按钮开始部署
+   - Vercel会自动构建和部署你的项目
 
-5. **自定义域名**（可选）
-   - 在项目设置中点击"Domains"
-   - 添加您的自定义域名
-   - 按照Vercel提供的说明配置DNS记录
+### 注意事项
 
-### 持续部署
+1. **数据库连接**
+   - 确保生产环境的数据库可以从Vercel的服务器访问
+   - 建议使用支持SSL连接的数据库服务，如Supabase、Neon或AWS RDS
 
-Vercel支持持续部署，每当您推送更改到Git仓库时，Vercel会自动重新构建和部署您的项目。
+2. **Prisma配置**
+   - 项目已配置`postinstall`脚本自动生成Prisma客户端
+   - 确保Vercel环境中的Prisma版本与本地开发环境一致
 
-- **预览部署**：当您创建Pull Request时，Vercel会自动创建预览部署
-- **生产部署**：当您合并到主分支时，Vercel会自动更新生产环境
+3. **环境变量安全**
+   - 不要在代码中硬编码敏感信息
+   - 使用Vercel的环境变量功能存储敏感信息
+   - 定期轮换数据库密码和API密钥
 
-### 监控和分析
+4. **域名配置**
+   - 如果使用自定义域名，在Vercel中配置并更新`NEXT_PUBLIC_API_URL`
 
-Vercel提供了内置的监控和分析工具：
+5. **监控和日志**
+   - 使用Vercel的监控功能跟踪应用性能
+   - 定期检查日志以识别潜在问题
 
-- **Analytics**：查看网站流量和性能指标
-- **Logs**：查看部署和运行日志
-- **Speed Insights**：分析网站加载速度和性能
+### 故障排除
+
+如果部署过程中遇到问题，请检查以下几点：
+
+1. **构建错误**
+   - 检查Vercel构建日志中的错误信息
+   - 确保所有必要的环境变量都已正确设置
+   - 验证`package.json`中的构建脚本是否正确
+
+2. **Prisma相关错误**
+   - 如果遇到Prisma客户端错误，尝试在本地运行`prisma generate`并重新部署
+   - 确保`.vercelignore`文件正确配置，忽略不必要的Prisma文件
+
+3. **数据库连接问题**
+   - 验证数据库连接字符串是否正确
+   - 确保数据库服务器允许来自Vercel的连接
+   - 检查数据库用户权限是否足够
+
+4. **API路由错误**
+   - 确保`NEXT_PUBLIC_API_URL`设置正确
+   - 检查API路由是否正确实现
+
+### 生产环境优化
+
+1. **启用缓存**
+   - 配置适当的缓存策略以提高性能
+   - 使用Vercel Edge Network加速内容分发
+
+2. **监控性能**
+   - 使用Vercel Analytics监控应用性能
+   - 定期检查并优化慢查询
+
+3. **自动扩展**
+   - Vercel会自动处理流量增加时的扩展需求
+   - 监控数据库负载，必要时升级数据库计划
 
 ## SEO优化
 

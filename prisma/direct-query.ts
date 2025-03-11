@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client/index';
 
 async function main() {
   process.stdout.write('开始直接查询数据库...\n');
