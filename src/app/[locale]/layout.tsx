@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 // 定义支持的语言
-const locales = ['en', 'zh', 'th', 'ko'];
+const locales = ['en', 'zh', 'ko'];
 
 // 验证并获取元数据
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
@@ -21,14 +21,14 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   try {
     // 从翻译中获取元数据
     return {
-      title: messages.metadata?.title || 'The Victoria\'s Outcall Massage | Professional Thai Massage in Bangkok',
+      title: messages.metadata?.title || 'Top Secret Outcall Massage | Professional Thai Massage in Bangkok',
       description: messages.metadata?.description || 'Experience premium Thai massage services in Bangkok.',
       keywords: messages.metadata?.keywords || 'Thai massage, Bangkok, relaxation, rejuvenation, professional massage',
       openGraph: {
-        title: messages.metadata?.ogTitle || 'The Victoria\'s Outcall Massage',
+        title: messages.metadata?.ogTitle || 'Top Secret Outcall Massage',
         description: messages.metadata?.ogDescription || 'Premium Thai massage services in Bangkok',
-        url: 'https://victorias-bangkok.com',
-        siteName: "The Victoria's Outcall Massage",
+        url: 'https://topsecret-bangkok.com',
+        siteName: "Top Secret Outcall Massage",
         locale: locale,
         type: 'website',
       },
@@ -37,7 +37,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
     console.error('Error generating metadata:', error);
     // 返回默认元数据
     return {
-      title: 'The Victoria\'s Outcall Massage | Professional Thai Massage in Bangkok',
+      title: 'Top Secret Outcall Massage | Professional Thai Massage in Bangkok',
       description: 'Experience premium Thai massage services in Bangkok.',
       keywords: 'Thai massage, Bangkok massage, relaxation',
     };

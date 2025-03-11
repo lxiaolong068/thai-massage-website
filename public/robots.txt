@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://victorias-bangkok.com/sitemap.xml 
+Sitemap: https://topsecret-bangkok.com/sitemap.xml 

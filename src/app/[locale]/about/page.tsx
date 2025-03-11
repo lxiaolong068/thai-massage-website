@@ -2,7 +2,7 @@ import About from '@/components/About';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About Us | The Victoria\'s Outcall Massage',
+  title: 'About Us | Top Secret Outcall Massage',
   description: 'Learn about our professional Thai massage services in Bangkok. Our skilled therapists bring relaxation and rejuvenation to your doorstep.',
 };
 

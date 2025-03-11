@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "title": "The Victoria's Outcall Massage | Professional Thai Massage in Bangkok",
+    "title": "Top Secret Outcall Massage | Professional Thai Massage in Bangkok",
     "description": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep with personalized massage therapy.",
     "keywords": "Thai massage, Bangkok massage, outcall massage, professional massage, relaxation therapy, Thai therapists",
-    "ogTitle": "The Victoria's Outcall Massage | Professional Thai Massage in Bangkok",
+    "ogTitle": "Top Secret Outcall Massage | Professional Thai Massage in Bangkok",
     "ogDescription": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep."
   },
   "common": {
@@ -27,13 +27,13 @@
     "backHome": "Return to Home"
   },
   "about": {
-    "title": "The Victoria's Outcall Massage",
-    "imageAlt": "The Victoria's Outcall Massage",
+    "title": "Top Secret Outcall Massage",
+    "imageAlt": "Top Secret Outcall Massage",
     "learnMoreButton": "LEARN MORE ABOUT US",
     "card1": {
-      "title": "The Victoria's Bangkok",
-      "description": "The Victoria's Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.",
-      "imageAlt": "The Victoria's Bangkok"
+      "title": "Top Secret Bangkok",
+      "description": "Top Secret Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.",
+      "imageAlt": "Top Secret Bangkok"
     },
     "card2": {
       "title": "Professional Outcall Massage Service in Bangkok",
@@ -109,7 +109,7 @@
     "phone": "Phone",
     "phoneValue": "+66 XX XXX XXXX",
     "email": "Email",
-    "emailValue": "info@victorias-bangkok.com",
+    "emailValue": "info@topsecret-bangkok.com",
     "workingHours": "Working Hours",
     "workingHoursValue": "Available 24/7",
     "feedbackTitle": "Feedback & Suggestions",
@@ -128,10 +128,26 @@
     "messageLabel": "Your Message",
     "messagePlaceholder": "Please share your feedback, suggestions, or concerns...",
     "submitButton": "Submit Feedback",
-    "feedbackAlert": "Thank you for your feedback! We will consider your suggestions carefully."
+    "feedbackAlert": "Thank you for your feedback! We will consider your suggestions carefully.",
+    "title": "Contact Us",
+    "subtitle": "Get in touch with our team",
+    "name": "Name",
+    "message": "Message",
+    "submit": "Submit",
+    "success": "Your message has been sent successfully. We will contact you shortly.",
+    "error": "There was an error sending your message. Please try again.",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "phoneRequired": "Phone is required",
+    "messageRequired": "Message is required",
+    "contactInfo": "Contact Information",
+    "address": "Bangkok, Thailand",
+    "phoneValue": "+66 84 503 5702",
+    "followUs": "Follow Us"
   },
   "footer": {
-    "title": "The Victoria's Outcall Massage",
+    "title": "Top Secret Bangkok",
     "address": "Sukhumvit Soi 13, Klongtoey Nua, Watthana, Bangkok, 10110",
     "tel": "Tel",
     "contactButton": "Contact Us Now",
@@ -142,7 +158,7 @@
       "whatsapp": "WhatsApp QR Code",
       "telegram": "Telegram QR Code"
     },
-    "copyright": "© {year} The Victoria's Outcall Massage. All rights reserved.",
+    "copyright": "© {year} Top Secret Bangkok. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
   },
@@ -157,10 +173,10 @@
       "viewAll": "View All Services"
     },
     "introduction": {
-      "title": "Welcome to Victoria's Thai Massage",
+      "title": "Welcome to Top Secret Thai Massage",
       "description": "We bring the authentic Thai massage experience directly to you. Our skilled therapists are trained in traditional techniques that have been perfected over centuries.",
-      "subtitle": "Victoria's Outcall Massage: Gateway to Renewal",
-      "content": "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Victoria's outcall massage was more than just a service; it was a gateway to physical and mental renewal.",
+      "subtitle": "Top Secret Outcall Massage: Gateway to Renewal",
+      "content": "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Top Secret's outcall massage was more than just a service; it was a gateway to physical and mental renewal.",
       "imageAlt": "Thai massage introduction"
     },
     "testimonials": {

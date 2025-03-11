@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "title": "维多利亚上门按摩 | 曼谷专业泰式按摩",
+    "title": "绝密上门按摩 | 曼谷专业泰式按摩",
     "description": "体验曼谷优质泰式按摩服务。我们的专业按摩师将放松和恢复活力的体验直接带到您的门前，提供个性化的按摩疗法。",
     "keywords": "泰式按摩, 曼谷按摩, 上门按摩, 专业按摩, 放松疗法, 泰国按摩师",
-    "ogTitle": "维多利亚上门按摩 | 曼谷专业泰式按摩",
+    "ogTitle": "绝密上门按摩 | 曼谷专业泰式按摩",
     "ogDescription": "体验曼谷优质泰式按摩服务。我们的专业按摩师将放松和恢复活力的体验直接带到您的门前。"
   },
   "common": {
@@ -27,13 +27,13 @@
     "backHome": "返回首页"
   },
   "about": {
-    "title": "维多利亚上门按摩",
-    "imageAlt": "维多利亚上门按摩",
+    "title": "绝密上门按摩",
+    "imageAlt": "绝密上门按摩",
     "learnMoreButton": "了解更多关于我们",
     "card1": {
-      "title": "维多利亚曼谷",
-      "description": "维多利亚曼谷是曼谷的专业上门按摩服务。我们所有的按摩师都经过全面培训并持有专业证书。",
-      "imageAlt": "维多利亚曼谷"
+      "title": "绝密曼谷",
+      "description": "绝密曼谷是曼谷的专业上门按摩服务。我们所有的按摩师都经过全面培训并持有专业证书。",
+      "imageAlt": "绝密曼谷"
     },
     "card2": {
       "title": "曼谷专业上门按摩服务",
@@ -109,7 +109,7 @@
     "phone": "电话",
     "phoneValue": "+66 XX XXX XXXX",
     "email": "电子邮箱",
-    "emailValue": "info@victorias-bangkok.com",
+    "emailValue": "info@topsecret-bangkok.com",
     "workingHours": "工作时间",
     "workingHoursValue": "24/7全天候服务",
     "feedbackTitle": "反馈与建议",
@@ -128,10 +128,25 @@
     "messageLabel": "您的留言",
     "messagePlaceholder": "请分享您的反馈、建议或疑虑...",
     "submitButton": "提交反馈",
-    "feedbackAlert": "感谢您的反馈！我们会认真考虑您的建议。"
+    "feedbackAlert": "感谢您的反馈！我们会认真考虑您的建议。",
+    "title": "联系我们",
+    "subtitle": "与我们的团队取得联系",
+    "name": "姓名",
+    "message": "留言",
+    "success": "您的留言已成功发送。我们将尽快与您联系。",
+    "error": "发送留言时出错。请重试。",
+    "nameRequired": "姓名为必填项",
+    "emailRequired": "电子邮件为必填项",
+    "emailInvalid": "请输入有效的电子邮件地址",
+    "phoneRequired": "电话为必填项",
+    "messageRequired": "留言为必填项",
+    "contactInfo": "联系信息",
+    "address": "泰国曼谷",
+    "phoneValue": "+66 84 503 5702",
+    "followUs": "关注我们"
   },
   "footer": {
-    "title": "维多利亚上门按摩",
+    "title": "绝密曼谷",
     "address": "曼谷市瓦塔纳区克隆托伊努阿素坤逸13巷，邮编10110",
     "tel": "电话",
     "contactButton": "立即联系我们",
@@ -142,7 +157,7 @@
       "whatsapp": "WhatsApp二维码",
       "telegram": "Telegram二维码"
     },
-    "copyright": "© {year} 维多利亚上门按摩。保留所有权利。",
+    "copyright": "© {year} 绝密曼谷。保留所有权利。",
     "privacyPolicy": "隐私政策",
     "termsOfService": "服务条款"
   },
@@ -157,10 +172,10 @@
       "viewAll": "查看所有服务"
     },
     "introduction": {
-      "title": "欢迎来到维多利亚泰式按摩",
+      "title": "欢迎来到绝密泰式按摩",
       "description": "我们将正宗的泰式按摩体验直接带给您。我们的技术娴熟的按摩师接受了传统技术的培训，这些技术已经经过几个世纪的完善。",
-      "subtitle": "维多利亚上门按摩：焕然一新的门户",
-      "content": "我们的服务以卓越的品质和专业的按摩师而闻名。每次按摩都会根据客户的个人需求量身定制，确保深度放松和焕发活力的体验，按摩师将他们的专业知识和关怀直接带到客户家门口。家庭服务的便利性和奢华使其成为热门选择。以整体健康为重点，维多利亚上门按摩不仅仅是一项服务；它是身心更新的门户。",
+      "subtitle": "绝密上门按摩：焕然一新的门户",
+      "content": "我们的服务以卓越的品质和专业的按摩师而闻名。每次按摩都会根据客户的个人需求量身定制，确保深度放松和焕发活力的体验，按摩师将他们的专业知识和关怀直接带到客户家门口。家庭服务的便利性和奢华使其成为热门选择。以整体健康为重点，绝密上门按摩不仅仅是一项服务；它是身心更新的门户。",
       "imageAlt": "泰式按摩介绍"
     },
     "testimonials": {

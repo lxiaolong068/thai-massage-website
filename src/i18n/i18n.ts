@@ -1,7 +1,7 @@
 import { getRequestConfig } from 'next-intl/server';
 
 // 支持的语言
-const locales = ['en', 'zh', 'th', 'ko'];
+const locales = ['en', 'zh', 'ko'];
 const defaultLocale = 'en';
 const timeZone = 'Asia/Bangkok';
 

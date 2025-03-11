@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+  extensions = [pgcrypto]
+}
+
+model Therapist {
+  id              String                 @id @default(cuid())
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  imageUrl        String                 @map("image_url")
+  specialties     String[]
+  experienceYears Int                    @map("experience_years")
+  bookings        Booking[]
+  translations    TherapistTranslation[]
+
+  @@map("therapists")
+}
+
+model TherapistTranslation {
+  id                     String    @id @default(cuid())
+  therapistId            String    @map("therapist_id")
+  locale                 String
+  name                   String
+  bio                    String
+  specialtiesTranslation String[]  @map("specialties_translation")
+  therapist              Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@unique([therapistId, locale])
+  @@map("therapist_translations")
+}
+
+model Service {
+  id           String               @id @default(cuid())
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+  price        Float
+  duration     Int
+  imageUrl     String               @map("image_url")
+  bookings     Booking[]
+  translations ServiceTranslation[]
+
+  @@map("services")
+}
+
+model ServiceTranslation {
+  id          String  @id @default(cuid())
+  serviceId   String  @map("service_id")
+  locale      String
+  name        String
+  description String
+  slug        String
+  service     Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, locale])
+  @@unique([locale, slug])
+  @@map("service_translations")
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  serviceId     String        @map("service_id")
+  therapistId   String        @map("therapist_id")
+  date          DateTime
+  time          String
+  customerName  String        @map("customer_name")
+  customerEmail String        @map("customer_email")
+  customerPhone String        @map("customer_phone")
+  status        BookingStatus @default(PENDING)
+  service       Service       @relation(fields: [serviceId], references: [id])
+  therapist     Therapist     @relation(fields: [therapistId], references: [id])
+
+  @@map("bookings")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         UserRole  @default(ADMIN)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  lastLogin    DateTime? @map("last_login")
+
+  @@map("users")
+}
+
+model ShopSetting {
+  id           String                   @id @default(cuid())
+  createdAt    DateTime                 @default(now()) @map("created_at")
+  updatedAt    DateTime                 @updatedAt @map("updated_at")
+  key          String                   @unique
+  type         String
+  translations ShopSettingTranslation[]
+
+  @@map("shop_settings")
+}
+
+model ShopSettingTranslation {
+  id        String      @id @default(cuid())
+  settingId String      @map("setting_id")
+  locale    String
+  value     String
+  setting   ShopSetting @relation(fields: [settingId], references: [id], onDelete: Cascade)
+
+  @@unique([settingId, locale])
+  @@map("shop_settings_translations")
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  status    MessageStatus @default(UNREAD)
+  reply     String?
+
+  @@map("messages")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+enum MessageStatus {
+  UNREAD
+  READ
+  REPLIED
+}

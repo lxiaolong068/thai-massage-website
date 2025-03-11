@@ -9,3 +9,4 @@ alwaysApply: false
 - must use pnpm instead of npm
 - use next.js 14
 - use tailwindcss
+- use database config in .env file

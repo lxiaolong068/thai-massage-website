@@ -1,7 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 
 // 定义支持的语言和默认语言
-const locales = ['en', 'zh', 'th', 'ko'];
+const locales = ['en', 'zh', 'ko'];
 const defaultLocale = 'en';
 
 // 创建中间件

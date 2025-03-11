@@ -18,6 +18,7 @@
 - **多步骤预约系统**：用户友好的预约流程
 - **表单验证**：确保用户输入的数据有效
 - **SEO优化**：针对搜索引擎优化的元数据和结构
+- **RESTful API**：提供完整的后端API支持
 
 ## 技术栈
 
@@ -26,6 +27,9 @@
 - [TypeScript](https://www.typescriptlang.org/) - 提供类型安全的JavaScript超集
 - [Tailwind CSS](https://tailwindcss.com/) - 实用优先的CSS框架，用于快速构建自定义设计
 - [next-intl](https://next-intl-docs.vercel.app/) - Next.js的国际化解决方案
+- [Prisma](https://www.prisma.io/) - 下一代ORM，用于数据库访问
+- [PostgreSQL](https://www.postgresql.org/) - 强大的开源关系型数据库
+- [Jest](https://jestjs.io/) - JavaScript测试框架
 - [ESLint](https://eslint.org/) - 代码质量工具，确保代码一致性
 - [pnpm](https://pnpm.io/) - 快速、节省磁盘空间的包管理器
 
@@ -369,3 +373,113 @@ Vercel提供了内置的监控和分析工具：
 ## 许可证
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## API文档
+
+本项目提供了完整的RESTful API，用于管理服务、按摩师和预约。
+
+### 服务API
+
+#### 获取所有服务
+```
+GET /api/services?locale=en
+```
+
+#### 获取单个服务
+```
+GET /api/services/:id?locale=en
+```
+
+#### 创建新服务
+```
+POST /api/services
+```
+
+#### 更新服务
+```
+PUT /api/services/:id
+```
+
+#### 删除服务
+```
+DELETE /api/services/:id
+```
+
+### 按摩师API
+
+#### 获取所有按摩师
+```
+GET /api/therapists?locale=en
+```
+
+#### 获取单个按摩师
+```
+GET /api/therapists/:id?locale=en
+```
+
+#### 创建新按摩师
+```
+POST /api/therapists
+```
+
+#### 更新按摩师
+```
+PUT /api/therapists/:id
+```
+
+#### 删除按摩师
+```
+DELETE /api/therapists/:id
+```
+
+### 预约API
+
+#### 获取所有预约
+```
+GET /api/bookings
+```
+
+#### 获取单个预约
+```
+GET /api/bookings/:id
+```
+
+#### 创建新预约
+```
+POST /api/bookings
+```
+
+#### 更新预约
+```
+PUT /api/bookings/:id
+```
+
+#### 删除预约
+```
+DELETE /api/bookings/:id
+```
+
+## 测试
+
+本项目使用Jest和Supertest进行API测试。
+
+### 运行测试
+
+```bash
+# 运行所有测试
+pnpm test
+
+# 运行API测试
+pnpm test:api
+
+# 监视模式运行测试
+pnpm test:watch
+```
+
+### 测试覆盖范围
+
+- **服务API测试**：测试服务的CRUD操作
+- **按摩师API测试**：测试按摩师的CRUD操作
+- **预约API测试**：测试预约的CRUD操作
+- **错误处理测试**：测试API的错误处理机制
+- **数据验证测试**：测试API的数据验证功能

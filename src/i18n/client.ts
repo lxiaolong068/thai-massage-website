@@ -14,7 +14,7 @@ const loadingPromises: Record<string, Promise<TranslationMessages>> = {};
 
 // 预加载所有翻译，提前返回翻译对象
 export async function preloadTranslations(): Promise<void> {
-  const locales = ['en', 'zh', 'th', 'ko'];
+  const locales = ['en', 'zh', 'ko'];
   await Promise.all(locales.map(locale => loadTranslations(locale)));
   console.log('All translations preloaded');
 }

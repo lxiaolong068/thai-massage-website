@@ -1,5 +1,5 @@
 // 定义支持的语言
-export const locales = ['en', 'zh', 'th', 'ko'] as const;
+export const locales = ['en', 'zh', 'ko'] as const;
 
 // 从类型中提取出语言代码的类型
 export type Locale = typeof locales[number];
