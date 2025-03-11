@@ -45,4 +45,7 @@ scripts/
 
 # 忽略临时文件
 temp/
-*.log 
+*.log
+
+# 忽略提取的翻译文件
+src/i18n/messages/extracted.json 
