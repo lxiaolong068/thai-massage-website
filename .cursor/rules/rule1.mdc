@@ -10,3 +10,4 @@ alwaysApply: false
 - use next.js 14
 - use tailwindcss
 - use database config in .env file
+- Develop APIs according to the documentation standards: [api-docs.md](mdc:api-docs.md)

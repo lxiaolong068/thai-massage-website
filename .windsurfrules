@@ -1,0 +1,2 @@
+- use pnpm instead of npm
+- Conduct a test after each development step to ensure functionality is error-free.

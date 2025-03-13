@@ -1,13 +1,27 @@
 import { useTranslations } from 'next-intl';
+import BookingForm from '@/components/BookingForm';
+import { Metadata } from 'next';
 
-export default function BookPage() {
+export const metadata: Metadata = {
+  title: 'Book Appointment',
+  description: 'Book your Thai massage appointment with our professional therapists',
+};
+
+export default function BookPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const t = useTranslations('booking');
+  
+  // 从URL参数中获取按摩师信息
+  const therapistId = searchParams.therapistId as string;
+  const therapistName = searchParams.therapistName as string;
   
   return (
     <main className="pt-20">
       <div className="container mx-auto py-12 px-4">
-        <h1 className="text-3xl font-bold mb-8">预约页面</h1>
-        <p className="mb-4">此页面正在开发中...</p>
+        <BookingForm initialTherapistId={therapistId} initialTherapistName={therapistName} />
       </div>
     </main>
   );

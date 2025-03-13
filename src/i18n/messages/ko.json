@@ -99,7 +99,11 @@
         "description": "저희는 고객의 시간을 존중하며 예약된 세션에 테라피스트가 정시에 도착하도록 보장합니다."
       }
     },
-    "viewAll": "모든 테라피스트 보기 및 지금 예약"
+    "viewAll": "모든 테라피스트 보기 및 지금 예약",
+    "bookingModal": {
+      "title": "마사지 서비스 예약"
+    },
+    "bookNow": "지금 예약"
   },
   "contact": {
     "getInTouch": "연락하기",
@@ -107,7 +111,7 @@
     "location": "위치",
     "locationValue": "방콕, 태국",
     "phone": "전화",
-    "phoneValue": "+66 XX XXX XXXX",
+    "phoneValueGeneral": "+66 XX XXX XXXX",
     "email": "이메일",
     "emailValue": "info@topsecret-bangkok.com",
     "workingHours": "영업 시간",
@@ -143,7 +147,7 @@
     "messageRequired": "메시지를 입력해 주세요",
     "contactInfo": "연락처 정보",
     "address": "방콕, 태국",
-    "phoneValue": "+66 84 503 5702",
+    "phoneValueContact": "+66 84 503 5702",
     "followUs": "팔로우하기"
   },
   "footer": {
@@ -182,6 +186,107 @@
     "testimonials": {
       "title": "고객 후기",
       "subtitle": "저희 서비스를 경험한 분들의 이야기를 들어보세요"
+    }
+  },
+  "booking": {
+    "title": "마사지 예약",
+    "subtitle": "마사지 세션을 예약하려면 아래 양식을 작성하세요",
+    "steps": {
+      "service": "서비스 선택",
+      "therapist": "테라피스트 선택",
+      "datetime": "날짜 및 시간",
+      "details": "개인 정보",
+      "confirm": "확인"
+    },
+    "loading": "로딩 중...",
+    "retry": "다시 시도",
+    "next": "다음",
+    "back": "이전",
+    "serviceSelection": {
+      "title": "서비스 선택",
+      "subtitle": "받고 싶은 마사지 유형을 선택하세요",
+      "duration": "시간",
+      "price": "가격",
+      "minutes": "분",
+      "selectButton": "이 서비스 선택"
+    },
+    "therapistSelection": {
+      "title": "테라피스트 선택",
+      "subtitle": "선호하는 테라피스트를 선택하세요",
+      "experience": "경력",
+      "years": "년",
+      "specialties": "전문 분야",
+      "selectButton": "이 테라피스트 선택"
+    },
+    "dateTimeSelection": {
+      "title": "날짜 및 시간 선택",
+      "subtitle": "마사지를 받고 싶은 날짜와 시간을 선택하세요",
+      "date": "날짜",
+      "time": "시간",
+      "availableTimes": "가능한 시간",
+      "noTimesAvailable": "이 날짜에는 가능한 시간이 없습니다. 다른 날짜를 선택해 주세요.",
+      "selectButton": "날짜 및 시간 확인"
+    },
+    "customerDetails": {
+      "title": "개인 정보",
+      "subtitle": "연락처 정보를 제공해 주세요",
+      "name": "이름",
+      "email": "이메일 주소",
+      "phone": "전화번호",
+      "address": "주소",
+      "notes": "특별 요청 또는 메모",
+      "notesPlaceholder": "저희가 알아야 할 특별 요청이나 정보",
+      "continueButton": "확인으로 계속"
+    },
+    "confirmation": {
+      "title": "예약 확인",
+      "subtitle": "확인하기 전에 예약 세부 정보를 검토해 주세요",
+      "bookingSummary": "예약 요약",
+      "service": "서비스",
+      "therapist": "테라피스트",
+      "date": "날짜",
+      "time": "시간",
+      "customerInfo": "고객 정보",
+      "name": "이름",
+      "email": "이메일",
+      "phone": "전화",
+      "address": "주소",
+      "notes": "특별 요청",
+      "termsAgreement": "이용 약관에 동의합니다",
+      "confirmButton": "예약 확인",
+      "editButton": "세부 정보 수정"
+    },
+    "success": {
+      "title": "예약 확인!",
+      "subtitle": "마사지 세션이 성공적으로 예약되었습니다",
+      "bookingId": "예약 ID",
+      "emailSent": "확인 이메일이 귀하의 이메일 주소로 전송되었습니다",
+      "contactInfo": "예약을 변경해야 하는 경우 다음 주소로 문의하십시오",
+      "homeButton": "홈으로 돌아가기",
+      "newBookingButton": "다른 예약하기"
+    },
+    "validation": {
+      "required": "이 필드는 필수입니다",
+      "invalidEmail": "유효한 이메일 주소를 입력해 주세요",
+      "invalidPhone": "유효한 전화번호를 입력해 주세요",
+      "termsRequired": "이용 약관에 동의해야 합니다"
+    },
+    "errors": {
+      "serviceUnavailable": "이 서비스는 현재 이용할 수 없습니다. 다른 서비스를 선택해 주세요.",
+      "therapistUnavailable": "이 테라피스트는 현재 이용할 수 없습니다. 다른 테라피스트를 선택해 주세요.",
+      "timeSlotUnavailable": "이 시간대는 더 이상 이용할 수 없습니다. 다른 시간을 선택해 주세요.",
+      "fetchFailed": "서비스를 가져오지 못했습니다",
+      "unauthorized": "승인되지 않은 접근",
+      "tryAgain": "다시 시도",
+      "generalError": "예약 처리 중 오류가 발생했습니다. 다시 시도해 주세요."
+    },
+    "contact": {
+      "title": "문의하기",
+      "description": "아래 QR 코드를 스캔하여 원하는 메시징 앱을 통해 문의하세요. 문의 시 예약 ID를 포함해 주세요.",
+      "bookingIdLabel": "예약 ID:",
+      "copy": "복사",
+      "copied": "복사됨!",
+      "scanToChat": "스캔하여 채팅하기"
     }
   }
 } 

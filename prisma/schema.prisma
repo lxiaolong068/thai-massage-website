@@ -64,19 +64,22 @@ model ServiceTranslation {
 }
 
 model Booking {
-  id            String        @id @default(cuid())
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  serviceId     String        @map("service_id")
-  therapistId   String        @map("therapist_id")
-  date          DateTime
-  time          String
-  customerName  String        @map("customer_name")
-  customerEmail String        @map("customer_email")
-  customerPhone String        @map("customer_phone")
-  status        BookingStatus @default(PENDING)
-  service       Service       @relation(fields: [serviceId], references: [id])
-  therapist     Therapist     @relation(fields: [therapistId], references: [id])
+  id             String        @id @default(cuid())
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  serviceId      String        @map("service_id")
+  therapistId    String        @map("therapist_id")
+  date           DateTime
+  time           String
+  customerName   String        @map("customer_name")
+  customerEmail  String        @map("customer_email")
+  customerPhone  String        @map("customer_phone")
+  customerAddress String?      @map("customer_address")
+  notes          String?
+  orderNumber    String?       @map("order_number")
+  status         BookingStatus @default(PENDING)
+  service        Service       @relation(fields: [serviceId], references: [id])
+  therapist      Therapist     @relation(fields: [therapistId], references: [id])
 
   @@map("bookings")
 }

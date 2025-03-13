@@ -99,7 +99,11 @@
         "description": "We respect your time and ensure our therapists arrive promptly for your scheduled session."
       }
     },
-    "viewAll": "View All Therapists & Book Now"
+    "viewAll": "View All Therapists & Book Now",
+    "bookingModal": {
+      "title": "Book Massage Service"
+    },
+    "bookNow": "Book Now"
   },
   "contact": {
     "getInTouch": "Get In Touch",
@@ -107,7 +111,7 @@
     "location": "Location",
     "locationValue": "Bangkok, Thailand",
     "phone": "Phone",
-    "phoneValue": "+66 XX XXX XXXX",
+    "phoneValueGeneral": "+66 XX XXX XXXX",
     "email": "Email",
     "emailValue": "info@topsecret-bangkok.com",
     "workingHours": "Working Hours",
@@ -143,7 +147,7 @@
     "messageRequired": "Message is required",
     "contactInfo": "Contact Information",
     "address": "Bangkok, Thailand",
-    "phoneValue": "+66 84 503 5702",
+    "phoneValueContact": "+66 84 503 5702",
     "followUs": "Follow Us"
   },
   "footer": {
@@ -182,6 +186,107 @@
     "testimonials": {
       "title": "What Our Clients Say",
       "subtitle": "Hear from those who have experienced our services"
+    }
+  },
+  "booking": {
+    "title": "Book Your Massage",
+    "subtitle": "Complete the form below to schedule your massage session",
+    "steps": {
+      "service": "Select Service",
+      "therapist": "Choose Therapist",
+      "datetime": "Date & Time",
+      "details": "Your Details",
+      "confirm": "Confirm"
+    },
+    "loading": "Loading...",
+    "retry": "Retry",
+    "next": "Next",
+    "back": "Back",
+    "serviceSelection": {
+      "title": "Select a Service",
+      "subtitle": "Choose the type of massage you would like to receive",
+      "duration": "Duration",
+      "price": "Price",
+      "minutes": "minutes",
+      "selectButton": "Select This Service"
+    },
+    "therapistSelection": {
+      "title": "Choose Your Therapist",
+      "subtitle": "Select the therapist you prefer for your session",
+      "experience": "Experience",
+      "years": "years",
+      "specialties": "Specialties",
+      "selectButton": "Select This Therapist"
+    },
+    "dateTimeSelection": {
+      "title": "Select Date and Time",
+      "subtitle": "Choose your preferred date and time for the massage",
+      "date": "Date",
+      "time": "Time",
+      "availableTimes": "Available Times",
+      "noTimesAvailable": "No times available for this date. Please select another date.",
+      "selectButton": "Confirm Date and Time"
+    },
+    "customerDetails": {
+      "title": "Your Details",
+      "subtitle": "Please provide your contact information",
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "address": "Address",
+      "notes": "Special Requests or Notes",
+      "notesPlaceholder": "Any special requests or information you'd like us to know",
+      "continueButton": "Continue to Confirmation"
+    },
+    "confirmation": {
+      "title": "Confirm Your Booking",
+      "subtitle": "Please review your booking details before confirming",
+      "bookingSummary": "Booking Summary",
+      "service": "Service",
+      "therapist": "Therapist",
+      "date": "Date",
+      "time": "Time",
+      "customerInfo": "Customer Information",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "notes": "Special Requests",
+      "termsAgreement": "I agree to the terms and conditions",
+      "confirmButton": "Confirm Booking",
+      "editButton": "Edit Details"
+    },
+    "success": {
+      "title": "Booking Confirmed!",
+      "subtitle": "Your massage session has been successfully booked",
+      "bookingId": "Booking ID",
+      "emailSent": "A confirmation email has been sent to your email address",
+      "contactInfo": "If you need to make any changes to your booking, please contact us at",
+      "homeButton": "Return to Home",
+      "newBookingButton": "Make Another Booking"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPhone": "Please enter a valid phone number",
+      "termsRequired": "You must agree to the terms and conditions"
+    },
+    "errors": {
+      "serviceUnavailable": "This service is currently unavailable. Please select another service.",
+      "therapistUnavailable": "This therapist is currently unavailable. Please select another therapist.",
+      "timeSlotUnavailable": "This time slot is no longer available. Please select another time.",
+      "fetchFailed": "Failed to fetch services",
+      "unauthorized": "Unauthorized access",
+      "tryAgain": "Try again",
+      "generalError": "An error occurred while processing your booking. Please try again."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "Scan the QR code below to contact us via your preferred messaging app. Please include your booking ID when contacting us.",
+      "bookingIdLabel": "Your Booking ID:",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "scanToChat": "Scan to chat with us"
     }
   }
 } 

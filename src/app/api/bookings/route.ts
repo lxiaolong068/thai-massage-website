@@ -124,7 +124,9 @@ export async function POST(request: NextRequest) {
       time, 
       customerName, 
       customerEmail, 
-      customerPhone 
+      customerPhone,
+      customerAddress,
+      notes
     } = body;
 
     // 验证必填字段
@@ -192,6 +194,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 生成订单号 - 格式: TS-年月日-随机数
+    const today = new Date();
+    const dateStr = today.getFullYear().toString().slice(-2) + 
+                   (today.getMonth() + 1).toString().padStart(2, '0') + 
+                   today.getDate().toString().padStart(2, '0');
+    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const orderNumber = `TS-${dateStr}-${randomNum}`;
+
     // 创建预约
     const booking = await prisma.booking.create({
       data: {
@@ -202,7 +212,10 @@ export async function POST(request: NextRequest) {
         customerName,
         customerEmail,
         customerPhone,
+        customerAddress: customerAddress || '',
+        notes: notes || '',
         status: 'PENDING',
+        orderNumber, // 添加订单号
       },
       include: {
         service: true,
@@ -212,7 +225,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: booking,
+      data: {
+        ...booking,
+        orderNumber, // 确保返回订单号
+      },
       message: 'Booking created successfully',
     });
   } catch (error) {

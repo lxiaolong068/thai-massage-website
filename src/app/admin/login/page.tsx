@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/admin/dashboard';
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,6 +20,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // 使用API路由进行登录
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
@@ -31,8 +35,9 @@ export default function LoginPage() {
         throw new Error(data.error?.message || '登录失败');
       }
 
-      // 登录成功，重定向到仪表盘
-      router.push('/admin/dashboard');
+      // 登录成功，重定向到仪表盘或回调URL
+      router.push(callbackUrl);
+      router.refresh();
     } catch (err: any) {
       setError(err.message || '登录失败，请稍后再试');
     } finally {

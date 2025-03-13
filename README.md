@@ -247,10 +247,9 @@ pnpm start
 
 ### 环境变量文件
 
-- `.env.example` - 环境变量模板，包含所有可能需要的环境变量
-- `.env.development` - 开发环境配置
-- `.env.production` - 生产环境配置
-- `.env` - 本地开发的主要环境变量文件（不应提交到版本控制）
+- `.env` - 默认环境配置，包含开发环境基础设置（不应提交到版本控制）
+- `.env.development` - 开发环境特定配置
+- `.env.production` - 生产环境特定配置，敏感信息在Vercel中设置
 
 ### 设置本地开发环境
 
@@ -272,6 +271,10 @@ cp .env.example .env
 POSTGRES_URL=postgres://username:password@host:port/database?sslmode=require
 POSTGRES_PRISMA_URL=postgres://username:password@host:port/database?sslmode=require
 POSTGRES_URL_NON_POOLING=postgres://username:password@host:port/database?sslmode=require
+POSTGRES_USER=username
+POSTGRES_PASSWORD=password
+POSTGRES_HOST=host
+POSTGRES_DATABASE=database
 ```
 
 #### 应用配置（必需）
@@ -279,6 +282,13 @@ POSTGRES_URL_NON_POOLING=postgres://username:password@host:port/database?sslmode
 ```
 NODE_ENV=development|production
 NEXT_PUBLIC_API_URL=http://localhost:3000/api|https://your-production-domain.com/api
+```
+
+#### NextAuth配置（必需）
+
+```
+NEXTAUTH_URL=http://localhost:3000|https://your-production-domain.com
+NEXTAUTH_SECRET=your-nextauth-secret
 ```
 
 ## Vercel部署说明
@@ -304,10 +314,18 @@ Vercel是部署Next.js应用的最佳平台，提供了无缝集成和自动部�
    POSTGRES_URL=postgres://username:password@host:port/database?sslmode=require
    POSTGRES_PRISMA_URL=postgres://username:password@host:port/database?sslmode=require
    POSTGRES_URL_NON_POOLING=postgres://username:password@host:port/database?sslmode=require
+   POSTGRES_USER=username
+   POSTGRES_PASSWORD=password
+   POSTGRES_HOST=host
+   POSTGRES_DATABASE=database
    
    # 应用配置（必需）
    NODE_ENV=production
    NEXT_PUBLIC_API_URL=https://your-vercel-domain.vercel.app/api
+   
+   # NextAuth配置（必需）
+   NEXTAUTH_URL=https://your-vercel-domain.vercel.app
+   NEXTAUTH_SECRET=your-nextauth-secret
    
    # 如果使用Supabase（可选）
    SUPABASE_URL=https://your-project-id.supabase.co
@@ -574,3 +592,135 @@ pnpm test:watch
 - **预约API测试**：测试预约的CRUD操作
 - **错误处理测试**：测试API的错误处理机制
 - **数据验证测试**：测试API的数据验证功能
+
+# 泰式按摩预约系统 API 重构
+
+## 项目概述
+
+本项目对泰式按摩预约系统的API进行了全面重构，旨在提高API的可维护性、安全性和可扩展性。主要工作包括：
+
+1. 引入API版本控制机制
+2. 统一API响应格式
+3. 按照功能分类API（公共、客户端、管理员）
+4. 增强错误处理机制
+5. 改进认证与授权流程
+
+## 目录结构
+
+```
+src/app/api/
+├── v1/                         # API版本1
+│   ├── middleware.ts           # API中间件（版本控制、认证）
+│   ├── public/                 # 公共API（无需授权）
+│   │   ├── services/           # 服务相关API
+│   │   ├── therapists/         # 按摩师相关API
+│   │   └── bookings/           # 预约相关API
+│   ├── client/                 # 客户端API（需要客户授权）
+│   │   ├── bookings/           # 客户预约管理API
+│   │   └── profile/            # 客户个人资料API
+│   └── admin/                  # 管理员API（需要管理员授权）
+│       ├── services/           # 服务管理API
+│       ├── therapists/         # 按摩师管理API
+│       ├── bookings/           # 预约管理API
+│       ├── users/              # 用户管理API
+│       ├── stats/              # 统计数据API
+│       └── settings/           # 系统设置API
+└── utils/                      # 工具函数
+    └── api/                    # API相关工具
+        └── response.ts         # 统一响应格式工具
+```
+
+## 文档
+
+- [API文档](api-docs.md)：详细说明API的使用方法、请求参数和响应格式
+- [迁移指南](migration-guide.md)：帮助开发团队从旧API结构迁移到新API结构
+
+## 主要特性
+
+### API版本控制
+
+API使用路径前缀进行版本控制，当前版本为`v1`：
+
+```
+/api/v1/[api-type]/[resource]
+```
+
+也可以通过请求头`API-Version`指定API版本。
+
+### 统一响应格式
+
+所有API响应均使用统一的格式：
+
+```json
+// 成功响应
+{
+  "success": true,
+  "data": {...},
+  "message": "操作成功"
+}
+
+// 错误响应
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "错误信息"
+  }
+}
+```
+
+### API分类
+
+API按照功能和授权需求分为三类：
+
+- **公共API**：无需授权，可直接访问的API
+- **客户端API**：需要客户授权的API
+- **管理员API**：需要管理员授权的API
+
+### 认证机制
+
+API使用Cookie进行认证：
+
+- 客户端API：使用`client_token` Cookie
+- 管理员API：使用`admin_session` Cookie
+
+## 实施进度
+
+| 阶段 | 状态 | 完成日期 |
+|------|------|---------|
+| API版本控制中间件 | ✅ 已完成 | 2023-11-15 |
+| 统一响应格式 | ✅ 已完成 | 2023-11-15 |
+| 公共API迁移 | ✅ 已完成 | 2023-11-15 |
+| 客户端API迁移 | ✅ 已完成 | 2023-11-15 |
+| 管理员API迁移 | ✅ 已完成 | 2023-11-15 |
+| 前端组件更新 | 🟡 进行中 | - |
+| 测试与调试 | 🟡 进行中 | - |
+| 文档更新 | ✅ 已完成 | 2023-11-15 |
+
+## 下一步计划
+
+1. **完成前端组件更新**
+   - 更新API请求工具
+   - 逐步迁移前端组件
+   - 更新认证逻辑
+
+2. **全面测试**
+   - 对所有API端点进行单元测试
+   - 进行集成测试
+   - 进行性能测试
+
+3. **部署与监控**
+   - 部署新API到生产环境
+   - 设置监控和告警
+   - 收集用户反馈
+
+## 贡献者
+
+- 开发团队
+- API设计团队
+- 前端团队
+- 测试团队
+
+## 许可证
+
+本项目采用私有许可证，仅供内部使用。

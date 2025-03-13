@@ -99,7 +99,11 @@
         "description": "我们尊重您的时间，确保我们的按摩师准时到达您预约的时间。"
       }
     },
-    "viewAll": "查看所有按摩师并立即预约"
+    "viewAll": "查看所有按摩师并立即预约",
+    "bookingModal": {
+      "title": "预约按摩服务"
+    },
+    "bookNow": "立即预约"
   },
   "contact": {
     "getInTouch": "联系我们",
@@ -107,7 +111,7 @@
     "location": "地址",
     "locationValue": "泰国曼谷",
     "phone": "电话",
-    "phoneValue": "+66 XX XXX XXXX",
+    "phoneValueGeneral": "+66 XX XXX XXXX",
     "email": "电子邮箱",
     "emailValue": "info@topsecret-bangkok.com",
     "workingHours": "工作时间",
@@ -142,7 +146,7 @@
     "messageRequired": "留言为必填项",
     "contactInfo": "联系信息",
     "address": "泰国曼谷",
-    "phoneValue": "+66 84 503 5702",
+    "phoneValueContact": "+66 84 503 5702",
     "followUs": "关注我们"
   },
   "footer": {
@@ -181,6 +185,107 @@
     "testimonials": {
       "title": "客户评价",
       "subtitle": "听听那些体验过我们服务的人怎么说"
+    }
+  },
+  "booking": {
+    "title": "预约按摩",
+    "subtitle": "填写以下表单预约您的按摩服务",
+    "steps": {
+      "service": "选择服务",
+      "therapist": "选择按摩师",
+      "datetime": "日期和时间",
+      "details": "个人信息",
+      "confirm": "确认"
+    },
+    "loading": "加载中...",
+    "retry": "重试",
+    "next": "下一步",
+    "back": "返回",
+    "serviceSelection": {
+      "title": "选择服务",
+      "subtitle": "选择您想要接受的按摩类型",
+      "duration": "时长",
+      "price": "价格",
+      "minutes": "分钟",
+      "selectButton": "选择此服务"
+    },
+    "therapistSelection": {
+      "title": "选择按摩师",
+      "subtitle": "选择您偏好的按摩师",
+      "experience": "经验",
+      "years": "年",
+      "specialties": "专长",
+      "selectButton": "选择此按摩师"
+    },
+    "dateTimeSelection": {
+      "title": "选择日期和时间",
+      "subtitle": "选择您偏好的按摩日期和时间",
+      "date": "日期",
+      "time": "时间",
+      "availableTimes": "可用时间",
+      "noTimesAvailable": "该日期没有可用时间。请选择其他日期。",
+      "selectButton": "确认日期和时间"
+    },
+    "customerDetails": {
+      "title": "个人信息",
+      "subtitle": "请提供您的联系信息",
+      "name": "姓名",
+      "email": "电子邮箱",
+      "phone": "电话号码",
+      "address": "地址",
+      "notes": "特殊要求或备注",
+      "notesPlaceholder": "任何您希望我们知道的特殊要求或信息",
+      "continueButton": "继续确认"
+    },
+    "confirmation": {
+      "title": "确认预约",
+      "subtitle": "请在确认前检查您的预约详情",
+      "bookingSummary": "预约摘要",
+      "service": "服务",
+      "therapist": "按摩师",
+      "date": "日期",
+      "time": "时间",
+      "customerInfo": "客户信息",
+      "name": "姓名",
+      "email": "电子邮箱",
+      "phone": "电话",
+      "address": "地址",
+      "notes": "特殊要求",
+      "termsAgreement": "我同意服务条款",
+      "confirmButton": "确认预约",
+      "editButton": "编辑详情"
+    },
+    "success": {
+      "title": "预约确认！",
+      "subtitle": "您的按摩预约已成功提交",
+      "bookingId": "预约编号",
+      "emailSent": "确认邮件已发送至您的邮箱",
+      "contactInfo": "如需更改预约，请联系我们",
+      "homeButton": "返回首页",
+      "newBookingButton": "再次预约"
+    },
+    "validation": {
+      "required": "此字段为必填项",
+      "invalidEmail": "请输入有效的电子邮箱地址",
+      "invalidPhone": "请输入有效的电话号码",
+      "termsRequired": "您必须同意服务条款"
+    },
+    "errors": {
+      "serviceUnavailable": "该服务目前不可用。请选择其他服务。",
+      "therapistUnavailable": "该按摩师目前不可用。请选择其他按摩师。",
+      "timeSlotUnavailable": "该时间段已不可用。请选择其他时间。",
+      "fetchFailed": "获取服务失败",
+      "unauthorized": "未授权访问",
+      "tryAgain": "重试",
+      "generalError": "处理您的预约时出错。请重试。"
+    },
+    "contact": {
+      "title": "联系我们",
+      "description": "扫描下方二维码，通过您喜欢的聊天应用联系我们。联系时请提供您的预约编号。",
+      "bookingIdLabel": "您的预约编号：",
+      "copy": "复制",
+      "copied": "已复制！",
+      "scanToChat": "扫码联系我们"
     }
   }
 } 
