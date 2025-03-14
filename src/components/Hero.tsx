@@ -108,7 +108,7 @@ const Hero = ({ locale = 'en' }: HeroProps) => {
         </p>
         <Link
           href="/therapists"
-          className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-full transition-colors duration-300 text-lg"
+          className="primary-button text-lg inline-block"
         >
           {t('bookNow', 'Book Now')}
         </Link>

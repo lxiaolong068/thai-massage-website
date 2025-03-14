@@ -12,8 +12,16 @@ type HeaderProps = {
 
 const Header = ({ locale }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname() || '';
+  
+  // 判断是否为首页（可能是根路径或带语言前缀的根路径）
+  const isHomePage = useMemo(() => {
+    // 检查是否为根路径或者仅包含语言前缀
+    return pathname === '/' || /^\/(zh|en)\/?$/.test(pathname);
+  }, [pathname]);
+  
+  // 在首页以外的页面，初始状态就设置为已滚动，以显示黑色背景
+  const [isScrolled, setIsScrolled] = useState(!isHomePage);
   
   // 使用 useMemo 创建翻译器，这样它不会在每次渲染时重新创建
   const translator = useMemo(() => {
@@ -36,21 +44,31 @@ const Header = ({ locale }: HeaderProps) => {
     // 监听滚动事件，用于处理导航栏背景
     const handleScroll = () => {
       const offset = window.scrollY;
-      if (offset > 50) {
-        setIsScrolled(true);
+      
+      // 只有在首页才根据滚动位置动态改变背景
+      if (isHomePage) {
+        if (offset > 50) {
+          setIsScrolled(true);
+        } else {
+          setIsScrolled(false);
+        }
       } else {
-        setIsScrolled(false);
+        // 非首页始终保持黑色背景
+        setIsScrolled(true);
       }
     };
     
     // 添加滚动事件监听
     window.addEventListener('scroll', handleScroll);
     
+    // 初始调用一次，确保状态正确
+    handleScroll();
+    
     // 移除滚动事件监听
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isHomePage]); // 依赖项添加 isHomePage
 
   // 检查当前路径是否匹配
   const isActive = (path: string) => {
@@ -58,8 +76,26 @@ const Header = ({ locale }: HeaderProps) => {
     return pathname === path || pathname.startsWith(`${path}/`);
   };
   
+  // 使用绝对定位设置一个底部边框元素，完全消除白边
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-dark py-2 shadow-lg' : 'bg-transparent py-4'}`}>
+    <>
+      {/* 三层防护：宽黑色背景层 + 阴影层 + 边框层 */}
+      {isScrolled && (
+        <>
+          {/* 额外黑色背景层，比导航栏稍大一点，确保不有空隙 */}
+          <div className="fixed top-0 left-0 right-0 w-full h-[72px] bg-black z-40"></div>
+          {/* 下方阴影层，深色遮挡白边 */}
+          <div className="fixed top-[70px] left-0 right-0 w-full h-[10px] bg-gradient-to-b from-black to-transparent z-40"></div>
+          {/* 宽度边框层，确保有液高分割线 */}
+          <div className="fixed top-[69px] left-0 right-0 w-full h-[3px] bg-black z-40"></div>
+        </>
+      )}
+      
+      <header className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-black py-3' 
+          : 'bg-transparent py-4'
+      }`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* 网站标志 */}
         <Logo />
@@ -228,6 +264,7 @@ const Header = ({ locale }: HeaderProps) => {
         </div>
       </div>
     </header>
+    </>
   );
 };
 

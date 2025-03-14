@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { apiSuccess, apiError } from '@/lib/api-response';
 
 // 获取单个按摩师
 export async function GET(
@@ -21,16 +22,7 @@ export async function GET(
     });
 
     if (!therapist) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Therapist not found',
-          },
-        },
-        { status: 404 }
-      );
+      return apiError('NOT_FOUND', '按摩师不存在', 404);
     }
 
     // 格式化响应数据
@@ -43,24 +35,14 @@ export async function GET(
       name: translation?.name || '',
       bio: translation?.bio || '',
       specialtiesTranslation: translation?.specialtiesTranslation || [],
+      createdAt: therapist.createdAt,
+      updatedAt: therapist.updatedAt,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: formattedTherapist,
-    });
+    return apiSuccess(formattedTherapist);
   } catch (error) {
     console.error('Error fetching therapist:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'SERVER_ERROR',
-          message: 'Failed to fetch therapist',
-        },
-      },
-      { status: 500 }
-    );
+    return apiError('SERVER_ERROR', '获取按摩师失败', 500);
   }
 }
 
@@ -80,23 +62,20 @@ export async function PUT(
     });
 
     if (!existingTherapist) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Therapist not found',
-          },
-        },
-        { status: 404 }
-      );
+      return apiError('NOT_FOUND', '按摩师不存在', 404);
+    }
+
+    // 验证必填字段
+    if (!imageUrl || !specialties || !experienceYears || !translations) {
+      return apiError('INVALID_INPUT', '缺少必填字段', 400);
     }
 
     // 更新按摩师基本信息
-    const updateData: any = {};
-    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
-    if (specialties !== undefined) updateData.specialties = specialties;
-    if (experienceYears !== undefined) updateData.experienceYears = experienceYears;
+    const updateData: any = {
+      imageUrl,
+      specialties,
+      experienceYears,
+    };
 
     // 更新按摩师
     const updatedTherapist = await prisma.therapist.update({
@@ -152,23 +131,10 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: therapistWithTranslations,
-      message: 'Therapist updated successfully',
-    });
+    return apiSuccess(therapistWithTranslations, '按摩师更新成功');
   } catch (error) {
     console.error('Error updating therapist:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'SERVER_ERROR',
-          message: 'Failed to update therapist',
-        },
-      },
-      { status: 500 }
-    );
+    return apiError('SERVER_ERROR', '更新按摩师失败', 500);
   }
 }
 
@@ -186,15 +152,21 @@ export async function DELETE(
     });
 
     if (!existingTherapist) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Therapist not found',
-          },
-        },
-        { status: 404 }
+      return apiError('NOT_FOUND', '按摩师不存在', 404);
+    }
+
+    // 检查是否有相关预约
+    const relatedBookings = await prisma.booking.count({
+      where: {
+        therapistId: id,
+      },
+    });
+
+    if (relatedBookings > 0) {
+      return apiError(
+        'RELATED_BOOKINGS',
+        `无法删除此按摩师，存在 ${relatedBookings} 个相关预约记录`,
+        400
       );
     }
 
@@ -203,21 +175,9 @@ export async function DELETE(
       where: { id },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Therapist deleted successfully',
-    });
+    return apiSuccess(null, '按摩师删除成功');
   } catch (error) {
     console.error('Error deleting therapist:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'SERVER_ERROR',
-          message: 'Failed to delete therapist',
-        },
-      },
-      { status: 500 }
-    );
+    return apiError('SERVER_ERROR', '删除按摩师失败', 500);
   }
-} 
+}
