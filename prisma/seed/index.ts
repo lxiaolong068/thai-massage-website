@@ -6,8 +6,8 @@ async function main() {
   console.log('开始添加示例数据...');
 
   try {
-    // 动态导入bcrypt
-    const bcrypt = await import('bcrypt');
+    // 导入crypto
+    const crypto = require('crypto');
     
     // 清理现有数据
     console.log('正在清理现有数据...');
@@ -25,10 +25,10 @@ async function main() {
 
     // 创建管理员用户
     console.log('正在创建管理员用户...');
-    const adminPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = crypto.createHash('sha256').update('admin123').digest('hex');
     const admin = await prisma.user.create({
       data: {
-        email: 'admin@example.com',
+        email: 'admin@admin.com',
         passwordHash: adminPassword,
         name: 'Admin User',
         role: UserRole.ADMIN,
@@ -376,6 +376,7 @@ async function main() {
       await prisma.therapist.create({
         data: {
           ...therapistInfo,
+          workStatus: 'AVAILABLE' as const,
           translations: {
             create: translations,
           },

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -13,6 +13,33 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // 在组件加载时检查用户是否已登录
+  useEffect(() => {
+    // 检查本地存储中是否有token
+    const adminToken = localStorage.getItem('adminToken');
+    
+    // 检查cookie中是否有会话
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/admin/check-session', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        
+        const data = await response.json();
+        
+        // 如果已登录，重定向到仪表盘
+        if (response.ok && data.success && (data.isLoggedIn || adminToken)) {
+          window.location.replace(callbackUrl);
+        }
+      } catch (err) {
+        console.error('Failed to check session:', err);
+      }
+    };
+    
+    checkSession();
+  }, [callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,19 +54,33 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include', // 确保包含cookie
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || '登录失败');
+        throw new Error(data.error?.message || 'Login failed');
       }
 
-      // 登录成功，重定向到仪表盘或回调URL
-      router.push(callbackUrl);
-      router.refresh();
+      // 将token存储在本地存储中
+      if (data.data?.token) {
+        localStorage.setItem('adminToken', data.data.token);
+        localStorage.setItem('adminUser', JSON.stringify({
+          id: data.data.id,
+          email: data.data.email,
+          name: data.data.name,
+          role: data.data.role
+        }));
+      }
+
+      // 登录成功，直接重定向到仪表盘
+      console.log('Login successful, redirecting to:', callbackUrl);
+      
+      // 使用强制页面刷新的方式重定向
+      window.location.replace(callbackUrl);
     } catch (err: any) {
-      setError(err.message || '登录失败，请稍后再试');
+      setError(err.message || 'Login failed, please try again later');
     } finally {
       setLoading(false);
     }
@@ -59,17 +100,17 @@ export default function LoginPage() {
             />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            管理后台登录
+            Admin Login
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            请输入您的管理员账号和密码
+            Please enter your admin credentials
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
-                邮箱
+                Email
               </label>
               <input
                 id="email"
@@ -80,12 +121,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                placeholder="邮箱地址"
+                placeholder="Email address"
               />
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
-                密码
+                Password
               </label>
               <input
                 id="password"
@@ -96,7 +137,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                placeholder="密码"
+                placeholder="Password"
               />
             </div>
           </div>
@@ -109,9 +150,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gold hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold"
             >
-              {loading ? '登录中...' : '登录'}
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </div>
         </form>

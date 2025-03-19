@@ -34,14 +34,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // 获取会话令牌
+  // 获取自定义管理员会话 cookie
+  const adminSession = request.cookies.get('admin_session');
+  
+  // 同时检查 NextAuth 令牌（兼容两种认证方式）
   const token = await getToken({ 
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
   
-  // 如果没有令牌，则重定向到登录页面（对于管理员路径）或返回未授权错误（对于API路径）
-  if (!token) {
+  // 如果没有管理员会话 cookie 和 NextAuth 令牌，则重定向到登录页面或返回未授权错误
+  if (!adminSession?.value && !token) {
     if (isAdminPath) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     } else {
@@ -50,7 +53,7 @@ export async function middleware(request: NextRequest) {
           success: false,
           error: {
             code: 'UNAUTHORIZED',
-            message: '未授权访问',
+            message: 'Unauthorized access',
           },
         }),
         {
@@ -63,8 +66,13 @@ export async function middleware(request: NextRequest) {
     }
   }
   
-  // 检查用户角色是否为管理员
-  if (token.role !== UserRole.ADMIN) {
+  // 如果有管理员会话cookie，则直接放行（自定义认证方式）
+  if (adminSession?.value) {
+    return NextResponse.next();
+  }
+  
+  // 检查NextAuth用户角色是否为管理员
+  if (token && token.role !== UserRole.ADMIN) {
     if (isAdminPath) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     } else {
@@ -73,7 +81,7 @@ export async function middleware(request: NextRequest) {
           success: false,
           error: {
             code: 'FORBIDDEN',
-            message: '权限不足',
+            message: 'Insufficient permissions',
           },
         }),
         {

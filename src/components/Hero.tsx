@@ -2,26 +2,16 @@
 
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
-import { useState, useEffect, useMemo } from 'react';
-import { createClientTranslator } from '@/i18n/client';
+import { useState, useEffect } from 'react';
+import { useImprovedTranslator } from '@/i18n/improved-client';
 
 type HeroProps = {
   locale: string;
 };
 
 const Hero = ({ locale = 'en' }: HeroProps) => {
-  // 使用 useMemo 创建翻译器，这样它不会在每次渲染时重新创建
-  const translator = useMemo(() => {
-    console.log('Creating hero translator for locale:', locale);
-    // 不使用命名空间方式，而是直接访问完整的翻译树
-    return createClientTranslator(locale);
-  }, [locale]);
-  
-  // 翻译函数
-  const t = (key: string, defaultValue: string) => {
-    // 完整指定路径，避免命名空间嵌套问题
-    return translator.t(`home.hero.${key}`, {}, defaultValue);
-  };
+  // 使用优化后的翻译Hook，自动处理服务器/客户端一致性
+  const { t } = useImprovedTranslator(locale, 'home.hero');
   
   // 轮播图片数组
   const sliderImages = [

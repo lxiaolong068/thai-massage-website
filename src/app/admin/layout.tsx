@@ -2,6 +2,7 @@ import React from 'react';
 import { Inter } from 'next/font/google';
 import '../globals.css';
 import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,7 +19,9 @@ export default function AdminLayout({
   return (
     <html lang="zh">
       <body className={inter.className}>
-        <AdminLayoutClient>{children}</AdminLayoutClient>
+        <ThemeProvider>
+          <AdminLayoutClient>{children}</AdminLayoutClient>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -4,10 +4,53 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
+/* 默认主题变量 */
 :root {
   --primary: #D4AF37;
   --secondary: #8B4513;
   --dark: #1A1A1A;
+  --accent: #8B4513;
+  --theme-bg: #FFF8E1;
+}
+
+/* 金色主题 */
+[data-theme="gold"] {
+  --primary: #D4AF37;
+  --secondary: #FFF8E1;
+  --accent: #8B4513;
+  --theme-bg: #FFF8E1;
+}
+
+/* 蓝色主题 */
+[data-theme="blue"] {
+  --primary: #1E40AF;
+  --secondary: #DBEAFE;
+  --accent: #1E3A8A;
+  --theme-bg: #EFF6FF;
+}
+
+/* 绿色主题 */
+[data-theme="green"] {
+  --primary: #047857;
+  --secondary: #ECFDF5;
+  --accent: #065F46;
+  --theme-bg: #ECFDF5;
+}
+
+/* 紫色主题 */
+[data-theme="purple"] {
+  --primary: #7E22CE;
+  --secondary: #F3E8FF;
+  --accent: #6B21A8;
+  --theme-bg: #F3E8FF;
+}
+
+/* 红色主题 */
+[data-theme="red"] {
+  --primary: #B91C1C;
+  --secondary: #FEE2E2;
+  --accent: #991B1B;
+  --theme-bg: #FEF2F2;
 }
 
 @theme inline {

@@ -25,6 +25,7 @@ type Therapist = {
   name: string;
   bio: string;
   specialtiesTranslation: string[];
+  workStatus: 'AVAILABLE' | 'WORKING';
   createdAt?: string;
   updatedAt?: string;
 };
@@ -33,40 +34,43 @@ export default function TherapistsPage() {
   const [therapists, setTherapists] = useState<Therapist[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [locale, setLocale] = useState('zh'); // 默认显示中文
   const [selectedTherapists, setSelectedTherapists] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'AVAILABLE' | 'WORKING'>('ALL');
   const [isBatchDeleting, setIsBatchDeleting] = useState(false);
+  const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+  const [isBatchUpdateDialogOpen, setIsBatchUpdateDialogOpen] = useState(false);
+  const [newWorkStatus, setNewWorkStatus] = useState<'AVAILABLE' | 'WORKING'>('AVAILABLE');
 
   // 获取按摩师列表
   const fetchTherapists = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch(`/api/therapists?locale=${locale}`);
+      const response = await fetch(`/api/therapists?locale=en`);
       
       if (!response.ok) {
-        throw new Error(`获取按摩师列表失败: ${response.status}`);
+        throw new Error(`Failed to get therapists: ${response.status}`);
       }
       
       const data = await response.json();
       if (!data.success) {
-        throw new Error(data.error?.message || '获取按摩师列表失败');
+        throw new Error(data.error?.message || 'Failed to get therapists');
       }
       
       setTherapists(data.data || []);
     } catch (err: any) {
-      setError(err.message || '获取按摩师列表失败');
+      setError(err.message || 'Failed to get therapists');
     } finally {
       setLoading(false);
       setSelectedTherapists([]);
     }
   };
 
-  // 当locale变化时，重新获取数据
+  // 初始化时获取数据
   useEffect(() => {
     fetchTherapists();
-  }, [locale]);
+  }, []);
 
   // 删除单个按摩师
   const [deleteTherapistId, setDeleteTherapistId] = useState<string | null>(null);
@@ -89,15 +93,15 @@ export default function TherapistsPage() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || `删除按摩师失败: ${response.status}`);
+        throw new Error(errorData.error?.message || `Failed to delete therapist: ${response.status}`);
       }
       
-      toast.success('按摩师已成功删除');
+      toast.success('Therapist successfully deleted');
       // 重新获取列表
       fetchTherapists();
       setIsDeleteDialogOpen(false);
     } catch (err: any) {
-      toast.error(err.message || '删除按摩师失败');
+      toast.error(err.message || 'Failed to delete therapist');
     } finally {
       setIsDeleting(false);
     }
@@ -135,19 +139,68 @@ export default function TherapistsPage() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || `批量删除失败: ${response.status}`);
+        throw new Error(errorData.error?.message || `Batch deletion failed: ${response.status}`);
       }
       
       const data = await response.json();
-      toast.success(data.message || `成功删除 ${selectedTherapists.length} 个按摩师`);
+      toast.success(data.message || `Successfully deleted ${selectedTherapists.length} therapists`);
       
       // 重新获取列表
       fetchTherapists();
       setIsBatchDeleteDialogOpen(false);
     } catch (err: any) {
-      toast.error(err.message || '批量删除按摩师失败');
+      toast.error(err.message || 'Failed to batch delete therapists');
     } finally {
       setIsBatchDeleting(false);
+    }
+  };
+
+  // 批量更新按摩师状态
+  const handleBatchUpdateClick = () => {
+    if (selectedTherapists.length === 0) {
+      toast.error('请至少选择一个按摩师');
+      return;
+    }
+    setIsBatchUpdateDialogOpen(true);
+  };
+
+  const handleBatchUpdate = async () => {
+    if (selectedTherapists.length === 0) {
+      toast.error('请至少选择一个按摩师');
+      return;
+    }
+    
+    try {
+      setIsBatchUpdating(true);
+      const response = await fetch(`/api/therapists`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'update',
+          ids: selectedTherapists,
+          data: {
+            workStatus: newWorkStatus
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || `Batch update failed: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      toast.success(data.message || `Successfully updated ${selectedTherapists.length} therapists status`);
+      
+      // 重新获取列表
+      fetchTherapists();
+      setIsBatchUpdateDialogOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to batch update therapists status');
+    } finally {
+      setIsBatchUpdating(false);
     }
   };
 
@@ -173,18 +226,26 @@ export default function TherapistsPage() {
     }
   };
 
-  // 处理语言切换
-  const handleLocaleChange = (newLocale: string) => {
-    setLocale(newLocale);
-  };
+
 
   // 处理搜索
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  // 根据搜索关键词过滤按摩师列表
+  // 处理状态筛选
+  const handleStatusFilterChange = (status: 'ALL' | 'AVAILABLE' | 'WORKING') => {
+    setStatusFilter(status);
+  };
+
+  // 根据搜索关键词和状态过滤按摩师列表
   const filteredTherapists = therapists.filter(therapist => {
+    // 先按状态过滤
+    if (statusFilter !== 'ALL' && therapist.workStatus !== statusFilter) {
+      return false;
+    }
+    
+    // 再按搜索关键词过滤
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
@@ -200,37 +261,11 @@ export default function TherapistsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">按摩师管理</h1>
+        <h1 className="text-2xl font-semibold">Therapist Management</h1>
         <div className="flex items-center space-x-4">
-          <div className="flex border rounded-md overflow-hidden">
-            <Button
-              onClick={() => handleLocaleChange('zh')}
-              variant={locale === 'zh' ? 'default' : 'outline'}
-              size="sm"
-              className="rounded-none"
-            >
-              中文
-            </Button>
-            <Button
-              onClick={() => handleLocaleChange('en')}
-              variant={locale === 'en' ? 'default' : 'outline'}
-              size="sm"
-              className="rounded-none"
-            >
-              英文
-            </Button>
-            <Button
-              onClick={() => handleLocaleChange('ko')}
-              variant={locale === 'ko' ? 'default' : 'outline'}
-              size="sm"
-              className="rounded-none"
-            >
-              韩文
-            </Button>
-          </div>
           <Button asChild>
             <Link href="/admin/therapists/new">
-              添加按摩师
+              Add Therapist
             </Link>
           </Button>
         </div>
@@ -246,14 +281,24 @@ export default function TherapistsPage() {
         <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center space-x-3">
             {selectedTherapists.length > 0 && (
-              <Button
-                onClick={handleBatchDeleteClick}
-                disabled={isBatchDeleting}
-                variant="destructive"
-                size="sm"
-              >
-                {isBatchDeleting ? '处理中...' : `删除所选 (${selectedTherapists.length})`}
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleBatchDeleteClick}
+                  disabled={isBatchDeleting}
+                  variant="destructive"
+                  size="sm"
+                >
+                  {isBatchDeleting ? 'Processing...' : `Delete Selected (${selectedTherapists.length})`}
+                </Button>
+                <Button
+                  onClick={handleBatchUpdateClick}
+                  disabled={isBatchUpdating}
+                  variant="secondary"
+                  size="sm"
+                >
+                  {isBatchUpdating ? 'Processing...' : `Update Status (${selectedTherapists.length})`}
+                </Button>
+              </div>
             )}
             <Button
               onClick={fetchTherapists}
@@ -261,16 +306,42 @@ export default function TherapistsPage() {
               variant="outline"
               size="sm"
             >
-              刷新
+              Refresh
             </Button>
           </div>
 
-          <div className="relative">
+          <div className="flex items-center space-x-4">
+            <div className="flex border rounded-md overflow-hidden">
+              <Button
+                onClick={() => handleStatusFilterChange('ALL')}
+                variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-none"
+              >
+                All
+              </Button>
+              <Button
+                onClick={() => handleStatusFilterChange('AVAILABLE')}
+                variant={statusFilter === 'AVAILABLE' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-none"
+              >
+                Available
+              </Button>
+              <Button
+                onClick={() => handleStatusFilterChange('WORKING')}
+                variant={statusFilter === 'WORKING' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-none"
+              >
+                Working
+              </Button>
+            </div>
             <Input
               type="text"
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="搜索按摩师姓名、专长、经验年限..."
+              placeholder="Search by name, specialties, experience..."
               className="w-64"
             />
           </div>
@@ -279,18 +350,18 @@ export default function TherapistsPage() {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-gray-600">加载中...</div>
+          <div className="text-xl text-gray-600">Loading...</div>
         </div>
       ) : 
 
       therapists.length === 0 ? (
         <div className="bg-yellow-50 p-6 rounded-lg text-center">
-          <p className="text-yellow-700">暂无按摩师数据</p>
+          <p className="text-yellow-700">No therapists found</p>
           <Link
             href="/admin/therapists/new"
             className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
           >
-            添加第一个按摩师
+            Add First Therapist
           </Link>
         </div>
       ) : (
@@ -307,24 +378,27 @@ export default function TherapistsPage() {
                   </div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  按摩师
+                  Therapist
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  专长
+                  Specialties
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  经验
+                  Experience
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
+                  Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredTherapists.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                    没有找到匹配的按摩师
+                  <td colSpan={6} className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                    No matching therapists found
                   </td>
                 </tr>
               ) : (
@@ -364,12 +438,17 @@ export default function TherapistsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{therapist.experienceYears} 年</div>
+                      <div className="text-sm text-gray-900">{therapist.experienceYears} years</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${therapist.workStatus === 'AVAILABLE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        {therapist.workStatus === 'AVAILABLE' ? 'Available' : 'Working'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button asChild variant="link" size="sm" className="mr-2">
                         <Link href={`/admin/therapists/${therapist.id}`}>
-                          编辑
+                          Edit
                         </Link>
                       </Button>
                       <Button
@@ -378,7 +457,7 @@ export default function TherapistsPage() {
                         size="sm"
                         className="text-red-600 hover:text-red-900"
                       >
-                        删除
+                        Delete
                       </Button>
                     </td>
                   </tr>
@@ -388,7 +467,7 @@ export default function TherapistsPage() {
           </table>
           {filteredTherapists.length > 0 && (
             <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
-              显示 {filteredTherapists.length} 个按摩师 {searchQuery ? `(已过滤，共 ${therapists.length} 个)` : ''}
+              Showing {filteredTherapists.length} therapists {searchQuery ? `(filtered from ${therapists.length})` : ''}
             </div>
           )}
         </div>
@@ -397,17 +476,17 @@ export default function TherapistsPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>确认删除</DialogTitle>
+            <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              您确定要删除此按摩师吗？此操作无法撤销。
+              Are you sure you want to delete this therapist? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
-              取消
+              Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? '删除中...' : '确认删除'}
+              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -417,17 +496,62 @@ export default function TherapistsPage() {
       <Dialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>确认批量删除</DialogTitle>
+            <DialogTitle>Confirm Batch Deletion</DialogTitle>
             <DialogDescription>
-              您确定要删除选中的 {selectedTherapists.length} 个按摩师吗？此操作无法撤销。
+              Are you sure you want to delete {selectedTherapists.length} selected therapists? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsBatchDeleteDialogOpen(false)} disabled={isBatchDeleting}>
-              取消
+              Cancel
             </Button>
             <Button variant="destructive" onClick={handleBatchDelete} disabled={isBatchDeleting}>
-              {isBatchDeleting ? '删除中...' : '确认删除'}
+              {isBatchDeleting ? 'Deleting...' : 'Confirm Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 批量更新状态对话框 */}
+      <Dialog open={isBatchUpdateDialogOpen} onOpenChange={setIsBatchUpdateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Therapist Status</DialogTitle>
+            <DialogDescription>
+              Please select the status to update for {selectedTherapists.length} therapists.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1 font-medium">New Status:</div>
+              <div className="flex border rounded-md overflow-hidden">
+                <Button
+                  onClick={() => setNewWorkStatus('AVAILABLE')}
+                  variant={newWorkStatus === 'AVAILABLE' ? 'default' : 'outline'}
+                  size="sm"
+                  className="rounded-none"
+                >
+                  Available
+                </Button>
+                <Button
+                  onClick={() => setNewWorkStatus('WORKING')}
+                  variant={newWorkStatus === 'WORKING' ? 'default' : 'outline'}
+                  size="sm"
+                  className="rounded-none"
+                >
+                  Working
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBatchUpdateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="default" onClick={handleBatchUpdate} disabled={isBatchUpdating}>
+              {isBatchUpdating ? 'Updating...' : 'Confirm Update'}
             </Button>
           </DialogFooter>
         </DialogContent>

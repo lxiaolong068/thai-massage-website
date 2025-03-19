@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'INVALID_INPUT',
-            message: '邮箱和密码不能为空',
+            message: 'Email and password cannot be empty',
           },
         },
         { status: 400 }
@@ -33,16 +33,17 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'INVALID_CREDENTIALS',
-            message: '邮箱或密码不正确',
+            message: 'Invalid email or password',
           },
         },
         { status: 401 }
       );
     }
 
-    // 注意：在测试环境下暂时跳过密码验证，直接允许登录以测试功能
-    // 实际生产环境需要恢复密码验证
-    const passwordMatch = true; // 测试环境下直接允许登录
+    // 验证密码
+    // 使用SHA-256哈希方法
+    const inputPasswordHash = crypto.createHash('sha256').update(password).digest('hex');
+    const passwordMatch = user.passwordHash === inputPasswordHash;
 
     if (!passwordMatch) {
       return NextResponse.json(
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'INVALID_CREDENTIALS',
-            message: '邮箱或密码不正确',
+            message: 'Invalid email or password',
           },
         },
         { status: 401 }
@@ -72,7 +73,10 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
-    // 返回用户信息（不包含密码）
+    // 生成一个简单的token
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // 返回用户信息（不包含密码）和token
     return NextResponse.json({
       success: true,
       data: {
@@ -80,17 +84,18 @@ export async function POST(request: NextRequest) {
         email: user.email,
         name: user.name,
         role: user.role,
+        token: token, // 添加token
       },
-      message: '登录成功',
+      message: 'Login successful',
     });
   } catch (error) {
-    console.error('登录失败:', error);
+    console.error('Login failed:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'SERVER_ERROR',
-          message: '服务器错误，请稍后再试',
+          message: 'Server error, please try again later',
         },
       },
       { status: 500 }

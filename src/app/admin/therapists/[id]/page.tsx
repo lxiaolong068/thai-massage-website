@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-type TherapistTranslation = {
-  locale: string;
+type TherapistData = {
   name: string;
   bio: string;
   specialtiesTranslation: string[];
@@ -21,7 +20,10 @@ type Therapist = {
   imageUrl: string;
   specialties: string[];
   experienceYears: number;
-  translations: TherapistTranslation[];
+  workStatus: 'AVAILABLE' | 'WORKING';
+  name: string;
+  bio: string;
+  specialtiesTranslation: string[];
 };
 
 export default function TherapistDetailPage({
@@ -38,12 +40,12 @@ export default function TherapistDetailPage({
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [specialtyInput, setSpecialtyInput] = useState<string>('');
   const [experienceYears, setExperienceYears] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<string>('zh');
-  const [translations, setTranslations] = useState<TherapistTranslation[]>([
-    { locale: 'zh', name: '', bio: '', specialtiesTranslation: [] },
-    { locale: 'en', name: '', bio: '', specialtiesTranslation: [] },
-    { locale: 'ko', name: '', bio: '', specialtiesTranslation: [] },
-  ]);
+  const [workStatus, setWorkStatus] = useState<'AVAILABLE' | 'WORKING'>('AVAILABLE');
+  const [therapistData, setTherapistData] = useState<TherapistData>({
+    name: '',
+    bio: '',
+    specialtiesTranslation: []
+  });
   const [loading, setLoading] = useState(!isNewTherapist);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -69,28 +71,22 @@ export default function TherapistDetailPage({
 
         const therapistData = data.data;
         
-        // 获取所有语言的翻译
-        const allTranslationsResponse = await Promise.all(
-          ['zh', 'en', 'ko'].map(locale => 
-            fetch(`/api/therapists/${id}?locale=${locale}`).then(res => res.json())
-          )
-        );
+        // 获取英文数据
+        const localeResponse = await fetch(`/api/therapists/${id}?locale=en`);
+        const localeData = await localeResponse.json();
         
-        const allTranslations = allTranslationsResponse.map((res, index) => {
-          const localeData = res.data;
-          return {
-            locale: ['zh', 'en', 'ko'][index],
-            name: localeData.name || '',
-            bio: localeData.bio || '',
-            specialtiesTranslation: localeData.specialtiesTranslation || [],
-          };
-        });
+        const therapistDataEnglish = {
+          name: localeData.data.name || '',
+          bio: localeData.data.bio || '',
+          specialtiesTranslation: localeData.data.specialtiesTranslation || [],
+        };
         
         setTherapist(therapistData);
         setImageUrl(therapistData.imageUrl);
         setSpecialties(therapistData.specialties);
         setExperienceYears(therapistData.experienceYears);
-        setTranslations(allTranslations);
+        setWorkStatus(therapistData.workStatus || 'AVAILABLE');
+        setTherapistData(therapistDataEnglish);
       } catch (err: any) {
         setError(err.message || '获取按摩师数据失败');
       } finally {
@@ -101,14 +97,11 @@ export default function TherapistDetailPage({
     fetchTherapist();
   }, [id, isNewTherapist]);
 
-  const handleTranslationChange = (locale: string, field: keyof TherapistTranslation, value: any) => {
-    setTranslations(prevTranslations =>
-      prevTranslations.map(translation =>
-        translation.locale === locale
-          ? { ...translation, [field]: value }
-          : translation
-      )
-    );
+  const handleDataChange = (field: keyof TherapistData, value: any) => {
+    setTherapistData(prevData => ({
+      ...prevData,
+      [field]: value
+    }));
   };
 
   const handleAddSpecialty = () => {
@@ -122,30 +115,24 @@ export default function TherapistDetailPage({
     setSpecialties(specialties.filter((_, i) => i !== index));
   };
 
-  const handleAddSpecialtyTranslation = (locale: string) => {
-    const translation = translations.find(t => t.locale === locale);
-    const input = document.getElementById(`specialty-input-${locale}`) as HTMLInputElement;
+  const handleAddSpecialtyTranslation = () => {
+    const input = document.getElementById('specialty-input') as HTMLInputElement;
     const value = input?.value.trim();
     
-    if (value && translation && !translation.specialtiesTranslation.includes(value)) {
-      handleTranslationChange(
-        locale, 
+    if (value && !therapistData.specialtiesTranslation.includes(value)) {
+      handleDataChange(
         'specialtiesTranslation', 
-        [...translation.specialtiesTranslation, value]
+        [...therapistData.specialtiesTranslation, value]
       );
       input.value = '';
     }
   };
 
-  const handleRemoveSpecialtyTranslation = (locale: string, index: number) => {
-    const translation = translations.find(t => t.locale === locale);
-    if (translation) {
-      handleTranslationChange(
-        locale, 
-        'specialtiesTranslation', 
-        translation.specialtiesTranslation.filter((_, i) => i !== index)
-      );
-    }
+  const handleRemoveSpecialtyTranslation = (index: number) => {
+    handleDataChange(
+      'specialtiesTranslation', 
+      therapistData.specialtiesTranslation.filter((_, i) => i !== index)
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -156,33 +143,33 @@ export default function TherapistDetailPage({
     try {
       // 验证必填字段
       if (!imageUrl) {
-        throw new Error('请填写图片URL');
+        throw new Error('Please enter an image URL');
       }
       
       if (specialties.length === 0) {
-        throw new Error('请至少添加一个专长');
+        throw new Error('Please add at least one specialty');
       }
       
       if (experienceYears <= 0) {
-        throw new Error('请填写有效的经验年限');
+        throw new Error('Please enter valid years of experience');
       }
 
-      for (const locale of ['zh', 'en', 'ko']) {
-        const translation = translations.find(t => t.locale === locale);
-        if (!translation?.name || !translation?.bio) {
-          throw new Error(`请填写${locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}的姓名和简介`);
-        }
-        
-        if (translation.specialtiesTranslation.length === 0) {
-          throw new Error(`请至少添加一个${locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}的专长翻译`);
-        }
+      if (!therapistData.name || !therapistData.bio) {
+        throw new Error('Please enter the name and bio');
+      }
+      
+      if (therapistData.specialtiesTranslation.length === 0) {
+        throw new Error('Please add at least one specialty translation');
       }
 
-      const therapistData = {
+      const dataToSubmit = {
         imageUrl,
         specialties,
         experienceYears,
-        translations,
+        workStatus,
+        name: therapistData.name,
+        bio: therapistData.bio,
+        specialtiesTranslation: therapistData.specialtiesTranslation,
       };
 
       const url = isNewTherapist ? '/api/therapists' : `/api/therapists/${id}`;
@@ -193,7 +180,7 @@ export default function TherapistDetailPage({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(therapistData),
+        body: JSON.stringify(dataToSubmit),
       });
 
       const data = await response.json();
@@ -237,10 +224,10 @@ export default function TherapistDetailPage({
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{isNewTherapist ? '添加' : '编辑'}按摩师</h1>
+        <h1 className="text-2xl font-semibold">{isNewTherapist ? 'Add' : 'Edit'} Therapist</h1>
         <Button asChild variant="outline">
           <Link href="/admin/therapists">
-            返回列表
+            Back to List
           </Link>
         </Button>
       </div>
@@ -265,7 +252,7 @@ export default function TherapistDetailPage({
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              请输入按摩师照片的URL地址
+              Please enter the URL of the therapist's photo
             </p>
           </div>
           <div>
@@ -281,11 +268,32 @@ export default function TherapistDetailPage({
               required
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Work Status
+            </label>
+            <div className="flex border rounded-md overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setWorkStatus('AVAILABLE')}
+                className={`flex-1 px-4 py-2 text-sm font-medium ${workStatus === 'AVAILABLE' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              >
+                Available
+              </button>
+              <button
+                type="button"
+                onClick={() => setWorkStatus('WORKING')}
+                className={`flex-1 px-4 py-2 text-sm font-medium ${workStatus === 'WORKING' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              >
+                Working
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            专长 (原始语言)
+            Specialties (Original)
           </label>
           <div className="flex">
             <Input
@@ -293,7 +301,7 @@ export default function TherapistDetailPage({
               value={specialtyInput}
               onChange={(e) => setSpecialtyInput(e.target.value)}
               className="flex-1 rounded-r-none"
-              placeholder="输入专长"
+              placeholder="Enter specialty"
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialty())}
             />
             <Button
@@ -301,7 +309,7 @@ export default function TherapistDetailPage({
               onClick={handleAddSpecialty}
               className="rounded-l-none"
             >
-              添加
+              Add
             </Button>
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -323,110 +331,84 @@ export default function TherapistDetailPage({
               </span>
             ))}
             {specialties.length === 0 && (
-              <p className="text-sm text-gray-500">尚未添加专长</p>
+              <p className="text-sm text-gray-500">No specialties added yet</p>
             )}
           </div>
         </div>
 
         <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex">
-              {['zh', 'en', 'ko'].map((locale) => (
-                <Button
-                  key={locale}
-                  type="button"
-                  onClick={() => setActiveTab(locale)}
-                  variant="ghost"
-                  className={`py-2 px-4 text-sm font-medium rounded-none ${
-                    activeTab === locale
-                      ? 'border-b-2 border-primary text-primary'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}
-                </Button>
-              ))}
-            </nav>
-          </div>
-
           <div className="mt-4">
-            {translations.map((translation) => (
-              <div
-                key={translation.locale}
-                className={`${activeTab === translation.locale ? 'block' : 'hidden'}`}
-              >
-                <div className="mb-4">
-                  <label htmlFor={`name-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    姓名
-                  </label>
-                  <Input
-                    type="text"
-                    id={`name-${translation.locale}`}
-                    value={translation.name}
-                    onChange={(e) => handleTranslationChange(translation.locale, 'name', e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="mb-4">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <Input
+                type="text"
+                id="name"
+                value={therapistData.name}
+                onChange={(e) => handleDataChange('name', e.target.value)}
+                required
+              />
+            </div>
 
-                <div className="mb-4">
-                  <label htmlFor={`bio-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    简介
-                  </label>
-                  <textarea
-                    id={`bio-${translation.locale}`}
-                    value={translation.bio}
-                    onChange={(e) => handleTranslationChange(translation.locale, 'bio', e.target.value)}
-                    rows={4}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  ></textarea>
-                </div>
+            <div className="mb-4">
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                Bio
+              </label>
+              <textarea
+                id="bio"
+                value={therapistData.bio}
+                onChange={(e) => handleDataChange('bio', e.target.value)}
+                rows={4}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                required
+              ></textarea>
+            </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    专长翻译
-                  </label>
-                  <div className="flex">
-                    <Input
-                      type="text"
-                      id={`specialty-input-${translation.locale}`}
-                      className="flex-1 rounded-r-none"
-                      placeholder={`输入${translation.locale === 'zh' ? '中文' : translation.locale === 'en' ? '英文' : '韩文'}专长`}
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialtyTranslation(translation.locale))}
-                    />
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Specialties
+              </label>
+              <div className="flex">
+                <Input
+                  type="text"
+                  id="specialty-input"
+                  className="flex-1 rounded-r-none"
+                  placeholder="Enter specialty"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialtyTranslation())}
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddSpecialtyTranslation}
+                  className="rounded-l-none"
+                >
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {therapistData.specialtiesTranslation.map((specialty, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800"
+                  >
+                    {specialty}
                     <Button
                       type="button"
-                      onClick={() => handleAddSpecialtyTranslation(translation.locale)}
-                      className="rounded-l-none"
+                      onClick={() => handleRemoveSpecialtyTranslation(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="ml-1 h-5 w-5 p-0 text-green-400 hover:text-green-600"
                     >
-                      添加
+                      &times;
                     </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {translation.specialtiesTranslation.map((specialty, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800"
-                      >
-                        {specialty}
-                        <Button
-                          type="button"
-                          onClick={() => handleRemoveSpecialtyTranslation(translation.locale, index)}
-                          variant="ghost"
-                          size="sm"
-                          className="ml-1 h-5 w-5 p-0 text-green-400 hover:text-green-600"
-                        >
-                          &times;
-                        </Button>
-                      </span>
-                    ))}
-                    {translation.specialtiesTranslation.length === 0 && (
-                      <p className="text-sm text-gray-500">尚未添加专长翻译</p>
-                    )}
-                  </div>
-                </div>
+                  </span>
+                ))}
+                {therapistData.specialtiesTranslation.length === 0 && (
+                  <p className="text-sm text-gray-500">No specialties added yet</p>
+                )}
               </div>
-            ))}
+            </div>
+          </div>
           </div>
         </div>
 
@@ -440,7 +422,7 @@ export default function TherapistDetailPage({
             type="submit"
             disabled={saving}
           >
-            {saving ? '保存中...' : '保存'}
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </form>

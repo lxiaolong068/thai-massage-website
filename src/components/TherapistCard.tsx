@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useImprovedTranslator } from '@/i18n/improved-client';
 
 // 按摩师数据类型
 export interface Therapist {
@@ -18,10 +18,12 @@ interface TherapistCardProps {
   therapist: Therapist;
   isSelected: boolean;
   onSelect: (therapist: Therapist) => void;
+  locale?: string;
 }
 
-const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, isSelected, onSelect }) => {
-  const t = useTranslations('booking');
+const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, isSelected, onSelect, locale = 'zh' }) => {
+  // 使用 useImprovedTranslator 钩子获取翻译
+  const { t } = useImprovedTranslator(locale, 'booking');
   
   return (
     <div 
@@ -49,12 +51,12 @@ const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, isSelected, on
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{therapist.bio}</p>
         
         <div className="mb-3">
-          <p className="text-gray-500 text-sm">{t('therapistSelection.experience')}</p>
-          <p className="font-semibold">{therapist.experience} {t('therapistSelection.years')}</p>
+          <p className="text-gray-500 text-sm">{t('therapistSelection.experience', '工作经验')}</p>
+          <p className="font-semibold">{therapist.experience} {t('therapistSelection.years', '年')}</p>
         </div>
         
         <div>
-          <p className="text-gray-500 text-sm">{t('therapistSelection.specialties')}</p>
+          <p className="text-gray-500 text-sm">{t('therapistSelection.specialties', '专长')}</p>
           <div className="flex flex-wrap gap-1 mt-1">
             {therapist.specialties.map((specialty, index) => (
               <span 
@@ -70,7 +72,7 @@ const TherapistCard: React.FC<TherapistCardProps> = ({ therapist, isSelected, on
         {isSelected && (
           <div className="mt-4 text-center">
             <span className="inline-block px-4 py-1 bg-primary text-white text-sm rounded-full">
-              {t('therapistSelection.selectButton')}
+              {t('therapistSelection.selectButton', '已选择')}
             </span>
           </div>
         )}

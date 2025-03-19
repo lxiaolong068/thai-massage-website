@@ -4,7 +4,7 @@ const withNextIntl = require('next-intl/plugin')('./src/i18n/i18n.ts');
 const nextConfig = {
   /* config options here */
   images: {
-    domains: ['images.unsplash.com', 'cdn-icons-png.flaticon.com'],
+    domains: ['images.unsplash.com', 'cdn-icons-png.flaticon.com', 'example.com'],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
+import { useImprovedTranslator } from '@/i18n/improved-client';
 
 interface AboutProps {
   locale?: string;
@@ -13,29 +13,19 @@ const About: React.FC<AboutProps> = ({ locale = 'en' }) => {
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   
-  // 使用一个安全的方式获取翻译函数
-  let t: any = null;
-  try {
-    t = useTranslations('about');
-  } catch (err) {
-    console.error('Error loading translations:', err);
-    // 不在这里设置状态，而是在useEffect中处理
-  }
+  // 使用优化后的翻译Hook，自动处理服务器/客户端一致性
+  const { t: translationFunc } = useImprovedTranslator(locale, 'about');
   
-  // 使用useEffect处理状态更新，避免无限循环
+  // 使用useEffect检查翻译是否加载成功
   useEffect(() => {
-    if (t) {
-      setLoaded(true);
-    } else {
-      setError('Translation function is undefined or failed to load');
-    }
-  }, [t]);
+    // 翻译函数总是存在的，所以我们只需要设置加载状态
+    setLoaded(true);
+  }, []);
   
   // 安全获取翻译的辅助函数
   const safeT = (key: string, defaultValue: string = '') => {
-    if (!t) return defaultValue;
     try {
-      return t(key);
+      return translationFunc(key, defaultValue);
     } catch (err) {
       console.error(`Error translating key "${key}":`, err);
       return defaultValue;
