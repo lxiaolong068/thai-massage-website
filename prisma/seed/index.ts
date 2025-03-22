@@ -1,11 +1,25 @@
 import { PrismaClient, BookingStatus, UserRole, MessageStatus } from '@prisma/client/index';
+import * as dotenv from 'dotenv';
 
-const prisma = new PrismaClient();
+// 加载环境变量
+dotenv.config({ path: '.env.development' });
+
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
+
+// 添加控制台输出以确保日志可见
+console.log('\n开始 seed 脚本执行...');
 
 async function main() {
   console.log('开始添加示例数据...');
+  console.log(`当前环境变量： ${process.env.DATABASE_URL}`);
 
   try {
+    // 测试连接
+    console.log('正在测试数据库连接...');
+    const result = await prisma.$queryRaw`SELECT 1 as connected`;
+    console.log(`数据库连接成功: ${JSON.stringify(result)}`);
     // 导入crypto
     const crypto = require('crypto');
     
@@ -34,8 +48,233 @@ async function main() {
         role: UserRole.ADMIN,
       },
     });
+    
+    // 创建服务数据
+    console.log('正在创建服务数据...');
+    const service1 = await prisma.service.create({
+      data: {
+        id: 'cls1',
+        price: 1500,
+        duration: 60,
+        imageUrl: 'https://example.com/thai-massage.jpg',
+        translations: {
+          create: [
+            {
+              id: 'clst1',
+              locale: 'en',
+              name: 'Thai Massage',
+              description: 'Traditional Thai massage therapy',
+              slug: 'thai-massage',
+            },
+            {
+              id: 'clst2',
+              locale: 'zh',
+              name: '泰式按摩',
+              description: '传统泰式按摩疗法',
+              slug: 'thai-massage-zh',
+            },
+            {
+              id: 'clst3',
+              locale: 'ko',
+              name: '타이 마사지',
+              description: '전통적인 타이 마사지 요법',
+              slug: 'thai-massage-ko',
+            },
+          ],
+        },
+      },
+    });
 
-    console.log('已创建管理员用户:', admin.email);
+    const service2 = await prisma.service.create({
+      data: {
+        id: 'cls2',
+        price: 2000,
+        duration: 90,
+        imageUrl: 'https://example.com/oil-massage.jpg',
+        translations: {
+          create: [
+            {
+              id: 'clst4',
+              locale: 'en',
+              name: 'Oil Massage',
+              description: 'Relaxing oil massage therapy',
+              slug: 'oil-massage',
+            },
+            {
+              id: 'clst5',
+              locale: 'zh',
+              name: '精油按摩',
+              description: '放松精油按摩疗法',
+              slug: 'oil-massage-zh',
+            },
+            {
+              id: 'clst6',
+              locale: 'ko',
+              name: '오일 마사지',
+              description: '편안한 오일 마사지 요법',
+              slug: 'oil-massage-ko',
+            },
+          ],
+        },
+      },
+    });
+    
+    // 创建按摩师数据
+    console.log('正在创建按摩师数据...');
+    const therapist1 = await prisma.therapist.create({
+      data: {
+        id: 'clt1',
+        imageUrl: 'https://example.com/therapist1.jpg',
+        specialties: ['Thai Massage', 'Oil Massage'],
+        experienceYears: 5,
+        workStatus: 'AVAILABLE',
+        translations: {
+          create: [
+            {
+              id: 'cltt1',
+              locale: 'en',
+              name: 'Somchai',
+              bio: 'Experienced massage therapist from Chiang Mai',
+              specialtiesTranslation: ['Thai Massage', 'Oil Massage'],
+            },
+            {
+              id: 'cltt2',
+              locale: 'zh',
+              name: '宋猜',
+              bio: '来自清迈的经验丰富的按摩师',
+              specialtiesTranslation: ['泰式按摩', '精油按摩'],
+            },
+            {
+              id: 'cltt3',
+              locale: 'ko',
+              name: '솜차이',
+              bio: '치앙마이 출신의 경험이 풍부한 마사지 치료사',
+              specialtiesTranslation: ['타이 마사지', '오일 마사지'],
+            },
+          ],
+        },
+      },
+    });
+
+    const therapist2 = await prisma.therapist.create({
+      data: {
+        id: 'clt2',
+        imageUrl: 'https://example.com/therapist2.jpg',
+        specialties: ['Foot Massage', 'Thai Massage'],
+        experienceYears: 3,
+        workStatus: 'WORKING',
+        translations: {
+          create: [
+            {
+              id: 'cltt4',
+              locale: 'en',
+              name: 'Malee',
+              bio: 'Professional therapist with 3 years of experience',
+              specialtiesTranslation: ['Foot Massage', 'Thai Massage'],
+            },
+            {
+              id: 'cltt5',
+              locale: 'zh',
+              name: '玛丽',
+              bio: '拥有3年经验的专业治疗师',
+              specialtiesTranslation: ['足部按摩', '泰式按摩'],
+            },
+            {
+              id: 'cltt6',
+              locale: 'ko',
+              name: '말리',
+              bio: '3년 경력의 전문 치료사',
+              specialtiesTranslation: ['발 마사지', '타이 마사지'],
+            },
+          ],
+        },
+      },
+    });
+    
+    // 创建店铺设置数据
+    console.log('正在创建店铺设置数据...');
+    const shopName = await prisma.shopSetting.create({
+      data: {
+        id: 'clss1',
+        key: 'shop_name',
+        type: 'string',
+        translations: {
+          create: [
+            {
+              id: 'clsst1',
+              locale: 'en',
+              value: 'Top Secret Thai Massage',
+            },
+            {
+              id: 'clsst2',
+              locale: 'zh',
+              value: '绝密泰式按摩',
+            },
+            {
+              id: 'clsst3',
+              locale: 'ko',
+              value: '탑 시크릿 타이 마사지',
+            },
+          ],
+        },
+      },
+    });
+    
+    const shopAddress = await prisma.shopSetting.create({
+      data: {
+        id: 'clss2',
+        key: 'shop_address',
+        type: 'string',
+        translations: {
+          create: [
+            {
+              id: 'clsst4',
+              locale: 'en',
+              value: '123 Bangkok Street, Thailand',
+            },
+            {
+              id: 'clsst5',
+              locale: 'zh',
+              value: '泰国曼谷街123号',
+            },
+            {
+              id: 'clsst6',
+              locale: 'ko',
+              value: '태국 방콕 거리 123번지',
+            },
+          ],
+        },
+      },
+    });
+    
+    const shopPhone = await prisma.shopSetting.create({
+      data: {
+        id: 'clss3',
+        key: 'shop_phone',
+        type: 'string',
+        translations: {
+          create: [
+            {
+              id: 'clsst7',
+              locale: 'en',
+              value: '+66 123 456 789',
+            },
+            {
+              id: 'clsst8',
+              locale: 'zh',
+              value: '+66 123 456 789',
+            },
+            {
+              id: 'clsst9',
+              locale: 'ko',
+              value: '+66 123 456 789',
+            },
+          ],
+        },
+      },
+    });
+
+    console.log(`已创建管理员用户: ${admin.email}`);
 
     // 创建服务
     console.log('正在创建服务示例数据...');
@@ -56,13 +295,7 @@ async function main() {
             name: '传统泰式按摩',
             description: '使用正宗技术的古老按摩方法，缓解身体紧张。',
             slug: 'traditional-thai-massage',
-          },
-          {
-            locale: 'th',
-            name: 'นวดแผนไทยโบราณ',
-            description: 'เทคนิคโบราณเพื่อบรรเทาความตึงเครียดด้วยเทคนิคดั้งเดิม',
-            slug: 'traditional-thai-massage',
-          },
+          }
           {
             locale: 'ko',
             name: '전통 태국 마사지',
@@ -87,13 +320,7 @@ async function main() {
             name: '颈肩按摩',
             description: '专注于缓解颈部和肩部紧张的按摩。',
             slug: 'neck-shoulder-massage',
-          },
-          {
-            locale: 'th',
-            name: 'นวดคอและไหล่',
-            description: 'การนวดที่มุ่งเน้นเพื่อบรรเทาความตึงเครียดในคอและไหล่ของคุณ',
-            slug: 'neck-shoulder-massage',
-          },
+          }
           {
             locale: 'ko',
             name: '목과 어깨 마사지',
@@ -118,13 +345,7 @@ async function main() {
             name: '精油按摩',
             description: '使用芳香精油的放松按摩，舒缓您的身心。',
             slug: 'oil-massage',
-          },
-          {
-            locale: 'th',
-            name: 'นวดน้ำมัน',
-            description: 'การนวดผ่อนคลายด้วยน้ำมันหอมระเหยเพื่อบรรเทาร่างกายและจิตใจของคุณ',
-            slug: 'oil-massage',
-          },
+          }
           {
             locale: 'ko',
             name: '오일 마사지',
@@ -149,13 +370,7 @@ async function main() {
             name: '芳香疗法按摩',
             description: '使用精油的治疗按摩，带来深度放松。',
             slug: 'aromatherapy-massage',
-          },
-          {
-            locale: 'th',
-            name: 'นวดอโรมาเธอราพี',
-            description: 'การนวดบำบัดด้วยน้ำมันหอมระเหยเพื่อการผ่อนคลายอย่างลึกซึ้ง',
-            slug: 'aromatherapy-massage',
-          },
+          }
           {
             locale: 'ko',
             name: '아로마테라피 마사지',
@@ -180,13 +395,7 @@ async function main() {
             name: '深层组织按摩',
             description: '针对深层肌肉的强力按摩，缓解疼痛。',
             slug: 'deep-tissue-massage',
-          },
-          {
-            locale: 'th',
-            name: 'นวดเนื้อเยื่อลึก',
-            description: 'การนวดอย่างเข้มข้นที่มุ่งเป้าไปที่ชั้นกล้ามเนื้อลึกเพื่อบรรเทาอาการปวด',
-            slug: 'deep-tissue-massage',
-          },
+          }
           {
             locale: 'ko',
             name: '딥 티슈 마사지',
@@ -211,13 +420,7 @@ async function main() {
             name: '足部按摩',
             description: '反射区按摩技术，为您的双脚和身体注入活力。',
             slug: 'foot-massage',
-          },
-          {
-            locale: 'th',
-            name: 'นวดเท้า',
-            description: 'เทคนิคการนวดกดจุดเพื่อฟื้นฟูเท้าและร่างกายของคุณ',
-            slug: 'foot-massage',
-          },
+          }
           {
             locale: 'ko',
             name: '발 마사지',
@@ -263,10 +466,6 @@ async function main() {
             specialtiesTranslation: ['传统泰式按摩', '精油按摩'],
           },
           {
-            locale: 'th',
-            name: 'สมหญิง',
-            bio: 'สมหญิงเป็นนักนวดที่ได้รับการรับรองด้วยประสบการณ์ 8 ปี เธอเชี่ยวชาญในการนวดแผนไทยโบราณและนวดน้ำมัน',
-            specialtiesTranslation: ['นวดแผนไทยโบราณ', 'นวดน้ำมัน'],
           },
           {
             locale: 'ko',
@@ -294,10 +493,6 @@ async function main() {
             specialtiesTranslation: ['芳香疗法按摩', '深层组织按摩'],
           },
           {
-            locale: 'th',
-            name: 'ณัฐญา',
-            bio: 'ณัฐญามีประสบการณ์ 10 ปีในการนวดอโรมาเธอราพีและนวดเนื้อเยื่อลึก เธอเป็นที่รู้จักในด้านมือที่แข็งแรงและความใส่ใจในรายละเอียด',
-            specialtiesTranslation: ['นวดอโรมาเธอราพี', 'นวดเนื้อเยื่อลึก'],
           },
           {
             locale: 'ko',
@@ -325,10 +520,6 @@ async function main() {
             specialtiesTranslation: ['足部按摩', '颈肩按摩'],
           },
           {
-            locale: 'th',
-            name: 'ปราณี',
-            bio: 'ปราณีเชี่ยวชาญในการนวดเท้าและนวดคอและไหล่ ด้วยประสบการณ์ 7 ปี เธอรู้วิธีบรรเทาความตึงเครียดในพื้นที่ที่เครียดมากที่สุด',
-            specialtiesTranslation: ['นวดเท้า', 'นวดคอและไหล่'],
           },
           {
             locale: 'ko',
@@ -356,10 +547,6 @@ async function main() {
             specialtiesTranslation: ['传统泰式按摩', '深层组织按摩'],
           },
           {
-            locale: 'th',
-            name: 'มาลัย',
-            bio: 'มาลัยมีประสบการณ์ 9 ปีในการนวดแผนไทยโบราณและนวดเนื้อเยื่อลึก เทคนิคที่แข็งแกร่งของเธอช่วยบรรเทาอาการปวดเรื้อรังและความตึงเครียด',
-            specialtiesTranslation: ['นวดแผนไทยโบราณ', 'นวดเนื้อเยื่อลึก'],
           },
           {
             locale: 'ko',
@@ -402,8 +589,6 @@ async function main() {
             value: '维多利亚上门按摩',
           },
           {
-            locale: 'th',
-            value: 'นวดนอกสถานที่วิคตอเรีย',
           },
           {
             locale: 'ko',
@@ -424,8 +609,6 @@ async function main() {
             value: '曼谷市瓦塔纳区克隆托伊努阿素坤逸13巷，邮编10110',
           },
           {
-            locale: 'th',
-            value: 'สุขุมวิท ซอย 13, คลองเตยเหนือ, วัฒนา, กรุงเทพฯ, 10110',
           },
           {
             locale: 'ko',
@@ -446,8 +629,6 @@ async function main() {
             value: '+66 XX XXX XXXX',
           },
           {
-            locale: 'th',
-            value: '+66 XX XXX XXXX',
           },
           {
             locale: 'ko',
@@ -468,8 +649,6 @@ async function main() {
             value: 'info@topsecret-bangkok.com',
           },
           {
-            locale: 'th',
-            value: 'info@topsecret-bangkok.com',
           },
           {
             locale: 'ko',
@@ -490,8 +669,6 @@ async function main() {
             value: '24/7全天候服务',
           },
           {
-            locale: 'th',
-            value: 'ให้บริการตลอด 24 ชั่วโมงทุกวัน',
           },
           {
             locale: 'ko',
@@ -589,8 +766,15 @@ async function main() {
     console.log('已创建留言示例数据');
 
     console.log('示例数据添加完成！');
+    
+    // 检查数据
+    const servicesCount = await prisma.service.count();
+    const therapistsCount = await prisma.therapist.count();
+    console.log(`数据库中有 ${therapistsCount} 个按摩师记录`);
+    console.log(`数据库中有 ${servicesCount} 个服务记录`);
   } catch (error) {
-    console.error('添加示例数据时出错:', error);
+    console.error(`添加示例数据时出错: ${error}`);
+    console.error(`错误详情: ${JSON.stringify(error, null, 2)}`);
     throw error;
   } finally {
     await prisma.$disconnect();
@@ -599,9 +783,10 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error('添加示例数据时出错:', e);
+    console.error(`添加示例数据时出错: ${e}`);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
+    console.log('数据库连接已关闭');
   }); 

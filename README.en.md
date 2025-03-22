@@ -8,7 +8,7 @@ This is a Thai massage service website built with Next.js 14 and Tailwind CSS. T
 
 - **Responsive Design**: Perfectly adapts to mobile, tablet, and desktop devices
 - **Modern UI Design**: Beautiful interface with smooth user experience
-- **Multilingual Support**: English, Chinese, Thai, and Korean interfaces
+- **Multilingual Support**: English, Chinese, and Korean interfaces
 - **Rich Components**:
   - Dynamic carousel display
   - Service items and price lists
@@ -64,7 +64,6 @@ thai-massage/
 │   │   ├── messages/       # Translation files
 │   │   │   ├── en.json     # English translations
 │   │   │   ├── zh.json     # Chinese translations
-│   │   │   ├── th.json     # Thai translations
 │   │   │   └── ko.json     # Korean translations
 │   │   ├── i18n.ts         # i18n configuration
 │   │   ├── client.ts       # Client-side i18n utilities
@@ -102,7 +101,7 @@ Displays information about professional massage therapists, their specialties, a
 Multi-step booking form, including service selection, time selection, and personal information.
 
 ### 6. Language Switcher Component (`src/components/LanguageSwitcher.tsx`)
-Allows users to switch between English, Chinese, Thai, and Korean language interfaces.
+Allows users to switch between English, Chinese, and Korean language interfaces.
 
 ## Internationalization Implementation
 
@@ -111,7 +110,6 @@ This project uses `next-intl` for multilingual support with the following featur
 ### 1. Supported Languages
 - English (en) - Default language
 - Chinese (zh)
-- Thai (th)
 - Korean (ko)
 
 ### 2. Implementation Method

@@ -2581,3 +2581,228 @@ API结构调整的成功标准包括：
    - 改进页面加载速度
    - 优化搜索引擎友好性
    - 实现缓存策略
+
+## 24. 按摩师管理模块更新
+
+### 24.1 功能扩展概述
+
+根据需求，我们对按摩师管理模块进行了功能扩展，主要包括以下三个方面：
+
+1. **状态UI展示**：在按摩师列表中直观显示按摩师的工作状态
+2. **状态编辑功能**：在详情页面和批量操作中支持编辑按摩师的工作状态
+3. **状态筛选功能**：根据工作状态筛选按摩师列表
+
+这些功能旨在帮助管理员更高效地管理按摩师资源，特别是在排班和预约管理方面。
+
+### 24.2 技术实现细节
+
+#### 24.2.1 状态UI展示
+
+在按摩师列表中，我们添加了状态显示列，使用不同颜色和图标来区分按摩师的工作状态：
+
+- **可预约状态**：使用绿色背景和勾选图标 (✓)，文本为"可预约"
+- **工作中状态**：使用蓝色背景和沙漏图标 (⌛)，文本为"工作中"
+
+代码实现：
+```tsx
+<span 
+  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+    therapist.workStatus === 'AVAILABLE' 
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-blue-100 text-blue-800'
+  }`}
+>
+  {therapist.workStatus === 'AVAILABLE' ? '✓ 可预约' : '⌛ 工作中'}
+</span>
+```
+
+#### 24.2.2 状态编辑功能
+
+1. **详情页面状态编辑**
+
+在按摩师详情页面，我们添加了状态选择按钮，允许管理员快速切换按摩师的工作状态：
+
+```tsx
+<div className="flex border rounded-md overflow-hidden">
+  <button
+    type="button"
+    onClick={() => setWorkStatus('AVAILABLE')}
+    className={`flex-1 px-4 py-2 text-sm font-medium ${
+      workStatus === 'AVAILABLE' 
+        ? 'bg-green-600 hover:bg-green-700 text-white' 
+        : 'bg-white text-green-600 hover:bg-green-50'
+    }`}
+  >
+    可预约
+  </button>
+  <button
+    type="button"
+    onClick={() => setWorkStatus('WORKING')}
+    className={`flex-1 px-4 py-2 text-sm font-medium ${
+      workStatus === 'WORKING' 
+        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+        : 'bg-white text-blue-600 hover:bg-blue-50'
+    }`}
+  >
+    工作中
+  </button>
+</div>
+```
+
+2. **批量状态更新**
+
+实现了批量状态更新功能，允许管理员同时更新多个按摩师的工作状态：
+
+```tsx
+const handleBatchUpdate = async () => {
+  if (selectedTherapists.length === 0) return;
+  
+  setIsBatchUpdating(true);
+  try {
+    const response = await fetch('/api/therapists', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ids: selectedTherapists,
+        data: {
+          workStatus: newWorkStatus,
+        },
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update therapists');
+    }
+    
+    // 更新列表中的状态
+    setTherapists(therapists.map(t => 
+      selectedTherapists.includes(t.id) ? { ...t, workStatus: newWorkStatus } : t
+    ));
+    
+    toast.success(`${selectedTherapists.length} therapists updated successfully`);
+    setIsBatchUpdateDialogOpen(false);
+  } catch (err) {
+    toast.error(err instanceof Error ? err.message : 'An unknown error occurred');
+  } finally {
+    setIsBatchUpdating(false);
+  }
+};
+```
+
+#### 24.2.3 状态筛选功能
+
+添加了按照工作状态筛选按摩师列表的功能，包括全部、可预约和工作中三个选项：
+
+```tsx
+<div className="flex space-x-2">
+  <Button 
+    variant={selectedStatus === null ? "default" : "outline"}
+    onClick={() => handleStatusFilterChange(null)}
+    size="sm"
+  >
+    全部
+  </Button>
+  <Button 
+    variant={selectedStatus === 'AVAILABLE' ? "default" : "outline"}
+    onClick={() => handleStatusFilterChange('AVAILABLE')}
+    size="sm"
+    className={selectedStatus === 'AVAILABLE' ? "bg-green-600 hover:bg-green-700 text-white" : "text-green-600 border-green-600 hover:bg-green-50"}
+  >
+    可预约
+  </Button>
+  <Button 
+    variant={selectedStatus === 'WORKING' ? "default" : "outline"}
+    onClick={() => handleStatusFilterChange('WORKING')}
+    size="sm"
+    className={selectedStatus === 'WORKING' ? "bg-blue-600 hover:bg-blue-700 text-white" : "text-blue-600 border-blue-600 hover:bg-blue-50"}
+  >
+    工作中
+  </Button>
+</div>
+```
+
+筛选逻辑实现：
+
+```tsx
+// 处理状态筛选
+const handleStatusFilterChange = (status: string | null) => {
+  setSelectedStatus(status);
+};
+
+// 根据搜索查询和状态筛选按摩师
+const filteredTherapists = therapists.filter((therapist) => {
+  const searchMatch = 
+    therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    therapist.specialties.some(specialty => 
+      specialty.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  
+  // 状态筛选
+  const statusMatch = selectedStatus === null || therapist.workStatus === selectedStatus;
+  
+  return searchMatch && statusMatch;
+});
+```
+
+### 24.3 API接口更新
+
+为支持这些功能，我们对按摩师管理API进行了扩展：
+
+1. **获取按摩师列表API**
+   - 返回结果中包含`workStatus`字段，表示按摩师当前工作状态
+
+2. **更新按摩师API**
+   - 添加对`workStatus`字段的支持，允许更新按摩师的工作状态
+
+3. **批量更新API**
+   - 支持批量更新多个按摩师的工作状态
+   - 请求格式：
+     ```json
+     {
+       "ids": ["id1", "id2", "id3"],
+       "data": {
+         "workStatus": "AVAILABLE"
+       }
+     }
+     ```
+
+### 24.4 用户体验优化
+
+1. **状态颜色编码**
+   - 使用一致的颜色方案：绿色表示"可预约"，蓝色表示"工作中"
+   - 在列表页和详情页使用相同的颜色编码
+
+2. **批量操作确认**
+   - 添加确认对话框，避免误操作
+   - 显示将要更新的按摩师数量和新状态
+
+3. **操作反馈**
+   - 使用toast消息提供操作结果反馈
+   - 操作完成后自动更新列表视图
+
+4. **UI一致性**
+   - 在列表页和详情页使用相同的状态文本和图标
+   - 保持按钮样式的一致性
+
+### 24.5 后续优化计划
+
+1. **按摩师可用性日历**
+   - 添加日历视图，显示按摩师的排班情况
+   - 支持按日期范围查看和管理按摩师工作状态
+
+2. **自动状态转换**
+   - 根据预约情况自动更新按摩师工作状态
+   - 添加状态转换的自动化规则
+
+3. **状态变更日志**
+   - 记录按摩师状态变更历史
+   - 提供状态变更统计和报表
+
+4. **通知系统**
+   - 状态变更时通知相关人员
+   - 与预约系统集成，同步状态变更
+
+通过这些功能的实现和优化，按摩师管理模块将更加完善，为管理员提供更高效的工具来管理按摩师资源和预约流程。

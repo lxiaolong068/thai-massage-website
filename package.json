@@ -22,9 +22,15 @@
     "test:setup-db": "node scripts/setup-test-db.js",
     "test:with-setup": "npm run test:setup-db && npm run test",
     "test:api:run": "node scripts/run-api-tests.js",
+    "test:api:endpoints": "node tests/api/test-api-endpoints.js",
+    "test:api:comprehensive": "node tests/api/test-api-comprehensive.js",
+    "test:api:batch-update": "node tests/api/test-api-batch-update.js",
+    "test:api:batch-delete": "node tests/api/test-api-batch-delete.js",
+    "test:api:batch-errors": "node tests/api/test-api-batch-errors.js",
     "remove-thai": "ts-node scripts/remove-thai-translations.ts",
     "run-sql": "node scripts/run-sql.js",
-    "check-thai": "node scripts/check-thai.js"
+    "init-admin": "node scripts/init-admin.js",
+    "check-db-connection": "node scripts/test-db-connection.js"
   },
   "dependencies": {
     "@auth/core": "^0.38.0",
@@ -68,6 +74,7 @@
     "@types/react-dom": "^19.0.4",
     "@types/supertest": "^6.0.2",
     "cookie": "^1.0.2",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.21.0",
     "eslint-config-next": "^15.2.1",
     "glob": "^11.0.1",
