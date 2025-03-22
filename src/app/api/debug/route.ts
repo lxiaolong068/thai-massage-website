@@ -1,7 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// 指定这是一个动态路由
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs'; // 确保使用 Node.js 运行时
+
 export async function GET() {
+  // 在构建时返回静态响应
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({
+      success: true,
+      message: "此调试API路由仅在运行时可用，不支持在构建时静态生成",
+      isStaticBuild: true
+    });
+  }
+
   try {
     // 检查服务数据
     const servicesCount = await prisma.service.count();

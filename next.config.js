@@ -11,6 +11,11 @@ const nextConfig = {
   },
   reactStrictMode: true,
   swcMinify: true,
+  output: 'standalone',
+  experimental: {
+    optimizeCss: false,
+    isrFlushToDisk: false,
+  },
 };
 
 module.exports = withNextIntl(nextConfig); 

@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
-export default function LoginPage() {
+// 使用包含 useSearchParams 的子组件，便于 Suspense 包装
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/admin/dashboard';
@@ -158,5 +159,18 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+// 主页面组件，使用 Suspense 包装 LoginForm
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-lg text-gray-600">加载中...</p>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 } 

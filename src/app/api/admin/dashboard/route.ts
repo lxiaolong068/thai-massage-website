@@ -1,7 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+// 指定这是一个动态路由
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs'; // 确保使用 Node.js 运行时
+
 export async function GET(request: NextRequest) {
+  // 在构建时返回静态响应
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({
+      success: true,
+      data: {
+        servicesCount: 0,
+        therapistsCount: 0,
+        bookingsCount: 0,
+        pendingBookingsCount: 0,
+        messagesCount: 0,
+        unreadMessagesCount: 0,
+        isStaticBuild: true
+      },
+    });
+  }
+
   try {
     // Get services count
     const servicesCount = await prisma.service.count();
