@@ -297,6 +297,14 @@ export const GET = withAdminApi(getUsers);
 export const POST = withAdminApi(createUser);
 export const PUT = withAdminApi(updateUser);
 export const DELETE = withAdminApi(deleteUser);
-
-// 导出其他路由处理函数
-export const resetPassword = withAdminApi(resetUserPassword); 
+export const PATCH = withAdminApi(async (request: NextRequest) => {
+  // 解析请求体以确定操作类型
+  const body = await request.json();
+  const { action } = body;
+  
+  if (action === 'resetPassword') {
+    return resetUserPassword(request);
+  }
+  
+  return apiValidationError('无效的操作类型');
+}); 

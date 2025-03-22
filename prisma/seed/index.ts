@@ -1,4 +1,4 @@
-import { PrismaClient, BookingStatus, UserRole, MessageStatus } from '@prisma/client/index';
+import { PrismaClient, BookingStatus, UserRole, MessageStatus } from '@prisma/client';
 import * as dotenv from 'dotenv';
 
 // 加载环境变量
@@ -295,7 +295,7 @@ async function main() {
             name: '传统泰式按摩',
             description: '使用正宗技术的古老按摩方法，缓解身体紧张。',
             slug: 'traditional-thai-massage',
-          }
+          },
           {
             locale: 'ko',
             name: '전통 태국 마사지',
@@ -320,7 +320,7 @@ async function main() {
             name: '颈肩按摩',
             description: '专注于缓解颈部和肩部紧张的按摩。',
             slug: 'neck-shoulder-massage',
-          }
+          },
           {
             locale: 'ko',
             name: '목과 어깨 마사지',
@@ -345,7 +345,7 @@ async function main() {
             name: '精油按摩',
             description: '使用芳香精油的放松按摩，舒缓您的身心。',
             slug: 'oil-massage',
-          }
+          },
           {
             locale: 'ko',
             name: '오일 마사지',
@@ -370,7 +370,7 @@ async function main() {
             name: '芳香疗法按摩',
             description: '使用精油的治疗按摩，带来深度放松。',
             slug: 'aromatherapy-massage',
-          }
+          },
           {
             locale: 'ko',
             name: '아로마테라피 마사지',
@@ -395,7 +395,7 @@ async function main() {
             name: '深层组织按摩',
             description: '针对深层肌肉的强力按摩，缓解疼痛。',
             slug: 'deep-tissue-massage',
-          }
+          },
           {
             locale: 'ko',
             name: '딥 티슈 마사지',
@@ -420,7 +420,7 @@ async function main() {
             name: '足部按摩',
             description: '反射区按摩技术，为您的双脚和身体注入活力。',
             slug: 'foot-massage',
-          }
+          },
           {
             locale: 'ko',
             name: '발 마사지',
@@ -466,8 +466,6 @@ async function main() {
             specialtiesTranslation: ['传统泰式按摩', '精油按摩'],
           },
           {
-          },
-          {
             locale: 'ko',
             name: '솜잉',
             bio: '솜잉은 8년의 경험을 가진 인증된 마사지 치료사입니다. 그녀는 전통 태국 마사지와 오일 마사지를 전문으로 합니다.',
@@ -491,8 +489,6 @@ async function main() {
             name: '娜塔雅',
             bio: '娜塔雅在芳香疗法和深层组织按摩方面拥有10年经验。她以手法强劲和注重细节而闻名。',
             specialtiesTranslation: ['芳香疗法按摩', '深层组织按摩'],
-          },
-          {
           },
           {
             locale: 'ko',
@@ -520,8 +516,6 @@ async function main() {
             specialtiesTranslation: ['足部按摩', '颈肩按摩'],
           },
           {
-          },
-          {
             locale: 'ko',
             name: '프라니',
             bio: '프라니는 발 마사지와 목과 어깨 마사지를 전문으로 합니다. 7년의 경험으로 가장 스트레스가 많은 부위의 긴장을 완화하는 방법을 알고 있습니다.',
@@ -545,8 +539,6 @@ async function main() {
             name: '玛莱',
             bio: '玛莱在传统泰式按摩和深层组织按摩方面拥有9年经验。她的强劲技术有助于缓解慢性疼痛和紧张。',
             specialtiesTranslation: ['传统泰式按摩', '深层组织按摩'],
-          },
-          {
           },
           {
             locale: 'ko',
@@ -589,8 +581,6 @@ async function main() {
             value: '维多利亚上门按摩',
           },
           {
-          },
-          {
             locale: 'ko',
             value: '빅토리아 출장 마사지',
           },
@@ -607,8 +597,6 @@ async function main() {
           {
             locale: 'zh',
             value: '曼谷市瓦塔纳区克隆托伊努阿素坤逸13巷，邮编10110',
-          },
-          {
           },
           {
             locale: 'ko',
@@ -629,8 +617,6 @@ async function main() {
             value: '+66 XX XXX XXXX',
           },
           {
-          },
-          {
             locale: 'ko',
             value: '+66 XX XXX XXXX',
           },
@@ -649,8 +635,6 @@ async function main() {
             value: 'info@topsecret-bangkok.com',
           },
           {
-          },
-          {
             locale: 'ko',
             value: 'info@topsecret-bangkok.com',
           },
@@ -667,8 +651,6 @@ async function main() {
           {
             locale: 'zh',
             value: '24/7全天候服务',
-          },
-          {
           },
           {
             locale: 'ko',

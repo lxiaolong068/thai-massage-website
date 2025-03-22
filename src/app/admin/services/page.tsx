@@ -234,114 +234,114 @@ export default function ServicesPage() {
         <div className="flex justify-center items-center h-64">
           <div className="text-xl text-gray-600">加载中...</div>
         </div>
-      ) : 
-
-      services.length === 0 ? (
-        <div className="bg-yellow-50 p-6 rounded-lg text-center">
-          <p className="text-yellow-700">暂无服务数据</p>
-          <Link
-            href="/admin/services/new"
-            className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
-          >
-            添加第一个服务
-          </Link>
-        </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="w-12 px-4 py-3">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedServices.length > 0 && selectedServices.length === filteredServices.length}
-                      onChange={handleSelectAll}
-                      className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                  </div>
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  服务
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  价格
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  时长
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredServices.length === 0 ? (
+        services.length === 0 ? (
+          <div className="bg-yellow-50 p-6 rounded-lg text-center">
+            <p className="text-yellow-700">暂无服务数据</p>
+            <Link
+              href="/admin/services/new"
+              className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
+            >
+              添加第一个服务
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                    没有找到匹配的服务
-                  </td>
+                  <th className="w-12 px-4 py-3">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedServices.length > 0 && selectedServices.length === filteredServices.length}
+                        onChange={handleSelectAll}
+                        className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                      />
+                    </div>
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    服务
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    价格
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    时长
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    操作
+                  </th>
                 </tr>
-              ) : (
-                filteredServices.map((service) => (
-                  <tr key={service.id} className="hover:bg-gray-50">
-                    <td className="w-12 px-4 py-4">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedServices.includes(service.id)}
-                          onChange={() => handleSelectService(service.id)}
-                          className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-                        />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 relative">
-                          <Image
-                            src={service.imageUrl}
-                            alt={service.name}
-                            fill
-                            className="rounded-md object-cover"
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{service.name}</div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">{service.description}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{service.price.toLocaleString()} 泰铢</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{service.duration} 分钟</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        href={`/admin/services/${service.id}`}
-                        className="text-primary hover:text-primary-dark mr-4"
-                      >
-                        编辑
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(service.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        删除
-                      </button>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredServices.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                      没有找到匹配的服务
                     </td>
                   </tr>
-                ))
-              )
-            </tbody>
-          </table>
-          {filteredServices.length > 0 && (
-            <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
-              显示 {filteredServices.length} 个服务 {searchQuery ? `(已过滤，共 ${services.length} 个)` : ''}
-            </div>
-          )}
-        </div>
+                ) : (
+                  filteredServices.map((service) => (
+                    <tr key={service.id} className="hover:bg-gray-50">
+                      <td className="w-12 px-4 py-4">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.includes(service.id)}
+                            onChange={() => handleSelectService(service.id)}
+                            className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0 relative">
+                            <Image
+                              src={service.imageUrl}
+                              alt={service.name}
+                              fill
+                              className="rounded-md object-cover"
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{service.name}</div>
+                            <div className="text-sm text-gray-500 truncate max-w-xs">{service.description}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{service.price.toLocaleString()} 泰铢</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{service.duration} 分钟</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Link
+                          href={`/admin/services/${service.id}`}
+                          className="text-primary hover:text-primary-dark mr-4"
+                        >
+                          编辑
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(service.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          删除
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            {filteredServices.length > 0 && (
+              <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
+                显示 {filteredServices.length} 个服务 {searchQuery ? `(已过滤，共 ${services.length} 个)` : ''}
+              </div>
+            )}
+          </div>
+        )
       )}
     </div>
   );

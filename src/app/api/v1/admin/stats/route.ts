@@ -270,9 +270,19 @@ async function getServiceDistribution(request: NextRequest) {
 }
 
 // 使用管理API中间件包装处理函数
-export const GET = withAdminApi(getDashboardStats);
-
-// 导出其他路由处理函数
-export const bookingTrends = withAdminApi(getBookingTrends);
-export const revenueTrends = withAdminApi(getRevenueTrends);
-export const serviceDistribution = withAdminApi(getServiceDistribution); 
+export const GET = withAdminApi(async (request: NextRequest) => {
+  // 获取URL参数确定调用哪个函数
+  const url = new URL(request.url);
+  const type = url.searchParams.get('type') || 'dashboard';
+  
+  switch (type) {
+    case 'booking_trends':
+      return getBookingTrends(request);
+    case 'revenue_trends':
+      return getRevenueTrends(request);
+    case 'service_distribution':
+      return getServiceDistribution(request);
+    default:
+      return getDashboardStats(request);
+  }
+}); 

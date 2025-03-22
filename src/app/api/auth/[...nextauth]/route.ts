@@ -4,7 +4,7 @@ import { JWT } from "next-auth/jwt";
 import prisma from "@/lib/prisma";
 
 // NextAuth配置
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
