@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 type TherapistData = {
   name: string;
@@ -37,6 +39,9 @@ export default function TherapistDetailPage({
   
   const [therapist, setTherapist] = useState<Therapist | null>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploading, setUploading] = useState<boolean>(false);
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [specialtyInput, setSpecialtyInput] = useState<string>('');
   const [experienceYears, setExperienceYears] = useState<number>(0);
@@ -85,6 +90,7 @@ export default function TherapistDetailPage({
         
         setTherapist(therapistData);
         setImageUrl(therapistData.imageUrl);
+        setImagePreview(therapistData.imageUrl); // 设置初始图片预览
         setSpecialties(therapistData.specialties);
         setExperienceYears(therapistData.experienceYears);
         setWorkStatus(therapistData.workStatus || 'AVAILABLE');
@@ -104,6 +110,63 @@ export default function TherapistDetailPage({
       ...prevData,
       [field]: value
     }));
+  };
+
+  // 处理图片上传
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 检查文件类型
+    if (!file.type.startsWith('image/')) {
+      setSaveError('请选择图片文件');
+      return;
+    }
+
+    // 创建图片预览URL
+    const previewUrl = URL.createObjectURL(file);
+    setImageFile(file);
+    setImagePreview(previewUrl);
+  };
+
+  // 上传图片到服务器
+  const handleImageUpload = async (): Promise<string> => {
+    if (!imageFile) {
+      return imageUrl; // 如果没有新文件，返回现有URL
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || '上传图片失败');
+      }
+
+      const data = await response.json();
+      return data.data.url;
+    } catch (error) {
+      console.error('图片上传失败:', error);
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // 移除已选图片
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    if (imageUrl) {
+      URL.revokeObjectURL(imagePreview);
+    }
   };
 
   const handleAddSpecialty = () => {
@@ -141,8 +204,8 @@ export default function TherapistDetailPage({
     e.preventDefault();
     
     // 验证表单
-    if (!imageUrl) {
-      setSaveError('请输入照片URL');
+    if (!imagePreview && !imageUrl) {
+      setSaveError('请上传按摩师照片');
       return;
     }
     if (!experienceYears || experienceYears <= 0) {
@@ -161,17 +224,23 @@ export default function TherapistDetailPage({
     setSaving(true);
     setSaveError('');
     
-    const url = isNewTherapist ? '/api/therapists' : `/api/therapists/${id}`;
-    const method = isNewTherapist ? 'POST' : 'PUT';
-    
     try {
+      // 如果有新图片，先上传图片
+      let finalImageUrl = imageUrl;
+      if (imageFile) {
+        finalImageUrl = await handleImageUpload();
+      }
+      
+      const url = isNewTherapist ? '/api/therapists' : `/api/therapists/${id}`;
+      const method = isNewTherapist ? 'POST' : 'PUT';
+      
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          imageUrl,
+          imageUrl: finalImageUrl,
           specialties,
           experienceYears,
           workStatus,
@@ -248,19 +317,50 @@ export default function TherapistDetailPage({
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                照片 URL
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                按摩师照片
               </label>
-              <Input
-                type="text"
-                id="imageUrl"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                请输入按摩师照片的URL
-              </p>
+              <div className="mt-1 flex items-center flex-col space-y-2">
+                {/* 图片预览区域 */}
+                {imagePreview ? (
+                  <div className="relative w-40 h-40 mb-2">
+                    <Image
+                      src={imagePreview}
+                      alt="按摩师照片预览"
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      title="移除图片"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
+                    <ImageIcon size={48} className="text-gray-400" />
+                  </div>
+                )}
+                
+                {/* 文件上传按钮 */}
+                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                  <Upload className="mr-2 h-4 w-4" />
+                  {imagePreview ? '更换图片' : '上传图片'}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </label>
+                
+                <p className="text-xs text-gray-500 mt-1">
+                  支持 JPG、PNG 格式图片
+                </p>
+              </div>
             </div>
             <div>
               <label htmlFor="experienceYears" className="block text-sm font-medium text-gray-700 mb-1">
@@ -426,9 +526,9 @@ export default function TherapistDetailPage({
             </Button>
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || uploading}
             >
-              {saving ? '保存中...' : '保存'}
+              {saving || uploading ? '保存中...' : '保存'}
             </Button>
           </div>
         </form>
