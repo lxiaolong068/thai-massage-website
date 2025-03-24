@@ -2,15 +2,15 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
 export default function AdminRedirect() {
-  // 检查用户是否已登录
+  // Check if user is logged in
   const cookieStore = cookies();
   const adminSession = cookieStore.get('admin_session');
   
-  // 如果没有会话 cookie，重定向到登录页面
+  // If no session cookie, redirect to login page
   if (!adminSession) {
     redirect('/admin/login');
   }
   
-  // 如果有会话 cookie，重定向到仪表盘
+  // If has session cookie, redirect to dashboard
   redirect('/admin/dashboard');
 }

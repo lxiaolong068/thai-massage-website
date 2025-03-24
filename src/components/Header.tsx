@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link, useSafePathname } from '@/i18n/navigation';
 import Logo from './Logo';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useImprovedTranslator } from '@/i18n/improved-client';
@@ -12,7 +12,8 @@ type HeaderProps = {
 
 const Header = ({ locale }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname() || '';
+  // 使用安全的路径名检查函数，避免静态资源路径被当作locale处理
+  const pathname = useSafePathname();
   
   // 判断是否为首页（可能是根路径或带语言前缀的根路径）
   const isHomePage = useMemo(() => {

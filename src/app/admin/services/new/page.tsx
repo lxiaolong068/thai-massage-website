@@ -34,12 +34,12 @@ export default function NewServicePage() {
       )
     );
 
-    // 如果修改的是名称字段，自动生成slug
+    // If the name field is modified, automatically generate slug
     if (field === 'name' && value) {
       const slug = value
         .toLowerCase()
-        .replace(/[^\w\u4e00-\u9fa5]+/g, '-') // 将非单词字符和非中文字符替换为连字符
-        .replace(/^-+|-+$/g, ''); // 移除开头和结尾的连字符
+        .replace(/[^\w\u4e00-\u9fa5]+/g, '-') // Replace non-word characters and non-Chinese characters with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove hyphens at the beginning and end
       
       setTranslations(prevTranslations =>
         prevTranslations.map(translation =>
@@ -57,17 +57,17 @@ export default function NewServicePage() {
     setLoading(true);
 
     try {
-      // 验证必填字段
+      // Validate required fields
       const currentTranslation = translations.find(t => t.locale === activeTab);
       if (!currentTranslation?.name || !currentTranslation?.description) {
-        throw new Error(`请填写${activeTab === 'zh' ? '中文' : activeTab === 'en' ? '英文' : '韩文'}的名称和描述`);
+        throw new Error(`Please fill in the ${activeTab === 'zh' ? 'Chinese' : activeTab === 'en' ? 'English' : 'Korean'} name and description`);
       }
 
-      // 验证所有语言的必填字段
+      // Validate required fields for all languages
       for (const locale of ['zh', 'en', 'ko']) {
         const translation = translations.find(t => t.locale === locale);
         if (!translation?.name || !translation?.description) {
-          throw new Error(`请填写${locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}的名称和描述`);
+          throw new Error(`Please fill in the ${locale === 'zh' ? 'Chinese' : locale === 'en' ? 'English' : 'Korean'} name and description`);
         }
       }
 
@@ -87,13 +87,13 @@ export default function NewServicePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || '创建服务失败');
+        throw new Error(data.error?.message || 'Failed to create service');
       }
 
-      // 创建成功，重定向到服务列表页
+      // Creation successful, redirect to service list page
       router.push('/admin/services');
     } catch (err: any) {
-      setError(err.message || '创建服务失败，请稍后再试');
+      setError(err.message || 'Failed to create service, please try again later');
     } finally {
       setLoading(false);
     }
@@ -102,12 +102,12 @@ export default function NewServicePage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">添加服务</h1>
+        <h1 className="text-2xl font-semibold">Add Service</h1>
         <Link
           href="/admin/services"
           className="text-gray-600 hover:text-gray-900"
         >
-          返回列表
+          Return to List
         </Link>
       </div>
 
@@ -121,7 +121,7 @@ export default function NewServicePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              价格 (泰铢)
+              Price (THB)
             </label>
             <input
               type="number"
@@ -134,7 +134,7 @@ export default function NewServicePage() {
           </div>
           <div>
             <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
-              时长 (分钟)
+              Duration (minutes)
             </label>
             <input
               type="number"
@@ -149,7 +149,7 @@ export default function NewServicePage() {
 
         <div className="mb-6">
           <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-            图片URL
+            Image URL
           </label>
           <input
             type="text"
@@ -160,7 +160,7 @@ export default function NewServicePage() {
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            请输入图片的URL地址，或使用默认图片
+            Please enter the URL of the image, or use the default image
           </p>
         </div>
 
@@ -178,7 +178,7 @@ export default function NewServicePage() {
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  {locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}
+                  {locale === 'zh' ? 'Chinese' : locale === 'en' ? 'English' : 'Korean'}
                 </button>
               ))}
             </nav>
@@ -192,7 +192,7 @@ export default function NewServicePage() {
               >
                 <div className="mb-4">
                   <label htmlFor={`name-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    名称
+                    Name
                   </label>
                   <input
                     type="text"
@@ -206,7 +206,7 @@ export default function NewServicePage() {
 
                 <div className="mb-4">
                   <label htmlFor={`description-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    描述
+                    Description
                   </label>
                   <textarea
                     id={`description-${translation.locale}`}
@@ -220,7 +220,7 @@ export default function NewServicePage() {
 
                 <div>
                   <label htmlFor={`slug-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    URL别名
+                    URL Alias
                   </label>
                   <input
                     type="text"
@@ -231,7 +231,7 @@ export default function NewServicePage() {
                     required={activeTab === translation.locale}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    URL别名用于生成服务详情页的URL，只能包含字母、数字、连字符和下划线
+                    URL alias is used to generate the URL of the service detail page, and can only contain letters, numbers, hyphens and underscores
                   </p>
                 </div>
               </div>
@@ -244,14 +244,14 @@ export default function NewServicePage() {
             href="/admin/services"
             className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-200 transition-colors"
           >
-            取消
+            Cancel
           </Link>
           <button
             type="submit"
             disabled={loading}
             className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
           >
-            {loading ? '保存中...' : '保存'}
+            {loading ? 'Saving...' : 'Save'}
           </button>
         </div>
       </form>

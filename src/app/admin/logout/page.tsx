@@ -1,61 +1,62 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LogoutPage() {
   const router = useRouter();
   const [error, setError] = useState('');
-
+  
   useEffect(() => {
-    const logout = async () => {
+    const logoutUser = async () => {
       try {
-        // 调用登出 API
+        // Call logout API
         const response = await fetch('/api/admin/logout', {
           method: 'POST',
-          credentials: 'include', // 确保包含 cookie
+          credentials: 'include', // Ensure cookies are included
         });
-
+        
+        const data = await response.json();
         if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error?.message || '登出失败');
+          throw new Error(data.error?.message || 'Logout failed');
         }
-
-        // 清除本地存储
+        
+        // Clear local storage
         localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
         
-        // 重定向到登录页面
-        router.replace('/admin/login');
+        // Redirect to login page
+        window.location.href = '/admin/login';
       } catch (err) {
-        console.error('登出错误:', err);
-        setError(err instanceof Error ? err.message : '登出失败，请重试');
+        console.error('Logout error:', err);
+        setError(err instanceof Error ? err.message : 'Logout failed, please try again');
         
-        // 即使出错也尝试重定向到登录页面
+        // Try to redirect to login page even if there's an error
         setTimeout(() => {
-          router.replace('/admin/login');
+          window.location.href = '/admin/login';
         }, 2000);
       }
     };
 
-    logout();
-  }, [router]);
+    logoutUser();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+          <h1 className="text-2xl font-semibold mb-2 text-red-500">Logout Problem</h1>
+          <p className="text-gray-600">{error}</p>
+          <p className="mt-2">Redirecting to login page...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="text-center">
-        {error ? (
-          <>
-            <h1 className="text-2xl font-semibold mb-2 text-red-500">登出遇到问题</h1>
-            <p className="text-red-500">{error}</p>
-            <p className="mt-2">正在跳转到登录页面...</p>
-          </>
-        ) : (
-          <>
-            <h1 className="text-2xl font-semibold mb-2">正在登出...</h1>
-            <p>正在清除登录信息并跳转到登录页面</p>
-          </>
-        )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-semibold mb-2">Logging Out...</h1>
+        <p className="text-gray-600">Please wait while we log you out.</p>
       </div>
     </div>
   );

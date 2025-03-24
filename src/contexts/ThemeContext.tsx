@@ -2,44 +2,44 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// 定义主题类型
+// Define theme types
 export type ThemeType = 'gold' | 'blue' | 'green' | 'purple' | 'red';
 
-// 主题配置
+// Theme configuration
 export const themeColors = {
   gold: {
     primary: '#D4AF37',
     secondary: '#FFF8E1',
     accent: '#8B4513',
-    name: '金色主题'
+    name: 'Gold Theme'
   },
   blue: {
     primary: '#1E40AF',
     secondary: '#DBEAFE',
     accent: '#1E3A8A',
-    name: '蓝色主题'
+    name: 'Blue Theme'
   },
   green: {
     primary: '#047857',
     secondary: '#ECFDF5',
     accent: '#065F46',
-    name: '绿色主题'
+    name: 'Green Theme'
   },
   purple: {
     primary: '#7E22CE',
     secondary: '#F3E8FF',
     accent: '#6B21A8',
-    name: '紫色主题'
+    name: 'Purple Theme'
   },
   red: {
     primary: '#B91C1C',
     secondary: '#FEE2E2',
     accent: '#991B1B',
-    name: '红色主题'
+    name: 'Red Theme'
   }
 };
 
-// 创建主题上下文
+// Create theme context
 type ThemeContextType = {
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
@@ -48,15 +48,15 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// 主题提供者组件
+// Theme provider component
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // 默认使用金色主题
+  // Default to gold theme
   const [theme, setTheme] = useState<ThemeType>('gold');
   
-  // 获取当前主题的颜色配置
+  // Get current theme color configuration
   const themeColor = themeColors[theme];
   
-  // 从localStorage加载保存的主题
+  // Load saved theme from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('admin-theme') as ThemeType;
     if (savedTheme && Object.keys(themeColors).includes(savedTheme)) {
@@ -65,7 +65,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
   
-  // 保存主题到localStorage
+  // Save theme to localStorage
   const handleSetTheme = (newTheme: ThemeType) => {
     setTheme(newTheme);
     localStorage.setItem('admin-theme', newTheme);
@@ -79,7 +79,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 使用主题的Hook
+// Hook for using theme
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {

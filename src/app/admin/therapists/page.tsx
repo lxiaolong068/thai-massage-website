@@ -16,7 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Trash2, RefreshCw, Search, Edit, Pencil } from 'lucide-react';
+import { Trash2, RefreshCw, Search, Edit, Pencil, User } from 'lucide-react';
+import ImageWithFallback from '@/components/ui/image-with-fallback';
 
 type Therapist = {
   id: string;
@@ -47,7 +48,7 @@ export default function TherapistsPage() {
   const [isBatchUpdateDialogOpen, setIsBatchUpdateDialogOpen] = useState(false);
   const [newWorkStatus, setNewWorkStatus] = useState<'AVAILABLE' | 'WORKING'>('AVAILABLE');
 
-  // 获取按摩师列表
+  // Fetch therapists list
   const fetchTherapists = async () => {
     setLoading(true);
     setError(null);
@@ -70,7 +71,7 @@ export default function TherapistsPage() {
     fetchTherapists();
   }, []);
 
-  // 处理删除单个按摩师
+  // Handle deleting a single therapist
   const handleDeleteClick = (id: string) => {
     setTherapistToDelete(id);
     setIsDeleteDialogOpen(true);
@@ -109,34 +110,32 @@ export default function TherapistsPage() {
   };
 
   const handleBatchDelete = async () => {
-    if (selectedTherapists.length === 0) return;
-    
     setIsBatchDeleting(true);
+    
     try {
+      // Batch delete therapists
       const response = await fetch('/api/therapists', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ids: selectedTherapists,
-        }),
+        body: JSON.stringify({ ids: selectedTherapists }),
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete therapists');
+        throw new Error(errorData.error?.message || 'Failed to delete therapists');
       }
       
-      // 更新列表
-      setTherapists(therapists.filter(t => !selectedTherapists.includes(t.id)));
-      setSelectedTherapists([]);
-      toast.success(`${selectedTherapists.length} therapists deleted successfully`);
-      setIsBatchDeleteDialogOpen(false);
+      toast.success(`Successfully deleted ${selectedTherapists.length} therapists`);
+      // Update list
+      fetchTherapists();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'An unknown error occurred');
+      toast.error(err instanceof Error ? err.message : 'Failed to delete therapists');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setIsBatchDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -147,10 +146,10 @@ export default function TherapistsPage() {
   };
 
   const handleBatchUpdate = async () => {
-    if (selectedTherapists.length === 0) return;
-    
     setIsBatchUpdating(true);
+    
     try {
+      // Batch update therapist status
       const response = await fetch('/api/therapists', {
         method: 'PATCH',
         headers: {
@@ -166,27 +165,35 @@ export default function TherapistsPage() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update therapists');
+        throw new Error(errorData.error?.message || 'Failed to update therapists');
       }
       
-      // 更新列表中的状态
-      setTherapists(therapists.map(t => 
-        selectedTherapists.includes(t.id) ? { ...t, workStatus: newWorkStatus } : t
-      ));
+      toast.success(`Successfully updated ${selectedTherapists.length} therapists`);
       
-      toast.success(`${selectedTherapists.length} therapists updated successfully`);
-      setIsBatchUpdateDialogOpen(false);
+      // Update status in the list
+      setTherapists(prev => 
+        prev.map(therapist => 
+          selectedTherapists.includes(therapist.id) 
+            ? { ...therapist, workStatus: newWorkStatus }
+            : therapist
+        )
+      );
+      
+      setSelectedTherapists([]);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'An unknown error occurred');
+      toast.error(err instanceof Error ? err.message : 'Failed to update therapists');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setIsBatchUpdating(false);
+      setIsBatchUpdateDialogOpen(false);
     }
   };
 
   // 处理全选
   const handleSelectAll = (checked: boolean) => {
+    // Handle select all
     if (checked) {
-      setSelectedTherapists(filteredTherapists.map(t => t.id));
+      setSelectedTherapists(therapists.map(t => t.id));
     } else {
       setSelectedTherapists([]);
     }
@@ -194,19 +201,20 @@ export default function TherapistsPage() {
 
   // 处理单选
   const handleSelectTherapist = (id: string, checked: boolean) => {
+    // Handle individual selection
     if (checked) {
-      setSelectedTherapists([...selectedTherapists, id]);
+      setSelectedTherapists(prev => [...prev, id]);
     } else {
-      setSelectedTherapists(selectedTherapists.filter(t => t !== id));
+      setSelectedTherapists(prev => prev.filter(therapistId => therapistId !== id));
     }
   };
 
-  // 处理状态筛选
+  // Handle status filtering
   const handleStatusFilterChange = (status: string | null) => {
     setSelectedStatus(status);
   };
 
-  // 根据搜索查询和状态筛选按摩师
+  // Filter therapists based on search query and status
   const filteredTherapists = therapists.filter((therapist) => {
     const searchMatch = 
       therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -214,7 +222,7 @@ export default function TherapistsPage() {
         specialty.toLowerCase().includes(searchQuery.toLowerCase())
       );
     
-    // 状态筛选
+    // Status filtering
     const statusMatch = selectedStatus === null || therapist.workStatus === selectedStatus;
     
     return searchMatch && statusMatch;
@@ -223,11 +231,11 @@ export default function TherapistsPage() {
   return (
     <div className="container p-6 mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">按摩师管理</h1>
+        <h1 className="text-2xl font-bold">Therapist Management</h1>
         <div className="flex space-x-2">
           <Button asChild>
             <Link href="/admin/therapists/new">
-              添加按摩师
+              Add Therapist
             </Link>
           </Button>
         </div>
@@ -240,7 +248,7 @@ export default function TherapistsPage() {
             onClick={() => handleStatusFilterChange(null)}
             size="sm"
           >
-            全部
+            All
           </Button>
           <Button 
             variant={selectedStatus === 'AVAILABLE' ? "default" : "outline"}
@@ -248,7 +256,7 @@ export default function TherapistsPage() {
             size="sm"
             className={selectedStatus === 'AVAILABLE' ? "bg-green-600 hover:bg-green-700 text-white" : "text-green-600 border-green-600 hover:bg-green-50"}
           >
-            可预约
+            Available
           </Button>
           <Button 
             variant={selectedStatus === 'WORKING' ? "default" : "outline"}
@@ -256,13 +264,13 @@ export default function TherapistsPage() {
             size="sm"
             className={selectedStatus === 'WORKING' ? "bg-blue-600 hover:bg-blue-700 text-white" : "text-blue-600 border-blue-600 hover:bg-blue-50"}
           >
-            工作中
+            Working
           </Button>
         </div>
         <div className="relative w-64">
           <Input
             type="text"
-            placeholder="搜索按摩师..."
+            placeholder="Search therapists..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-8"
@@ -279,16 +287,16 @@ export default function TherapistsPage() {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-gray-600">加载中...</div>
+          <div className="text-xl text-gray-600">Loading...</div>
         </div>
       ) : therapists.length === 0 ? (
         <div className="bg-yellow-50 p-6 rounded-lg text-center">
-          <p className="text-yellow-700">没有找到按摩师</p>
+          <p className="text-yellow-700">No therapists found</p>
           <Link
             href="/admin/therapists/new"
             className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
           >
-            添加第一位按摩师
+            Add First Therapist
           </Link>
         </div>
       ) : (
@@ -304,7 +312,7 @@ export default function TherapistsPage() {
                   className="flex items-center"
                 >
                   <Trash2 size={16} className="mr-1"/> 
-                  {isBatchDeleting ? '处理中...' : `批量删除 (${selectedTherapists.length})`}
+                  {isBatchDeleting ? 'Processing...' : `Delete Selected (${selectedTherapists.length})`}
                 </Button>
                 <Button
                   onClick={handleBatchUpdateClick}
@@ -314,7 +322,7 @@ export default function TherapistsPage() {
                   className="flex items-center"
                 >
                   <RefreshCw size={16} className="mr-1"/>
-                  {isBatchUpdating ? '处理中...' : `批量更新状态 (${selectedTherapists.length})`}
+                  {isBatchUpdating ? 'Processing...' : `Update Status (${selectedTherapists.length})`}
                 </Button>
               </div>
             )}
@@ -325,7 +333,7 @@ export default function TherapistsPage() {
               size="sm"
               className="flex items-center"
             >
-              <RefreshCw size={16} className="mr-1"/> 刷新
+              <RefreshCw size={16} className="mr-1"/> Refresh
             </Button>
           </div>
 
@@ -340,19 +348,19 @@ export default function TherapistsPage() {
                     />
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    按摩师
+                    Therapist
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    专长
+                    Specialties
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    经验
+                    Experience
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    状态
+                    Status
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    操作
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -365,18 +373,25 @@ export default function TherapistsPage() {
                         onCheckedChange={(checked) => handleSelectTherapist(therapist.id, checked === true)}
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap py-3 pl-4 pr-3 text-sm">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0">
-                          <img
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={therapist.imageUrl || '/images/placeholder.png'}
-                            alt={therapist.name}
-                          />
+                        <div className="h-12 w-12 flex-shrink-0 relative">
+                          {therapist.imageUrl ? (
+                            <ImageWithFallback
+                              src={therapist.imageUrl}
+                              alt={`${therapist.name} photo`}
+                              fill
+                              className="object-cover rounded-md"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 bg-gray-200 flex items-center justify-center rounded-md">
+                              <User className="h-6 w-6 text-gray-400" />
+                            </div>
+                          )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{therapist.name}</div>
-                          <div className="text-sm text-gray-500">{therapist.id.substring(0, 8)}...</div>
+                          <div className="font-medium text-gray-900">{therapist.name}</div>
+                          <div className="text-gray-500 truncate max-w-[200px]">{therapist.specialties.join(', ')}</div>
                         </div>
                       </div>
                     </td>
@@ -395,7 +410,7 @@ export default function TherapistsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{therapist.experienceYears} 年</div>
+                      <div className="text-sm text-gray-900">{therapist.experienceYears} years</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span 
@@ -405,13 +420,13 @@ export default function TherapistsPage() {
                             : 'bg-blue-100 text-blue-800'
                         }`}
                       >
-                        {therapist.workStatus === 'AVAILABLE' ? '✓ 可预约' : '⌛ 工作中'}
+                        {therapist.workStatus === 'AVAILABLE' ? '✓ Available' : '⌛ Working'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button asChild variant="link" size="sm" className="mr-2">
                         <Link href={`/admin/therapists/${therapist.id}`} className="flex items-center">
-                          <Pencil size={14} className="mr-1"/> 编辑
+                          <Pencil size={14} className="mr-1"/> Edit
                         </Link>
                       </Button>
                       <Button
@@ -420,7 +435,7 @@ export default function TherapistsPage() {
                         size="sm"
                         className="text-red-600 hover:text-red-900 flex items-center"
                       >
-                        <Trash2 size={14} className="mr-1"/> 删除
+                        <Trash2 size={14} className="mr-1"/> Delete
                       </Button>
                     </td>
                   </tr>
@@ -429,66 +444,66 @@ export default function TherapistsPage() {
             </table>
             {filteredTherapists.length > 0 && (
               <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
-                显示 {filteredTherapists.length} 位按摩师 {searchQuery || selectedStatus ? `(已筛选，共${therapists.length}位)` : ''}
+                Showing {filteredTherapists.length} therapists {searchQuery || selectedStatus ? `(filtered from ${therapists.length} total)` : ''}
               </div>
             )}
           </div>
         </>
       )}
 
-      {/* 删除确认对话框 */}
+      {/* Delete confirmation dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>确认删除</DialogTitle>
+            <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              您确定要删除此按摩师吗？此操作无法撤销。
+              Are you sure you want to delete this therapist? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
-              取消
+              Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? '删除中...' : '确认删除'}
+              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 批量删除确认对话框 */}
+      {/* Batch delete confirmation dialog */}
       <Dialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>确认批量删除</DialogTitle>
+            <DialogTitle>Confirm Batch Delete</DialogTitle>
             <DialogDescription>
-              您确定要删除 {selectedTherapists.length} 位选中的按摩师吗？此操作无法撤销。
+              Are you sure you want to delete {selectedTherapists.length} selected therapists? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsBatchDeleteDialogOpen(false)} disabled={isBatchDeleting}>
-              取消
+              Cancel
             </Button>
             <Button variant="destructive" onClick={handleBatchDelete} disabled={isBatchDeleting}>
-              {isBatchDeleting ? '删除中...' : '确认删除'}
+              {isBatchDeleting ? 'Deleting...' : 'Confirm Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 批量更新状态对话框 */}
+      {/* Batch update status dialog */}
       <Dialog open={isBatchUpdateDialogOpen} onOpenChange={setIsBatchUpdateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>更新按摩师状态</DialogTitle>
+            <DialogTitle>Update Therapist Status</DialogTitle>
             <DialogDescription>
-              请选择 {selectedTherapists.length} 位按摩师的新状态。
+              Please select the new status for {selectedTherapists.length} therapists.
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
             <div className="flex items-center space-x-4">
-              <div className="flex-1 font-medium">新状态:</div>
+              <div className="flex-1 font-medium">New Status:</div>
               <div className="flex border rounded-md overflow-hidden">
                 <Button
                   onClick={() => setNewWorkStatus('AVAILABLE')}
@@ -496,7 +511,7 @@ export default function TherapistsPage() {
                   size="sm"
                   className={`rounded-none ${newWorkStatus === 'AVAILABLE' ? 'bg-green-600 hover:bg-green-700' : 'text-green-600'}`}
                 >
-                  可预约
+                  Available
                 </Button>
                 <Button
                   onClick={() => setNewWorkStatus('WORKING')}
@@ -504,7 +519,7 @@ export default function TherapistsPage() {
                   size="sm"
                   className={`rounded-none ${newWorkStatus === 'WORKING' ? 'bg-blue-600 hover:bg-blue-700' : 'text-blue-600'}`}
                 >
-                  工作中
+                  Working
                 </Button>
               </div>
             </div>
@@ -512,10 +527,10 @@ export default function TherapistsPage() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsBatchUpdateDialogOpen(false)}>
-              取消
+              Cancel
             </Button>
             <Button variant="default" onClick={handleBatchUpdate} disabled={isBatchUpdating}>
-              {isBatchUpdating ? '更新中...' : '确认更新'}
+              {isBatchUpdating ? 'Updating...' : 'Confirm Update'}
             </Button>
           </DialogFooter>
         </DialogContent>

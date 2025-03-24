@@ -22,13 +22,13 @@ export default function DashboardPage() {
         const response = await fetch('/api/admin/dashboard');
         
         if (!response.ok) {
-          throw new Error('获取数据失败');
+          throw new Error('Failed to fetch data');
         }
         
         const data = await response.json();
         setStats(data.data);
       } catch (err: any) {
-        setError(err.message || '获取数据失败');
+        setError(err.message || 'Failed to fetch data');
       } finally {
         setLoading(false);
       }
@@ -40,7 +40,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">加载中...</div>
+        <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -55,11 +55,11 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">仪表盘</h1>
+      <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
       
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 服务统计 */}
+          {/* Services Statistics */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-blue-100 text-blue-500">
@@ -68,18 +68,18 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-gray-600 text-sm">服务项目</h2>
+                <h2 className="text-gray-600 text-sm">Services</h2>
                 <p className="text-2xl font-semibold">{stats.servicesCount}</p>
               </div>
             </div>
             <div className="mt-4">
               <a href="/admin/services" className="text-blue-500 text-sm hover:underline">
-                管理服务 &rarr;
+                Manage Services &rarr;
               </a>
             </div>
           </div>
           
-          {/* 按摩师统计 */}
+          {/* Therapists Statistics */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-green-100 text-green-500">
@@ -88,18 +88,18 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-gray-600 text-sm">按摩师</h2>
+                <h2 className="text-gray-600 text-sm">Therapists</h2>
                 <p className="text-2xl font-semibold">{stats.therapistsCount}</p>
               </div>
             </div>
             <div className="mt-4">
               <a href="/admin/therapists" className="text-green-500 text-sm hover:underline">
-                管理按摩师 &rarr;
+                Manage Therapists &rarr;
               </a>
             </div>
           </div>
           
-          {/* 预约统计 */}
+          {/* Bookings Statistics */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-purple-100 text-purple-500">
@@ -108,21 +108,21 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-gray-600 text-sm">预约</h2>
+                <h2 className="text-gray-600 text-sm">Bookings</h2>
                 <p className="text-2xl font-semibold">{stats.bookingsCount}</p>
                 <p className="text-sm text-yellow-500">
-                  {stats.pendingBookingsCount} 个待确认
+                  {stats.pendingBookingsCount} pending
                 </p>
               </div>
             </div>
             <div className="mt-4">
               <a href="/admin/bookings" className="text-purple-500 text-sm hover:underline">
-                管理预约 &rarr;
+                Manage Bookings &rarr;
               </a>
             </div>
           </div>
           
-          {/* 留言统计 */}
+          {/* Messages Statistics */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-yellow-100 text-yellow-500">
@@ -131,25 +131,25 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <h2 className="text-gray-600 text-sm">留言</h2>
+                <h2 className="text-gray-600 text-sm">Messages</h2>
                 <p className="text-2xl font-semibold">{stats.messagesCount}</p>
                 <p className="text-sm text-red-500">
-                  {stats.unreadMessagesCount} 个未读
+                  {stats.unreadMessagesCount} unread
                 </p>
               </div>
             </div>
             <div className="mt-4">
               <a href="/admin/messages" className="text-yellow-500 text-sm hover:underline">
-                管理留言 &rarr;
+                Manage Messages &rarr;
               </a>
             </div>
           </div>
         </div>
       )}
       
-      {/* 快速操作 */}
+      {/* Quick Actions */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">快速操作</h2>
+        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <a
             href="/admin/services/new"
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <span>添加服务</span>
+            <span>Add Service</span>
           </a>
           
           <a
@@ -172,7 +172,7 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <span>添加按摩师</span>
+            <span>Add Therapist</span>
           </a>
           
           <a
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <span>创建预约</span>
+            <span>Create Booking</span>
           </a>
           
           <a
@@ -197,7 +197,7 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <span>网站设置</span>
+            <span>Website Settings</span>
           </a>
         </div>
       </div>

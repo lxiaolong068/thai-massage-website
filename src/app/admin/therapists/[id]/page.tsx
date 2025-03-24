@@ -8,13 +8,19 @@ import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import ImageWithFallback from '@/components/ui/image-with-fallback';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 type TherapistData = {
+  id?: string;
   name: string;
   bio: string;
   specialtiesTranslation: string[];
+  specialties: string[];
+  experienceYears: number;
+  workStatus: string;
+  imageUrl: string;
 };
 
 type Therapist = {
@@ -49,13 +55,18 @@ export default function TherapistDetailPage({
   const [therapistData, setTherapistData] = useState<TherapistData>({
     name: '',
     bio: '',
-    specialtiesTranslation: []
+    specialtiesTranslation: [],
+    specialties: [],
+    experienceYears: 0,
+    workStatus: 'AVAILABLE',
+    imageUrl: '',
   });
   const [loading, setLoading] = useState(!isNewTherapist);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [imageLoading, setImageLoading] = useState(false);
 
   useEffect(() => {
     if (isNewTherapist) {
@@ -86,6 +97,10 @@ export default function TherapistDetailPage({
           name: localeData.data.name || '',
           bio: localeData.data.bio || '',
           specialtiesTranslation: localeData.data.specialtiesTranslation || [],
+          specialties: localeData.data.specialties || [],
+          experienceYears: localeData.data.experienceYears || 0,
+          workStatus: localeData.data.workStatus || 'AVAILABLE',
+          imageUrl: localeData.data.imageUrl || '',
         };
         
         setTherapist(therapistData);
@@ -117,28 +132,49 @@ export default function TherapistDetailPage({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 检查文件类型
+    // Check file type
     if (!file.type.startsWith('image/')) {
-      setSaveError('请选择图片文件');
+      setSaveError('Please select an image file');
       return;
     }
 
-    // 创建图片预览URL
+    // Create temporary URL for preview
     const previewUrl = URL.createObjectURL(file);
+    console.log('Creating temporary preview URL:', previewUrl);
+    
     setImageFile(file);
-    setImagePreview(previewUrl);
+    // Not setting image preview here, will set after successful upload
+    setSaveError('');
+    
+    // Execute actual upload
+    handleImageUpload(e);
   };
 
-  // 上传图片到服务器
-  const handleImageUpload = async (): Promise<string> => {
-    if (!imageFile) {
-      return imageUrl; // 如果没有新文件，返回现有URL
-    }
+  // Remove image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    setTherapistData(prevData => ({
+      ...prevData,
+      imageUrl: '', // Clear image URL in therapist data
+    }));
+  };
 
-    setUploading(true);
+  // 更新头像图片
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    console.log('Uploading image file:', file.name, file.size, file.type);
+    setImageLoading(true);
+    
     try {
+      // Show loading status
+      const loadingToastId = 'upload-loading';
+      toast.loading('Uploading image...', { id: loadingToastId });
+      
       const formData = new FormData();
-      formData.append('file', imageFile);
+      formData.append('file', file);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -146,26 +182,44 @@ export default function TherapistDetailPage({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || '上传图片失败');
+        toast.dismiss(loadingToastId);
+        console.error('Server returned error status:', response.status);
+        toast.error('File upload failed: Server error');
+        return;
       }
 
-      const data = await response.json();
-      return data.data.url;
-    } catch (error) {
-      console.error('图片上传失败:', error);
-      throw error;
-    } finally {
-      setUploading(false);
-    }
-  };
+      const result = await response.json();
+      toast.dismiss(loadingToastId);
 
-  // 移除已选图片
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview('');
-    if (imageUrl) {
-      URL.revokeObjectURL(imagePreview);
+      if (result.success) {
+        console.log('Image upload successful, response data:', result);
+        
+        // Ensure URL starts with /
+        const imageUrl = result.data.url.startsWith('/')
+          ? result.data.url
+          : `/${result.data.url}`;
+        
+        console.log('Formatted image URL:', imageUrl);
+        
+        // Update form data
+        setTherapistData(prevData => ({
+          ...prevData,
+          imageUrl: imageUrl,
+        }));
+        
+        // Set image preview
+        setImagePreview(imageUrl);
+        
+        toast.success('Image uploaded successfully');
+      } else {
+        console.error('Image upload failed:', result.error);
+        toast.error(`Image upload failed: ${result.error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error('Error during image upload');
+    } finally {
+      setImageLoading(false);
     }
   };
 
@@ -200,78 +254,49 @@ export default function TherapistDetailPage({
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, shouldRedirect = true) => {
     e.preventDefault();
     
-    // 验证表单
-    if (!imagePreview && !imageUrl) {
-      setSaveError('请上传按摩师照片');
-      return;
-    }
-    if (!experienceYears || experienceYears <= 0) {
-      setSaveError('请输入有效的工作经验年数');
-      return;
-    }
-    if (!therapistData.name) {
-      setSaveError('请输入按摩师姓名');
-      return;
-    }
-    if (!therapistData.bio) {
-      setSaveError('请输入按摩师简介');
-      return;
-    }
-    
     setSaving(true);
+    setSaveSuccess(false);
     setSaveError('');
     
     try {
-      // 如果有新图片，先上传图片
-      let finalImageUrl = imageUrl;
-      if (imageFile) {
-        finalImageUrl = await handleImageUpload();
-      }
+      // 构建更新数据
+      const updateData = {
+        ...therapistData,
+      };
       
-      const url = isNewTherapist ? '/api/therapists' : `/api/therapists/${id}`;
-      const method = isNewTherapist ? 'POST' : 'PUT';
+      // 使用当前的imageUrl，不再通过handleImageUpload获取
+      // 因为图片上传已经单独处理了
       
-      const response = await fetch(url, {
-        method,
+      // 发送更新请求
+      const response = await fetch(`/api/therapists/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          imageUrl: finalImageUrl,
-          specialties,
-          experienceYears,
-          workStatus,
-          translations: [
-            {
-              locale: 'en',
-              name: therapistData.name,
-              bio: therapistData.bio,
-              specialtiesTranslation: therapistData.specialtiesTranslation,
-            }
-          ],
-        }),
+        body: JSON.stringify(updateData),
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `保存按摩师信息失败: ${response.status}`);
+        throw new Error(errorData.message || 'Failed to save therapist information');
       }
       
-      // 显示成功消息
+      const data = await response.json();
+      console.log('Save successful:', data);
+      
       setSaveSuccess(true);
+      toast.success('Saved successfully!');
       
-      // 如果是新建，则在2秒后重定向到列表页面
-      if (isNewTherapist) {
-        setTimeout(() => {
-          router.push('/admin/therapists');
-        }, 2000);
+      if (shouldRedirect) {
+        router.push('/admin/therapists');
       }
-    } catch (err) {
-      setSaveSuccess(false);
-      setSaveError(err instanceof Error ? err.message : '保存按摩师信息时发生未知错误');
+    } catch (error) {
+      console.error('Save failed:', error);
+      setSaveError(error instanceof Error ? error.message : 'Unknown error');
+      toast.error('Save failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setSaving(false);
     }
@@ -280,7 +305,7 @@ export default function TherapistDetailPage({
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">加载中...</div>
+        <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -291,7 +316,7 @@ export default function TherapistDetailPage({
         <p className="text-red-700">{error}</p>
         <div className="mt-4">
           <Button asChild>
-            <Link href="/admin/therapists">返回按摩师列表</Link>
+            <Link href="/admin/therapists">Return to therapist list</Link>
           </Button>
         </div>
       </div>
@@ -302,11 +327,11 @@ export default function TherapistDetailPage({
     <div className="container p-6 mx-auto">
       <div className="bg-white p-6 rounded-lg shadow">
         <h1 className="text-2xl font-bold mb-6">
-          {id === 'new' ? '添加新按摩师' : '编辑按摩师'}
+          {id === 'new' ? 'Add New Therapist' : 'Edit Therapist'}
         </h1>
         {saveSuccess && (
           <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
-            按摩师信息保存成功
+            Therapist information saved successfully
           </div>
         )}
         {saveError && (
@@ -314,27 +339,28 @@ export default function TherapistDetailPage({
             {saveError}
           </div>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => handleSubmit(e, true)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                按摩师照片
+                Therapist Photo
               </label>
               <div className="mt-1 flex items-center flex-col space-y-2">
                 {/* 图片预览区域 */}
                 {imagePreview ? (
                   <div className="relative w-40 h-40 mb-2">
-                    <Image
+                    <ImageWithFallback
                       src={imagePreview}
-                      alt="按摩师照片预览"
+                      alt="Therapist photo preview"
                       fill
                       className="object-cover rounded-md"
+                      fallbackSrc="/images/placeholder-therapist.jpg"
                     />
                     <button
                       type="button"
                       onClick={handleRemoveImage}
                       className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                      title="移除图片"
+                      title="Remove image"
                     >
                       <X size={16} />
                     </button>
@@ -348,7 +374,7 @@ export default function TherapistDetailPage({
                 {/* 文件上传按钮 */}
                 <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                   <Upload className="mr-2 h-4 w-4" />
-                  {imagePreview ? '更换图片' : '上传图片'}
+                  {imagePreview ? 'Change image' : 'Upload image'}
                   <input
                     type="file"
                     className="hidden"
@@ -358,13 +384,13 @@ export default function TherapistDetailPage({
                 </label>
                 
                 <p className="text-xs text-gray-500 mt-1">
-                  支持 JPG、PNG 格式图片
+                  Supports JPG, PNG format images
                 </p>
               </div>
             </div>
             <div>
               <label htmlFor="experienceYears" className="block text-sm font-medium text-gray-700 mb-1">
-                工作经验（年）
+                Work Experience (years)
               </label>
               <Input
                 type="number"
@@ -377,7 +403,7 @@ export default function TherapistDetailPage({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                工作状态
+                Work Status
               </label>
               <div className="flex border rounded-md overflow-hidden">
                 <button
@@ -385,14 +411,14 @@ export default function TherapistDetailPage({
                   onClick={() => setWorkStatus('AVAILABLE')}
                   className={`flex-1 px-4 py-2 text-sm font-medium ${workStatus === 'AVAILABLE' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-white text-green-600 hover:bg-green-50'}`}
                 >
-                  可预约
+                  Available
                 </button>
                 <button
                   type="button"
                   onClick={() => setWorkStatus('WORKING')}
                   className={`flex-1 px-4 py-2 text-sm font-medium ${workStatus === 'WORKING' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}
                 >
-                  工作中
+                  Working
                 </button>
               </div>
             </div>
@@ -400,7 +426,7 @@ export default function TherapistDetailPage({
 
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              专长（原始语言）
+              Specialties (Original Language)
             </label>
             <div className="flex">
               <Input
@@ -408,7 +434,7 @@ export default function TherapistDetailPage({
                 value={specialtyInput}
                 onChange={(e) => setSpecialtyInput(e.target.value)}
                 className="flex-1 rounded-r-none"
-                placeholder="输入专长"
+                placeholder="Enter specialty"
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialty())}
               />
               <Button
@@ -416,7 +442,7 @@ export default function TherapistDetailPage({
                 onClick={handleAddSpecialty}
                 className="rounded-l-none"
               >
-                添加
+                Add
               </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -438,7 +464,7 @@ export default function TherapistDetailPage({
                 </span>
               ))}
               {specialties.length === 0 && (
-                <p className="text-sm text-gray-500">尚未添加专长</p>
+                <p className="text-sm text-gray-500">No specialties added yet</p>
               )}
             </div>
           </div>
@@ -447,7 +473,7 @@ export default function TherapistDetailPage({
             <div className="mt-4">
               <div className="mb-4">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  姓名
+                  Name
                 </label>
                 <Input
                   type="text"
@@ -460,7 +486,7 @@ export default function TherapistDetailPage({
 
               <div className="mb-4">
                 <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
-                  简介
+                  Bio
                 </label>
                 <textarea
                   id="bio"
@@ -474,14 +500,14 @@ export default function TherapistDetailPage({
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  专长
+                  Specialties
                 </label>
                 <div className="flex">
                   <Input
                     type="text"
                     id="specialty-input"
                     className="flex-1 rounded-r-none"
-                    placeholder="输入专长"
+                    placeholder="Enter specialty"
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialtyTranslation())}
                   />
                   <Button
@@ -489,7 +515,7 @@ export default function TherapistDetailPage({
                     onClick={handleAddSpecialtyTranslation}
                     className="rounded-l-none"
                   >
-                    添加
+                    Add
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -511,7 +537,7 @@ export default function TherapistDetailPage({
                     </span>
                   ))}
                   {therapistData.specialtiesTranslation.length === 0 && (
-                    <p className="text-sm text-gray-500">尚未添加专长</p>
+                    <p className="text-sm text-gray-500">No specialties added yet</p>
                   )}
                 </div>
               </div>
@@ -521,14 +547,14 @@ export default function TherapistDetailPage({
           <div className="flex justify-end space-x-2">
             <Button asChild variant="outline">
               <Link href="/admin/therapists">
-                取消
+                Cancel
               </Link>
             </Button>
             <Button
               type="submit"
-              disabled={saving || uploading}
+              disabled={saving || imageLoading}
             >
-              {saving || uploading ? '保存中...' : '保存'}
+              {saving || imageLoading ? 'Processing...' : 'Save'}
             </Button>
           </div>
         </form>

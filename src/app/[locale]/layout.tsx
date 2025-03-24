@@ -1,89 +1,103 @@
-import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
-import { unstable_setRequestLocale } from 'next-intl/server';
-import '../globals.css';
+import { getMessages } from 'next-intl/server';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Toaster } from 'react-hot-toast';
+import { Inter } from 'next/font/google';
+import '@/styles/globals.css';
 
-// 定义支持的语言
-const locales = ['en', 'zh', 'ko'];
+// 加载字体
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
-// 验证并获取元数据
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
-  // 验证语言是否支持
-  if (!locales.includes(locale)) {
-    notFound();
-  }
-
-  // 加载翻译消息
-  const messages = await getMessages(locale);
-
-  try {
-    // 从翻译中获取元数据
-    return {
-      title: messages.metadata?.title || 'Top Secret Outcall Massage | Professional Thai Massage in Bangkok',
-      description: messages.metadata?.description || 'Experience premium Thai massage services in Bangkok.',
-      keywords: messages.metadata?.keywords || 'Thai massage, Bangkok, relaxation, rejuvenation, professional massage',
-      openGraph: {
-        title: messages.metadata?.ogTitle || 'Top Secret Outcall Massage',
-        description: messages.metadata?.ogDescription || 'Premium Thai massage services in Bangkok',
-        url: 'https://topsecret-bangkok.com',
-        siteName: "Top Secret Outcall Massage",
-        locale: locale,
-        type: 'website',
-      },
-    };
-  } catch (error) {
-    console.error('Error generating metadata:', error);
-    // 返回默认元数据
-    return {
-      title: 'Top Secret Outcall Massage | Professional Thai Massage in Bangkok',
-      description: 'Experience premium Thai massage services in Bangkok.',
-      keywords: 'Thai massage, Bangkok massage, relaxation',
-    };
-  }
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { locale: string } 
+}) {
+  // 获取基础元数据...
+  return {
+    title: 'Thai Massage',
+  };
 }
 
-// 加载翻译消息的函数
-async function getMessages(locale: string) {
-  try {
-    // 从正确的目录导入特定语言的翻译文件
-    return (await import(`../../i18n/messages/${locale}.json`)).default;
-  } catch (error) {
-    // 如果出错，返回空对象
-    console.error(`Error loading messages for locale '${locale}'`, error);
-    return {};
-  }
-}
-
-// 布局组件
-export default async function LocaleLayout({
+export default async function RootLayout({
   children,
   params: { locale }
 }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  // 验证语言是否支持
-  if (!locales.includes(locale)) {
-    notFound();
-  }
-
-  // 设置请求语言，这是Next.js 14中推荐的方式
-  unstable_setRequestLocale(locale);
-
   // 加载翻译消息
-  const messages = await getMessages(locale);
+  const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className="antialiased">
+    <html lang={locale} suppressHydrationWarning className={`${inter.className} scroll-smooth`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // 语言前缀列表
+              const LOCALE_PREFIXES = ['/en/', '/zh/', '/th/', '/ko/'];
+              
+              // 修复图片URL，移除语言前缀
+              function fixImageUrl(url) {
+                if (!url) return '/images/placeholder-therapist.jpg';
+                
+                // 移除语言前缀
+                for (const prefix of LOCALE_PREFIXES) {
+                  if (url.startsWith(prefix)) {
+                    return '/' + url.slice(prefix.length);
+                  }
+                }
+                
+                return url;
+              }
+              
+              // 全局图片错误处理
+              window.addEventListener('error', function(event) {
+                if (event.target instanceof HTMLImageElement) {
+                  const img = event.target;
+                  const src = img.src || '';
+                  
+                  // 静态资源路径修正
+                  if (src.includes('/${locale}/images/') || src.includes('/${locale}/uploads/')) {
+                    const fixedSrc = fixImageUrl(new URL(src).pathname);
+                    console.warn('修正带语言前缀的图片路径:', src, '->', fixedSrc);
+                    img.src = fixedSrc;
+                    img.onerror = null;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                  }
+                  
+                  // 处理其他错误图片
+                  if (src.includes('/_next/image') && 
+                      (src.includes('/http') || 
+                       src.includes('/uploads/therapists') || 
+                       src.includes('example.com'))) {
+                    console.warn('图片加载失败，使用占位图:', src);
+                    img.src = '/images/placeholder-therapist.jpg';
+                    img.onerror = null;
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                }
+              }, true);
+            `,
+          }}
+        />
+      </head>
+      <body className="flex min-h-screen flex-col bg-white">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header locale={locale} />
-          <main>
+          <main className="flex-grow">
             {children}
           </main>
           <Footer locale={locale} />
+          <Toaster position="top-center" />
         </NextIntlClientProvider>
       </body>
     </html>
