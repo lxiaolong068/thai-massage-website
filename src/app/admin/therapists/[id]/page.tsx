@@ -138,12 +138,12 @@ export default function TherapistDetailPage({
       return;
     }
 
-    // Create temporary URL for preview
+    // Create temporary URL for preview immediately
     const previewUrl = URL.createObjectURL(file);
     console.log('Creating temporary preview URL:', previewUrl);
     
     setImageFile(file);
-    // Not setting image preview here, will set after successful upload
+    setImagePreview(previewUrl); // Set image preview immediately
     setSaveError('');
     
     // Execute actual upload
@@ -167,6 +167,11 @@ export default function TherapistDetailPage({
 
     console.log('Uploading image file:', file.name, file.size, file.type);
     setImageLoading(true);
+    
+    // 立即创建本地预览
+    const localPreviewUrl = URL.createObjectURL(file);
+    console.log('Created local preview URL:', localPreviewUrl);
+    setImagePreview(localPreviewUrl);
     
     try {
       // Show loading status
@@ -199,16 +204,36 @@ export default function TherapistDetailPage({
           ? result.data.url
           : `/${result.data.url}`;
         
-        console.log('Formatted image URL:', imageUrl);
+        console.log('Formatted server image URL:', imageUrl);
         
-        // Update form data
+        // 不修改预览图，继续使用本地预览
+        // 只更新数据库存储的URL
+        setImageUrl(imageUrl);
+        
+        // 创建一个图片元素来验证图片
+        const validateImage = document.createElement('img');
+        validateImage.onload = () => {
+          console.log('Uploaded image validated successfully');
+        };
+        validateImage.onerror = () => {
+          console.error('Uploaded image URL is invalid:', imageUrl);
+          // 设计接下来的操作，继续使用本地预览
+        };
+        validateImage.src = imageUrl;
+        
+        // Update therapist data
         setTherapistData(prevData => ({
           ...prevData,
           imageUrl: imageUrl,
         }));
         
-        // Set image preview
-        setImagePreview(imageUrl);
+        // Update therapist state if it exists
+        if (therapist) {
+          setTherapist(prevTherapist => ({
+            ...prevTherapist!,
+            imageUrl: imageUrl,
+          }));
+        }
         
         toast.success('Image uploaded successfully');
       } else {
@@ -324,38 +349,64 @@ export default function TherapistDetailPage({
   }
 
   return (
-    <div className="container p-6 mx-auto">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-6">
-          {id === 'new' ? 'Add New Therapist' : 'Edit Therapist'}
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">
+          {isNewTherapist ? 'Add New Therapist' : 'Edit Therapist'}
         </h1>
-        {saveSuccess && (
-          <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
-            Therapist information saved successfully
-          </div>
-        )}
-        {saveError && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
-            {saveError}
-          </div>
-        )}
-        <form onSubmit={(e) => handleSubmit(e, true)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Therapist Photo
-              </label>
-              <div className="mt-1 flex items-center flex-col space-y-2">
-                {/* 图片预览区域 */}
-                {imagePreview ? (
-                  <div className="relative w-40 h-40 mb-2">
-                    <ImageWithFallback
-                      src={imagePreview}
-                      alt="Therapist photo preview"
-                      fill
-                      className="object-cover rounded-md"
-                      fallbackSrc="/images/placeholder-therapist.jpg"
-                    />
+        <Link href="/admin/therapists">
+          <Button variant="outline">Back to List</Button>
+        </Link>
+      </div>
+
+      {loading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <div className="text-red-500">{error}</div>
+      ) : (
+        <form onSubmit={(e) => handleSubmit(e)} className="space-y-8">
+          {/* Image Upload Section */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Profile Image</label>
+            <div className="flex items-center gap-4">
+              {/* Debug image URLs */}
+              {(() => {
+                console.log('Current image states:', {
+                  imageUrl,
+                  imagePreview,
+                  therapistImageUrl: therapist?.imageUrl,
+                  therapistDataImageUrl: therapistData.imageUrl
+                });
+                return null;
+              })()}
+              
+              {/* 图片预览和上传区域 */}
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative w-40 h-40">
+                  {/* 使用标准 img 标签 */}
+                  {(() => {
+                    console.log('Rendering image with URL:', imagePreview || therapistData.imageUrl || '/images/placeholder-therapist.jpg');
+                    return null;
+                  })()}
+                  <img
+                    src={imagePreview || therapistData.imageUrl || '/images/placeholder-therapist.jpg'}
+                    alt="Therapist photo"
+                    className="object-cover rounded-lg w-full h-full"
+                    onError={(e) => {
+                      console.error('Image load error for:', e.currentTarget.src);
+                      // 图片加载失败，立即使用占位图片
+                      e.currentTarget.src = '/images/placeholder-therapist.jpg';
+                      // 如果是从服务器加载的图片失败，更新状态
+                      if (e.currentTarget.src === therapistData.imageUrl) {
+                        console.log('Updating therapistData.imageUrl to placeholder');
+                        setTherapistData(prev => ({
+                          ...prev,
+                          imageUrl: '/images/placeholder-therapist.jpg'
+                        }));
+                      }
+                    }}
+                  />
+                  {(imagePreview || therapistData.imageUrl) && (
                     <button
                       type="button"
                       onClick={handleRemoveImage}
@@ -364,30 +415,30 @@ export default function TherapistDetailPage({
                     >
                       <X size={16} />
                     </button>
-                  </div>
-                ) : (
-                  <div className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
-                    <ImageIcon size={48} className="text-gray-400" />
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 {/* 文件上传按钮 */}
-                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                  <Upload className="mr-2 h-4 w-4" />
-                  {imagePreview ? 'Change image' : 'Upload image'}
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                </label>
-                
-                <p className="text-xs text-gray-500 mt-1">
-                  Supports JPG, PNG format images
-                </p>
+                <div className="flex flex-col items-center space-y-2">
+                  <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <Upload className="mr-2 h-4 w-4" />
+                    {imagePreview || therapistData.imageUrl ? 'Change image' : 'Upload image'}
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    Supports JPG, PNG format images
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="experienceYears" className="block text-sm font-medium text-gray-700 mb-1">
                 Work Experience (years)
@@ -395,12 +446,13 @@ export default function TherapistDetailPage({
               <Input
                 type="number"
                 id="experienceYears"
-                value={experienceYears}
-                onChange={(e) => setExperienceYears(Number(e.target.value))}
-                min="1"
+                value={therapistData.experienceYears}
+                onChange={(e) => handleDataChange('experienceYears', Number(e.target.value))}
+                min="0"
                 required
               />
             </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Work Status
@@ -408,15 +460,15 @@ export default function TherapistDetailPage({
               <div className="flex border rounded-md overflow-hidden">
                 <button
                   type="button"
-                  onClick={() => setWorkStatus('AVAILABLE')}
-                  className={`flex-1 px-4 py-2 text-sm font-medium ${workStatus === 'AVAILABLE' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-white text-green-600 hover:bg-green-50'}`}
+                  onClick={() => handleDataChange('workStatus', 'AVAILABLE')}
+                  className={`flex-1 px-4 py-2 text-sm font-medium ${therapistData.workStatus === 'AVAILABLE' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-white text-green-600 hover:bg-green-50'}`}
                 >
                   Available
                 </button>
                 <button
                   type="button"
-                  onClick={() => setWorkStatus('WORKING')}
-                  className={`flex-1 px-4 py-2 text-sm font-medium ${workStatus === 'WORKING' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}
+                  onClick={() => handleDataChange('workStatus', 'WORKING')}
+                  className={`flex-1 px-4 py-2 text-sm font-medium ${therapistData.workStatus === 'WORKING' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}
                 >
                   Working
                 </button>
@@ -424,122 +476,75 @@ export default function TherapistDetailPage({
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Specialties (Original Language)
-            </label>
-            <div className="flex">
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
               <Input
                 type="text"
-                value={specialtyInput}
-                onChange={(e) => setSpecialtyInput(e.target.value)}
-                className="flex-1 rounded-r-none"
-                placeholder="Enter specialty"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialty())}
+                id="name"
+                value={therapistData.name}
+                onChange={(e) => handleDataChange('name', e.target.value)}
+                required
               />
-              <Button
-                type="button"
-                onClick={handleAddSpecialty}
-                className="rounded-l-none"
-              >
-                Add
-              </Button>
             </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {specialties.map((specialty, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-100 text-blue-800"
-                >
-                  {specialty}
-                  <Button
-                    type="button"
-                    onClick={() => handleRemoveSpecialty(index)}
-                    variant="ghost"
-                    size="sm"
-                    className="ml-1 h-5 w-5 p-0 text-blue-400 hover:text-blue-600"
-                  >
-                    &times;
-                  </Button>
-                </span>
-              ))}
-              {specialties.length === 0 && (
-                <p className="text-sm text-gray-500">No specialties added yet</p>
-              )}
-            </div>
-          </div>
 
-          <div className="mb-6">
-            <div className="mt-4">
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
+            <div>
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                Bio
+              </label>
+              <textarea
+                id="bio"
+                value={therapistData.bio}
+                onChange={(e) => handleDataChange('bio', e.target.value)}
+                rows={4}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                required
+              ></textarea>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Specialties
+              </label>
+              <div className="flex">
                 <Input
                   type="text"
-                  id="name"
-                  value={therapistData.name}
-                  onChange={(e) => handleDataChange('name', e.target.value)}
-                  required
+                  id="specialty-input"
+                  className="flex-1 rounded-r-none"
+                  placeholder="Enter specialty"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialtyTranslation())}
                 />
+                <Button
+                  type="button"
+                  onClick={handleAddSpecialtyTranslation}
+                  className="rounded-l-none"
+                >
+                  Add
+                </Button>
               </div>
-
-              <div className="mb-4">
-                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
-                  Bio
-                </label>
-                <textarea
-                  id="bio"
-                  value={therapistData.bio}
-                  onChange={(e) => handleDataChange('bio', e.target.value)}
-                  rows={4}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                ></textarea>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Specialties
-                </label>
-                <div className="flex">
-                  <Input
-                    type="text"
-                    id="specialty-input"
-                    className="flex-1 rounded-r-none"
-                    placeholder="Enter specialty"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSpecialtyTranslation())}
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddSpecialtyTranslation}
-                    className="rounded-l-none"
+              <div className="flex flex-wrap gap-2 mt-2">
+                {therapistData.specialtiesTranslation.map((specialty, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800"
                   >
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {therapistData.specialtiesTranslation.map((specialty, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800"
+                    {specialty}
+                    <Button
+                      type="button"
+                      onClick={() => handleRemoveSpecialtyTranslation(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="ml-1 h-5 w-5 p-0 text-green-400 hover:text-green-600"
                     >
-                      {specialty}
-                      <Button
-                        type="button"
-                        onClick={() => handleRemoveSpecialtyTranslation(index)}
-                        variant="ghost"
-                        size="sm"
-                        className="ml-1 h-5 w-5 p-0 text-green-400 hover:text-green-600"
-                      >
-                        &times;
-                      </Button>
-                    </span>
-                  ))}
-                  {therapistData.specialtiesTranslation.length === 0 && (
-                    <p className="text-sm text-gray-500">No specialties added yet</p>
-                  )}
-                </div>
+                      &times;
+                    </Button>
+                  </span>
+                ))}
+                {therapistData.specialtiesTranslation.length === 0 && (
+                  <p className="text-sm text-gray-500">No specialties added yet</p>
+                )}
               </div>
             </div>
           </div>
@@ -558,7 +563,7 @@ export default function TherapistDetailPage({
             </Button>
           </div>
         </form>
-      </div>
+      )}
     </div>
   );
 }

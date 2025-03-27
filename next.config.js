@@ -18,6 +18,7 @@ const nextConfig = {
         hostname: 'example.com',
       },
     ],
+    domains: ['localhost'],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -40,7 +41,7 @@ const nextConfig = {
           {
             type: 'query',
             key: 'url',
-            value: '(^/http|/uploads/therapists|example\.com)',
+            value: '(^/http|example\.com)',
           }
         ],
         destination: '/images/placeholder-therapist.jpg'

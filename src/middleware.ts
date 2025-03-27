@@ -168,7 +168,7 @@ export function middleware(request: NextRequest) {
     // 如果是有问题的图片URL，直接重定向到占位图
     if (urlParam && (
         urlParam.includes('/http') || 
-        urlParam.includes('/uploads/therapists') ||
+        // urlParam.includes('/uploads/therapists') || // 注释掉，不再重定向上传的图片
         urlParam.includes('/example.com')
       )) {
       

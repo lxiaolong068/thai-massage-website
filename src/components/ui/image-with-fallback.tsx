@@ -22,11 +22,11 @@ export default function ImageWithFallback({
   console.log('ImageWithFallback - Original src:', src);
   
   // Use safely processed image URL
-  const safeSrc = typeof src === 'string' ? fixImageUrl(src) : fallbackSrc;
-  console.log('ImageWithFallback - Processed safeSrc:', safeSrc);
+  const safeSrc = typeof src === 'string' ? src : fallbackSrc;
+  console.log('ImageWithFallback - Using src:', safeSrc);
   
   // Safe path for fallback image
-  const safeFallbackSrc = fixImageUrl(fallbackSrc);
+  const safeFallbackSrc = fallbackSrc;
   console.log('ImageWithFallback - Fallback src:', safeFallbackSrc);
   
   // Simplified error handling state
@@ -35,15 +35,7 @@ export default function ImageWithFallback({
   
   // Handle image loading error - immediately use placeholder
   const handleError = () => {
-    // Limit retry attempts to avoid infinite loops
-    if (errorsRef.current > 0) {
-      console.log('ImageWithFallback - Already tried once, using fallback image');
-      setError(true);
-      return;
-    }
-    
-    errorsRef.current += 1;
-    console.warn('Image loading failed, using placeholder:', safeSrc);
+    console.warn('Image loading error occurred for:', safeSrc);
     setError(true);
   };
   
