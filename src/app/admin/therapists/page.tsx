@@ -16,8 +16,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Trash2, RefreshCw, Search, Edit, Pencil, User } from 'lucide-react';
+import { Trash2, RefreshCw, Search, Edit, Pencil, User, PlusCircle, MoreHorizontal, Check } from 'lucide-react';
 import ImageWithFallback from '@/components/ui/image-with-fallback';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Therapist = {
   id: string;
@@ -145,7 +162,7 @@ export default function TherapistsPage() {
     setIsBatchUpdateDialogOpen(true);
   };
 
-  const handleBatchUpdate = async () => {
+  const handleBatchUpdate = async (status: 'active' | 'inactive') => {
     setIsBatchUpdating(true);
     
     try {
@@ -158,7 +175,7 @@ export default function TherapistsPage() {
         body: JSON.stringify({
           ids: selectedTherapists,
           data: {
-            workStatus: newWorkStatus,
+            status: status,
           },
         }),
       });
@@ -174,7 +191,7 @@ export default function TherapistsPage() {
       setTherapists(prev => 
         prev.map(therapist => 
           selectedTherapists.includes(therapist.id) 
-            ? { ...therapist, workStatus: newWorkStatus }
+            ? { ...therapist, status }
             : therapist
         )
       );
@@ -228,227 +245,242 @@ export default function TherapistsPage() {
     return searchMatch && statusMatch;
   });
 
+  // 加载状态组件
+  const LoadingState = () => (
+    <div className="w-full space-y-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center space-x-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="container p-6 mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Therapist Management</h1>
-        <div className="flex space-x-2">
-          <Button asChild>
-            <Link href="/admin/therapists/new">
-              Add Therapist
-            </Link>
-          </Button>
+        <h1 className="text-2xl font-semibold">Therapist Management</h1>
+        <div className="flex items-center space-x-4">
+          <Link
+            href="/admin/therapists/new"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base"
+          >
+            <PlusCircle className="w-5 h-5" />
+            Add Therapist
+          </Link>
         </div>
       </div>
 
-      <div className="mb-6 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <Button 
-            variant={selectedStatus === null ? "default" : "outline"}
-            onClick={() => handleStatusFilterChange(null)}
-            size="sm"
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Search therapists..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedStatus('all');
+            }}
+            className="shrink-0"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={selectedStatus === 'all' ? 'default' : 'outline'}
+            onClick={() => setSelectedStatus('all')}
+            className="whitespace-nowrap"
           >
             All
           </Button>
-          <Button 
-            variant={selectedStatus === 'AVAILABLE' ? "default" : "outline"}
-            onClick={() => handleStatusFilterChange('AVAILABLE')}
-            size="sm"
-            className={selectedStatus === 'AVAILABLE' ? "bg-green-600 hover:bg-green-700 text-white" : "text-green-600 border-green-600 hover:bg-green-50"}
+          <Button
+            variant={selectedStatus === 'active' ? 'default' : 'outline'}
+            onClick={() => setSelectedStatus('active')}
+            className="whitespace-nowrap"
           >
-            Available
+            Active
           </Button>
-          <Button 
-            variant={selectedStatus === 'WORKING' ? "default" : "outline"}
-            onClick={() => handleStatusFilterChange('WORKING')}
-            size="sm"
-            className={selectedStatus === 'WORKING' ? "bg-blue-600 hover:bg-blue-700 text-white" : "text-blue-600 border-blue-600 hover:bg-blue-50"}
+          <Button
+            variant={selectedStatus === 'inactive' ? 'default' : 'outline'}
+            onClick={() => setSelectedStatus('inactive')}
+            className="whitespace-nowrap"
           >
-            Working
+            Inactive
           </Button>
-        </div>
-        <div className="relative w-64">
-          <Input
-            type="text"
-            placeholder="Search therapists..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-8"
-          />
-          <Search className="absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 p-4 rounded-md mb-6">
-          <p className="text-red-700">{error}</p>
+      {selectedTherapists.length > 0 && (
+        <div className="mb-4 p-4 bg-muted rounded-lg flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            {selectedTherapists.length} therapist(s) selected
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleBatchUpdate('active')}
+            >
+              Set Active
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleBatchUpdate('inactive')}
+            >
+              Set Inactive
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBatchDelete}
+            >
+              Delete Selected
+            </Button>
+          </div>
         </div>
       )}
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-gray-600">Loading...</div>
-        </div>
+        <LoadingState />
       ) : therapists.length === 0 ? (
-        <div className="bg-yellow-50 p-6 rounded-lg text-center">
-          <p className="text-yellow-700">No therapists found</p>
-          <Link
-            href="/admin/therapists/new"
-            className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
-          >
-            Add First Therapist
-          </Link>
+        <div className="text-center py-10">
+          <User className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-semibold text-gray-900">No Therapists</h3>
+          <p className="mt-1 text-sm text-gray-500">Get started by creating a new therapist.</p>
+          <div className="mt-6">
+            <Link
+              href="/admin/therapists/new"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base mx-auto w-fit"
+            >
+              <PlusCircle className="w-5 h-5" />
+              Add First Therapist
+            </Link>
+          </div>
         </div>
       ) : (
-        <>
-          <div className="mb-4 flex items-center space-x-3">
-            {selectedTherapists.length > 0 && (
-              <div className="flex space-x-2">
-                <Button
-                  onClick={handleBatchDeleteClick}
-                  disabled={isBatchDeleting}
-                  variant="destructive"
-                  size="sm"
-                  className="flex items-center"
-                >
-                  <Trash2 size={16} className="mr-1"/> 
-                  {isBatchDeleting ? 'Processing...' : `Delete Selected (${selectedTherapists.length})`}
-                </Button>
-                <Button
-                  onClick={handleBatchUpdateClick}
-                  disabled={isBatchUpdating}
-                  variant="secondary"
-                  size="sm"
-                  className="flex items-center"
-                >
-                  <RefreshCw size={16} className="mr-1"/>
-                  {isBatchUpdating ? 'Processing...' : `Update Status (${selectedTherapists.length})`}
-                </Button>
-              </div>
-            )}
-            <Button
-              onClick={fetchTherapists}
-              disabled={loading}
-              variant="outline"
-              size="sm"
-              className="flex items-center"
-            >
-              <RefreshCw size={16} className="mr-1"/> Refresh
-            </Button>
-          </div>
-
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">
+                  <Checkbox
+                    checked={selectedTherapists.length === therapists.length}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedTherapists(therapists.map(t => t.id));
+                      } else {
+                        setSelectedTherapists([]);
+                      }
+                    }}
+                  />
+                </TableHead>
+                <TableHead className="w-[250px]">Name</TableHead>
+                <TableHead>Experience</TableHead>
+                <TableHead>Specialties</TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+                <TableHead className="w-[100px] text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {therapists.map((therapist) => (
+                <TableRow key={therapist.id}>
+                  <TableCell>
                     <Checkbox
-                      checked={selectedTherapists.length === filteredTherapists.length && filteredTherapists.length > 0}
-                      onCheckedChange={handleSelectAll}
+                      checked={selectedTherapists.includes(therapist.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedTherapists([...selectedTherapists, therapist.id]);
+                        } else {
+                          setSelectedTherapists(selectedTherapists.filter(id => id !== therapist.id));
+                        }
+                      }}
                     />
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Therapist
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Specialties
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Experience
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredTherapists.map((therapist) => (
-                  <tr key={therapist.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap w-10">
-                      <Checkbox
-                        checked={selectedTherapists.includes(therapist.id)}
-                        onCheckedChange={(checked) => handleSelectTherapist(therapist.id, checked === true)}
-                      />
-                    </td>
-                    <td className="whitespace-nowrap py-3 pl-4 pr-3 text-sm">
-                      <div className="flex items-center">
-                        <div className="h-12 w-12 flex-shrink-0 relative">
-                          {therapist.imageUrl ? (
-                            <ImageWithFallback
-                              src={therapist.imageUrl}
-                              alt={`${therapist.name} photo`}
-                              fill
-                              className="object-cover rounded-md"
-                            />
-                          ) : (
-                            <div className="h-12 w-12 bg-gray-200 flex items-center justify-center rounded-md">
-                              <User className="h-6 w-6 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-gray-900">{therapist.name}</div>
-                          <div className="text-gray-500 truncate max-w-[200px]">{therapist.specialties.join(', ')}</div>
-                        </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 relative rounded-full overflow-hidden">
+                        <ImageWithFallback
+                          src={therapist.imageUrl || '/images/placeholder-therapist.jpg'}
+                          alt={therapist.name}
+                          width={48}
+                          height={48}
+                          className="object-cover"
+                        />
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {therapist.specialties.slice(0, 3).map((specialty, index) => (
-                          <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-                            {specialty}
-                          </span>
-                        ))}
-                        {therapist.specialties.length > 3 && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                            +{therapist.specialties.length - 3}
-                          </span>
-                        )}
+                      <div>
+                        <div className="font-medium">{therapist.name}</div>
+                        <div className="text-sm text-gray-500">{therapist.specialties.join(', ')}</div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{therapist.experienceYears} years</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span 
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          therapist.workStatus === 'AVAILABLE' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {therapist.workStatus === 'AVAILABLE' ? '✓ Available' : '⌛ Working'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Button asChild variant="link" size="sm" className="mr-2">
-                        <Link href={`/admin/therapists/${therapist.id}`} className="flex items-center">
-                          <Pencil size={14} className="mr-1"/> Edit
-                        </Link>
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteClick(therapist.id)}
-                        variant="link"
-                        size="sm"
-                        className="text-red-600 hover:text-red-900 flex items-center"
-                      >
-                        <Trash2 size={14} className="mr-1"/> Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredTherapists.length > 0 && (
-              <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
-                Showing {filteredTherapists.length} therapists {searchQuery || selectedStatus ? `(filtered from ${therapists.length} total)` : ''}
-              </div>
-            )}
-          </div>
-        </>
+                    </div>
+                  </TableCell>
+                  <TableCell>{therapist.experienceYears} years</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {therapist.specialties.slice(0, 3).map((specialty, index) => (
+                        <Badge key={index} variant="secondary">
+                          {specialty}
+                        </Badge>
+                      ))}
+                      {therapist.specialties.length > 3 && (
+                        <Badge variant="secondary">
+                          +{therapist.specialties.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={therapist.workStatus === 'AVAILABLE' ? 'success' : 'secondary'}
+                    >
+                      {therapist.workStatus === 'AVAILABLE' ? '✓ Available' : '⌛ Working'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/therapists/${therapist.id}/edit`}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteClick(therapist.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       {/* Delete confirmation dialog */}
@@ -529,7 +561,7 @@ export default function TherapistsPage() {
             <Button variant="outline" onClick={() => setIsBatchUpdateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="default" onClick={handleBatchUpdate} disabled={isBatchUpdating}>
+            <Button variant="default" onClick={() => handleBatchUpdate(newWorkStatus as 'active' | 'inactive')} disabled={isBatchUpdating}>
               {isBatchUpdating ? 'Updating...' : 'Confirm Update'}
             </Button>
           </DialogFooter>

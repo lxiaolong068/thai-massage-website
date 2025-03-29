@@ -17,6 +17,8 @@ type Service = {
   duration: number;
   imageUrl: string;
   translations: ServiceTranslation[];
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export default function ServiceDetailPage({
@@ -31,7 +33,6 @@ export default function ServiceDetailPage({
   const [price, setPrice] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<string>('zh');
   const [translations, setTranslations] = useState<ServiceTranslation[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,13 +44,13 @@ export default function ServiceDetailPage({
         const response = await fetch(`/api/services/${id}`);
         
         if (!response.ok) {
-          throw new Error('获取服务数据失败');
+          throw new Error('Failed to fetch service data');
         }
         
         const data = await response.json();
         const serviceData = data.data;
         
-        // 获取所有语言的翻译
+        // Get translations for all supported languages
         const allTranslationsResponse = await Promise.all(
           ['zh', 'en', 'ko'].map(locale => 
             fetch(`/api/services/${id}?locale=${locale}`).then(res => res.json())
@@ -69,7 +70,7 @@ export default function ServiceDetailPage({
         setImageUrl(serviceData.imageUrl);
         setTranslations(allTranslations);
       } catch (err: any) {
-        setError(err.message || '获取服务数据失败');
+        setError(err.message || 'Failed to fetch service data');
       } finally {
         setLoading(false);
       }
@@ -94,11 +95,11 @@ export default function ServiceDetailPage({
     setSaving(true);
 
     try {
-      // 验证必填字段
+      // Validate required fields
       for (const locale of ['zh', 'en', 'ko']) {
         const translation = translations.find(t => t.locale === locale);
         if (!translation?.name || !translation?.description) {
-          throw new Error(`请填写${locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}的名称和描述`);
+          throw new Error(`Please fill in the name and description for ${locale === 'zh' ? 'Chinese' : locale === 'en' ? 'English' : 'Korean'}`);
         }
       }
 
@@ -118,13 +119,12 @@ export default function ServiceDetailPage({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || '更新服务失败');
+        throw new Error(data.error?.message || 'Failed to update service');
       }
 
-      // 更新成功，重定向到服务列表页
       router.push('/admin/services');
     } catch (err: any) {
-      setError(err.message || '更新服务失败，请稍后再试');
+      setError(err.message || 'Failed to update service. Please try again later');
     } finally {
       setSaving(false);
     }
@@ -133,7 +133,7 @@ export default function ServiceDetailPage({
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">加载中...</div>
+        <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -146,7 +146,7 @@ export default function ServiceDetailPage({
           href="/admin/services"
           className="mt-4 inline-block text-primary hover:underline"
         >
-          返回服务列表
+          Back to Services
         </Link>
       </div>
     );
@@ -155,12 +155,12 @@ export default function ServiceDetailPage({
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">编辑服务</h1>
+        <h1 className="text-2xl font-semibold">Edit Service</h1>
         <Link
           href="/admin/services"
           className="text-gray-600 hover:text-gray-900"
         >
-          返回列表
+          Back to List
         </Link>
       </div>
 
@@ -174,7 +174,7 @@ export default function ServiceDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              价格 (泰铢)
+              Price (THB)
             </label>
             <input
               type="number"
@@ -187,7 +187,7 @@ export default function ServiceDetailPage({
           </div>
           <div>
             <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
-              时长 (分钟)
+              Duration (minutes)
             </label>
             <input
               type="number"
@@ -202,7 +202,7 @@ export default function ServiceDetailPage({
 
         <div className="mb-6">
           <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-            图片URL
+            Image URL
           </label>
           <input
             type="text"
@@ -212,40 +212,23 @@ export default function ServiceDetailPage({
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            请输入图片的URL地址
-          </p>
         </div>
 
         <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex">
-              {['zh', 'en', 'ko'].map((locale) => (
-                <button
-                  key={locale}
-                  type="button"
-                  onClick={() => setActiveTab(locale)}
-                  className={`py-2 px-4 text-sm font-medium ${
-                    activeTab === locale
-                      ? 'border-b-2 border-primary text-primary'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {locale === 'zh' ? '中文' : locale === 'en' ? '英文' : '韩文'}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          <div className="mt-4">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Translations</h2>
+          <div className="space-y-6">
             {translations.map((translation) => (
               <div
                 key={translation.locale}
-                className={`${activeTab === translation.locale ? 'block' : 'hidden'}`}
+                className="border border-gray-200 rounded-lg p-4"
               >
+                <h3 className="text-md font-medium text-gray-900 mb-3">
+                  {translation.locale === 'zh' ? 'Chinese' : translation.locale === 'en' ? 'English' : 'Korean'}
+                </h3>
+
                 <div className="mb-4">
                   <label htmlFor={`name-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    名称
+                    Name
                   </label>
                   <input
                     type="text"
@@ -259,21 +242,21 @@ export default function ServiceDetailPage({
 
                 <div className="mb-4">
                   <label htmlFor={`description-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    描述
+                    Description
                   </label>
                   <textarea
                     id={`description-${translation.locale}`}
                     value={translation.description}
                     onChange={(e) => handleTranslationChange(translation.locale, 'description', e.target.value)}
-                    rows={4}
+                    rows={3}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                     required
-                  ></textarea>
+                  />
                 </div>
 
                 <div>
                   <label htmlFor={`slug-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    URL别名
+                    URL Slug
                   </label>
                   <input
                     type="text"
@@ -284,7 +267,7 @@ export default function ServiceDetailPage({
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    URL别名用于生成服务详情页的URL，只能包含字母、数字、连字符和下划线
+                    URL slug is used to generate the service detail page URL. Only letters, numbers, hyphens and underscores are allowed.
                   </p>
                 </div>
               </div>
@@ -297,14 +280,14 @@ export default function ServiceDetailPage({
             href="/admin/services"
             className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-200 transition-colors"
           >
-            取消
+            Cancel
           </Link>
           <button
             type="submit"
             disabled={saving}
             className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
           >
-            {saving ? '保存中...' : '保存'}
+            {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </form>

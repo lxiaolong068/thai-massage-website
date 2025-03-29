@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { PlusCircle } from 'lucide-react';
 
 type Service = {
   id: string;
@@ -21,40 +22,38 @@ export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [locale, setLocale] = useState('zh'); // 默认显示中文
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isBatchDeleting, setIsBatchDeleting] = useState(false);
 
-  // 获取服务列表
+  // Fetch services list
   const fetchServices = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch(`/api/services?locale=${locale}`);
+      const response = await fetch('/api/services?locale=en');
       
       if (!response.ok) {
-        throw new Error(`获取服务列表失败: ${response.status}`);
+        throw new Error(`Failed to fetch services: ${response.status}`);
       }
       
       const data = await response.json();
       setServices(data.data || []);
     } catch (err: any) {
-      setError(err.message || '获取服务列表失败');
+      setError(err.message || 'Failed to fetch services');
     } finally {
       setLoading(false);
       setSelectedServices([]);
     }
   };
 
-  // 当locale变化时，重新获取数据
   useEffect(() => {
     fetchServices();
-  }, [locale]);
+  }, []);
 
-  // 删除单个服务
+  // Delete single service
   const handleDelete = async (id: string) => {
-    if (!confirm('确定要删除此服务吗？此操作无法撤销。')) return;
+    if (!confirm('Are you sure you want to delete this service? This action cannot be undone.')) return;
     
     try {
       const response = await fetch(`/api/services/${id}`, {
@@ -62,29 +61,28 @@ export default function ServicesPage() {
       });
       
       if (!response.ok) {
-        throw new Error(`删除服务失败: ${response.status}`);
+        throw new Error(`Failed to delete service: ${response.status}`);
       }
       
-      toast.success('服务已成功删除');
-      // 重新获取列表
+      toast.success('Service deleted successfully');
       fetchServices();
     } catch (err: any) {
-      toast.error(err.message || '删除服务失败');
+      toast.error(err.message || 'Failed to delete service');
     }
   };
 
-  // 批量删除服务
+  // Batch delete services
   const handleBatchDelete = async () => {
     if (selectedServices.length === 0) {
-      toast.error('请至少选择一个服务');
+      toast.error('Please select at least one service');
       return;
     }
 
-    if (!confirm(`确定要删除选中的 ${selectedServices.length} 个服务吗？此操作无法撤销。`)) return;
+    if (!confirm(`Are you sure you want to delete ${selectedServices.length} selected services? This action cannot be undone.`)) return;
     
     try {
       setIsBatchDeleting(true);
-      const response = await fetch(`/api/services`, {
+      const response = await fetch('/api/services', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -97,54 +95,44 @@ export default function ServicesPage() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || `批量删除失败: ${response.status}`);
+        throw new Error(errorData.error?.message || `Batch deletion failed: ${response.status}`);
       }
       
       const data = await response.json();
-      toast.success(data.message || `成功删除 ${selectedServices.length} 个服务`);
+      toast.success(data.message || `Successfully deleted ${selectedServices.length} services`);
       
-      // 重新获取列表
       fetchServices();
     } catch (err: any) {
-      toast.error(err.message || '批量删除服务失败');
+      toast.error(err.message || 'Failed to delete services');
     } finally {
       setIsBatchDeleting(false);
     }
   };
 
-  // 处理选择/取消选择所有服务
+  // Handle select/deselect all services
   const handleSelectAll = () => {
     if (selectedServices.length === filteredServices.length) {
-      // 如果所有服务都已选中，则取消全选
       setSelectedServices([]);
     } else {
-      // 否则全选
       setSelectedServices(filteredServices.map(service => service.id));
     }
   };
 
-  // 处理选择/取消选择单个服务
+  // Handle select/deselect single service
   const handleSelectService = (id: string) => {
     if (selectedServices.includes(id)) {
-      // 如果已选中，则取消选择
       setSelectedServices(selectedServices.filter(serviceId => serviceId !== id));
     } else {
-      // 否则添加到选中列表
       setSelectedServices([...selectedServices, id]);
     }
   };
 
-  // 处理语言切换
-  const handleLocaleChange = (newLocale: string) => {
-    setLocale(newLocale);
-  };
-
-  // 处理搜索
+  // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  // 根据搜索关键词过滤服务列表
+  // Filter services based on search query
   const filteredServices = services.filter(service => {
     if (!searchQuery) return true;
     
@@ -160,33 +148,14 @@ export default function ServicesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">服务管理</h1>
+        <h1 className="text-2xl font-semibold">Services Management</h1>
         <div className="flex items-center space-x-4">
-          <div className="flex border rounded-md overflow-hidden">
-            <button
-              onClick={() => handleLocaleChange('zh')}
-              className={`px-3 py-1.5 text-sm transition-colors ${locale === 'zh' ? 'bg-primary text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            >
-              中文
-            </button>
-            <button
-              onClick={() => handleLocaleChange('en')}
-              className={`px-3 py-1.5 text-sm transition-colors ${locale === 'en' ? 'bg-primary text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            >
-              英文
-            </button>
-            <button
-              onClick={() => handleLocaleChange('ko')}
-              className={`px-3 py-1.5 text-sm transition-colors ${locale === 'ko' ? 'bg-primary text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            >
-              韩文
-            </button>
-          </div>
           <Link
             href="/admin/services/new"
-            className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base"
           >
-            添加服务
+            <PlusCircle className="w-5 h-5" />
+            Add Service
           </Link>
         </div>
       </div>
@@ -206,7 +175,7 @@ export default function ServicesPage() {
                 disabled={isBatchDeleting}
                 className="flex items-center bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isBatchDeleting ? '处理中...' : `删除所选 (${selectedServices.length})`}
+                {isBatchDeleting ? 'Processing...' : `Delete Selected (${selectedServices.length})`}
               </button>
             )}
             <button
@@ -214,7 +183,7 @@ export default function ServicesPage() {
               disabled={loading}
               className="flex items-center bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition-colors"
             >
-              刷新
+              Refresh
             </button>
           </div>
 
@@ -223,7 +192,7 @@ export default function ServicesPage() {
               type="text"
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="搜索服务名称、描述、价格..."
+              placeholder="Search services..."
               className="border border-gray-300 rounded-md py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-primary w-64"
             />
           </div>
@@ -232,17 +201,17 @@ export default function ServicesPage() {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-gray-600">加载中...</div>
+          <div className="text-xl text-gray-600">Loading...</div>
         </div>
       ) : (
         services.length === 0 ? (
           <div className="bg-yellow-50 p-6 rounded-lg text-center">
-            <p className="text-yellow-700">暂无服务数据</p>
+            <p className="text-yellow-700">No services found</p>
             <Link
               href="/admin/services/new"
               className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
             >
-              添加第一个服务
+              Add First Service
             </Link>
           </div>
         ) : (
@@ -261,16 +230,16 @@ export default function ServicesPage() {
                     </div>
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    服务
+                    Service
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    价格
+                    Price
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    时长
+                    Duration
                   </th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    操作
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -278,7 +247,7 @@ export default function ServicesPage() {
                 {filteredServices.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                      没有找到匹配的服务
+                      No matching services found
                     </td>
                   </tr>
                 ) : (
@@ -311,23 +280,23 @@ export default function ServicesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{service.price.toLocaleString()} 泰铢</div>
+                        <div className="text-sm text-gray-900">{service.price.toLocaleString()} THB</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{service.duration} 分钟</div>
+                        <div className="text-sm text-gray-900">{service.duration} minutes</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           href={`/admin/services/${service.id}`}
                           className="text-primary hover:text-primary-dark mr-4"
                         >
-                          编辑
+                          Edit
                         </Link>
                         <button
                           onClick={() => handleDelete(service.id)}
                           className="text-red-600 hover:text-red-900"
                         >
-                          删除
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -337,7 +306,7 @@ export default function ServicesPage() {
             </table>
             {filteredServices.length > 0 && (
               <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
-                显示 {filteredServices.length} 个服务 {searchQuery ? `(已过滤，共 ${services.length} 个)` : ''}
+                Showing {filteredServices.length} services {searchQuery ? `(filtered from ${services.length})` : ''}
               </div>
             )}
           </div>
