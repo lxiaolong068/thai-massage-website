@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 // Upload directories
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
 const THERAPISTS_DIR = path.join(UPLOAD_DIR, 'therapists');
+const SERVICES_DIR = path.join(UPLOAD_DIR, 'services');
 
 // Ensure upload directories exist
 async function ensureDirectoriesExist() {
@@ -24,6 +25,12 @@ async function ensureDirectoriesExist() {
     if (!fs.existsSync(THERAPISTS_DIR)) {
       await fsPromises.mkdir(THERAPISTS_DIR, { recursive: true });
       console.log('Created therapists image directory:', THERAPISTS_DIR);
+    }
+
+    // Ensure service images directory exists
+    if (!fs.existsSync(SERVICES_DIR)) {
+      await fsPromises.mkdir(SERVICES_DIR, { recursive: true });
+      console.log('Created services image directory:', SERVICES_DIR);
     }
   } catch (error) {
     console.error('Error creating directories:', error);
@@ -44,13 +51,14 @@ function isImageFile(file: File): boolean {
 }
 
 // Write file to disk and return access URL
-async function saveFileToDisk(file: File): Promise<string> {
+async function saveFileToDisk(file: File, type: 'therapist' | 'service' = 'therapist'): Promise<string> {
   // File extension
   const fileExt = path.extname(file.name).toLowerCase() || '.jpg';
   
   // Generate unique filename
   const uniqueFilename = `${uuidv4()}${fileExt}`;
-  const filePath = path.join(THERAPISTS_DIR, uniqueFilename);
+  const uploadDir = type === 'therapist' ? THERAPISTS_DIR : SERVICES_DIR;
+  const filePath = path.join(uploadDir, uniqueFilename);
   
   try {
     // Read file content
@@ -68,8 +76,10 @@ async function saveFileToDisk(file: File): Promise<string> {
     
     console.log(`File successfully saved to: ${filePath}, size: ${fileStats.size} bytes`);
     
-    // Get public URL path (this is crucial - we're returing a URL format that works in Next.js)
-    const publicPath = `/uploads/therapists/${uniqueFilename}`;
+    // Get public URL path
+    const publicPath = type === 'therapist' 
+      ? `/uploads/therapists/${uniqueFilename}`
+      : `/uploads/services/${uniqueFilename}`;
     console.log('Public URL path:', publicPath);
     
     // Verify the file is accessible
@@ -98,6 +108,7 @@ export async function POST(request: NextRequest) {
     // Check if request contains file
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const type = formData.get('type') as 'therapist' | 'service' || 'therapist';
     
     if (!file) {
       console.error('No file found in request');
@@ -115,6 +126,7 @@ export async function POST(request: NextRequest) {
       filename: file.name,
       type: file.type,
       size: file.size,
+      uploadType: type
     });
     
     // Validate file type
@@ -143,14 +155,14 @@ export async function POST(request: NextRequest) {
     }
     
     // Save file and get URL
-    const fileUrl = await saveFileToDisk(file);
+    const fileUrl = await saveFileToDisk(file, type);
     
     // List directory contents for debugging
     try {
-      const files = await fsPromises.readdir(THERAPISTS_DIR);
-      console.log('Current files in upload directory:', files);
+      const files = await fsPromises.readdir(type === 'therapist' ? THERAPISTS_DIR : SERVICES_DIR);
+      console.log(`Current files in ${type} upload directory:`, files);
     } catch (error) {
-      console.error('Error reading upload directory:', error);
+      console.error(`Error reading ${type} upload directory:`, error);
     }
     
     // Return success response
@@ -164,17 +176,11 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    // Log error
-    console.error('Error during file upload:', error);
-    
-    // Return error response
+    console.error('Error handling file upload:', error);
     return NextResponse.json(
       {
         success: false,
-        error: {
-          message: 'File upload failed',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        }
+        error: { message: error instanceof Error ? error.message : 'Unknown error during file upload' }
       },
       { status: 500 }
     );

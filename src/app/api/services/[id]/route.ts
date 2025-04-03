@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { apiSuccess, apiError } from '../../../../lib/api-response';
+import prisma from '@/lib/prisma';
+import { apiSuccess, apiError } from '@/lib/api-response';
+import { generateSlug } from '@/utils/string';
 
 // 获取单个服务
 export async function GET(
@@ -22,12 +23,7 @@ export async function GET(
     });
 
     if (!service) {
-      const errorMessage = getLocalizedText(locale, {
-        en: 'Service not found',
-        zh: '未找到服务',
-        ko: '서비스를 찾을 수 없습니다'
-      });
-      return apiError('NOT_FOUND', errorMessage, 404);
+      return apiError('NOT_FOUND', 'Service not found', 404);
     }
 
     // 格式化响应数据
@@ -47,13 +43,7 @@ export async function GET(
     return apiSuccess(formattedService);
   } catch (error) {
     console.error('Error fetching service:', error);
-    const url = new URL(request.url);
-    const locale = url.searchParams.get('locale') || 'en';
-    return apiError(
-      'SERVER_ERROR', 
-      getLocalizedErrorMessage(locale, 'fetch'),
-      500
-    );
+    return apiError('SERVER_ERROR', 'Failed to fetch service', 500);
   }
 }
 
@@ -66,42 +56,42 @@ export async function PUT(
     const id = params.id;
     const body = await request.json();
     const { price, duration, imageUrl, translations } = body;
-    const locale = request.headers.get('Accept-Language') || 'en';
 
     // 验证必填字段
     if (!price || !duration || !imageUrl || !translations || !Array.isArray(translations)) {
-      return apiError(
-        'INVALID_INPUT', 
-        getLocalizedText(locale, {
-          en: 'Missing required fields',
-          zh: '缺少必填字段',
-          ko: '필수 필드가 누락되었습니다'
-        }),
-        400
-      );
+      return apiError('INVALID_INPUT', 'Missing required fields', 400);
     }
 
     // 验证服务是否存在
     const existingService = await prisma.service.findUnique({
       where: { id },
+      include: {
+        translations: true,
+      },
     });
 
     if (!existingService) {
+      return apiError('NOT_FOUND', 'Service not found', 404);
+    }
+
+    // 验证翻译数据
+    const requiredLocales = ['en', 'zh', 'ko'];
+    const missingLocales = requiredLocales.filter(
+      locale => !translations.some((t: any) => t.locale === locale)
+    );
+
+    if (missingLocales.length > 0) {
       return apiError(
-        'NOT_FOUND',
-        getLocalizedText(locale, {
-          en: 'Service not found',
-          zh: '未找到服务',
-          ko: '서비스를 찾을 수 없습니다'
-        }),
-        404
+        'INVALID_INPUT',
+        `Missing translations for: ${missingLocales.join(', ')}`,
+        400
       );
     }
-    
+
     // 使用事务更新服务及其翻译
     const updatedService = await prisma.$transaction(async (tx) => {
       // 更新服务基本信息
-      const updated = await tx.service.update({
+      const service = await tx.service.update({
         where: { id },
         data: {
           price,
@@ -109,44 +99,59 @@ export async function PUT(
           imageUrl,
         },
       });
-      
+
       // 更新翻译
       for (const translation of translations) {
-        const { locale, name, description, slug } = translation;
-        
-        // 查找现有翻译
-        const existingTranslation = await tx.serviceTranslation.findFirst({
-          where: {
-            serviceId: id,
-            locale,
-          },
-        });
+        const { locale, name, description } = translation;
+        // 始终使用英文名称生成slug
+        const isEnglish = locale === 'en';
+        if (isEnglish) {
+          const baseSlug = generateSlug(name);
+          
+          // 检查slug是否已存在（排除当前服务）
+          const existingSlug = await tx.serviceTranslation.findFirst({
+            where: {
+              AND: [
+                { locale: 'en' },
+                { slug: baseSlug },
+                { serviceId: { not: id } },
+              ],
+            },
+          });
 
-        if (existingTranslation) {
-          // 更新现有翻译
-          await tx.serviceTranslation.update({
-            where: { id: existingTranslation.id },
-            data: {
-              name,
-              description,
-              slug: slug || generateSlug(name),
-            },
-          });
-        } else {
-          // 创建新翻译
-          await tx.serviceTranslation.create({
-            data: {
-              serviceId: id,
-              locale,
-              name,
-              description,
-              slug: slug || generateSlug(name),
-            },
-          });
+          // 如果slug已存在，添加随机字符串
+          const slug = existingSlug ? `${baseSlug}-${Date.now().toString(36)}` : baseSlug;
+
+          // 更新所有语言版本使用相同的slug
+          for (const loc of requiredLocales) {
+            const localeTranslation = translations.find(t => t.locale === loc);
+            if (localeTranslation) {
+              await tx.serviceTranslation.upsert({
+                where: {
+                  serviceId_locale: {
+                    serviceId: id,
+                    locale: loc,
+                  },
+                },
+                create: {
+                  serviceId: id,
+                  locale: loc,
+                  name: localeTranslation.name,
+                  description: localeTranslation.description,
+                  slug: slug, // 使用相同的slug
+                },
+                update: {
+                  name: localeTranslation.name,
+                  description: localeTranslation.description,
+                  slug: slug, // 使用相同的slug
+                },
+              });
+            }
+          }
+          break; // 处理完英文版本后退出循环
         }
       }
-      
-      // 获取更新后的完整服务数据
+
       return await tx.service.findUnique({
         where: { id },
         include: {
@@ -155,75 +160,14 @@ export async function PUT(
       });
     });
 
-    return apiSuccess(
-      updatedService, 
-      getLocalizedText(locale, {
-        en: 'Service updated successfully',
-        zh: '服务更新成功',
-        ko: '서비스가 성공적으로 업데이트되었습니다'
-      })
-    );
+    return apiSuccess(updatedService, 'Service updated successfully');
   } catch (error) {
     console.error('Error updating service:', error);
-    const locale = request.headers.get('Accept-Language') || 'en';
-    return apiError(
-      'SERVER_ERROR',
-      getLocalizedErrorMessage(locale, 'update'),
-      500
-    );
-  }
-}
-
-// 辅助函数：生成 slug
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-// 根据语言获取本地化文本
-function getLocalizedText(locale: string, texts: {en: string; zh?: string; ko?: string; [key: string]: string | undefined}): string {
-  return (locale in texts && texts[locale]) ? texts[locale]! : texts.en; // 默认英文
-}
-
-// 根据语言获取本地化错误消息
-function getLocalizedErrorMessage(locale: string, type: 'fetch' | 'create' | 'update' | 'delete'): string {
-  interface ErrorMessages {
-    [key: string]: {
-      en: string;
-      zh: string;
-      ko: string;
+    if (error instanceof Error) {
+      return apiError('SERVER_ERROR', error.message, 500);
     }
+    return apiError('SERVER_ERROR', 'Failed to update service', 500);
   }
-  
-  const errorMessages: ErrorMessages = {
-    fetch: {
-      en: 'Failed to fetch service',
-      zh: '获取服务失败',
-      ko: '서비스를 가져오지 못했습니다'
-    },
-    create: {
-      en: 'Failed to create service',
-      zh: '创建服务失败',
-      ko: '서비스 생성 실패'
-    },
-    update: {
-      en: 'Failed to update service',
-      zh: '更新服务失败',
-      ko: '서비스 업데이트 실패'
-    },
-    delete: {
-      en: 'Failed to delete service',
-      zh: '删除服务失败',
-      ko: '서비스 삭제 실패'
-    }
-  };
-  
-  const messages = errorMessages[type];
-  if (locale === 'zh') return messages.zh;
-  if (locale === 'ko') return messages.ko;
-  return messages.en;
 }
 
 // 删除服务
@@ -233,7 +177,6 @@ export async function DELETE(
 ) {
   try {
     const id = params.id;
-    const locale = request.headers.get('Accept-Language') || 'en';
 
     // 验证服务是否存在
     const existingService = await prisma.service.findUnique({
@@ -241,19 +184,11 @@ export async function DELETE(
     });
 
     if (!existingService) {
-      return apiError(
-        'NOT_FOUND',
-        getLocalizedText(locale, {
-          en: 'Service not found',
-          zh: '未找到服务',
-          ko: '서비스를 찾을 수 없습니다'
-        }),
-        404
-      );
+      return apiError('NOT_FOUND', 'Service not found', 404);
     }
 
     // 使用事务删除服务及其相关数据
-    await prisma.$transaction([      
+    await prisma.$transaction([
       // 先删除翻译
       prisma.serviceTranslation.deleteMany({
         where: {
@@ -266,21 +201,9 @@ export async function DELETE(
       })
     ]);
 
-    return apiSuccess(
-      null, 
-      getLocalizedText(locale, {
-        en: 'Service deleted successfully',
-        zh: '服务删除成功',
-        ko: '서비스가 성공적으로 삭제되었습니다'
-      })
-    );
+    return apiSuccess(null, 'Service deleted successfully');
   } catch (error) {
     console.error('Error deleting service:', error);
-    const locale = request.headers.get('Accept-Language') || 'en';
-    return apiError(
-      'SERVER_ERROR',
-      getLocalizedErrorMessage(locale, 'delete'),
-      500
-    );
+    return apiError('SERVER_ERROR', 'Failed to delete service', 500);
   }
 } 

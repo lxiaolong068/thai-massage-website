@@ -218,22 +218,14 @@ export default function NewServicePage() {
                   ></textarea>
                 </div>
 
-                <div>
-                  <label htmlFor={`slug-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    URL Alias
-                  </label>
-                  <input
-                    type="text"
-                    id={`slug-${translation.locale}`}
-                    value={translation.slug}
-                    onChange={(e) => handleTranslationChange(translation.locale, 'slug', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                    required={activeTab === translation.locale}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    URL alias is used to generate the URL of the service detail page, and can only contain letters, numbers, hyphens and underscores
-                  </p>
-                </div>
+                {/* Remove the URL Slug input field since it will be auto-generated */}
+                {translation.locale === 'en' && (
+                  <div className="bg-blue-50 p-4 rounded-md mb-4">
+                    <p className="text-sm text-blue-700">
+                      The URL slug will be automatically generated from the English service name to ensure consistency across all languages.
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

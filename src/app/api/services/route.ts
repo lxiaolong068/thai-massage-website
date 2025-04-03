@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { apiSuccess, apiError } from '../../../lib/api-response';
+import { generateSlug } from '@/utils/string';
 
 // Get all services
 export async function GET(request: NextRequest) {
@@ -71,6 +72,27 @@ export async function POST(request: NextRequest) {
 
     // Create service with translations
     const newService = await prisma.$transaction(async (tx) => {
+      // 从英文翻译中获取名称并生成slug
+      const englishTranslation = translations.find((t: any) => t.locale === 'en');
+      if (!englishTranslation) {
+        throw new Error('English translation is required');
+      }
+
+      // 生成基础slug
+      const baseSlug = generateSlug(englishTranslation.name);
+
+      // 检查slug是否已存在
+      const existingSlug = await tx.serviceTranslation.findFirst({
+        where: {
+          locale: 'en',
+          slug: baseSlug
+        }
+      });
+
+      // 如果slug已存在，添加随机字符串
+      const slug = existingSlug ? `${baseSlug}-${Date.now().toString(36)}` : baseSlug;
+
+      // 创建服务
       const service = await tx.service.create({
         data: {
           price,
@@ -81,7 +103,7 @@ export async function POST(request: NextRequest) {
               locale: translation.locale,
               name: translation.name,
               description: translation.description,
-              slug: translation.slug || generateSlug(translation.name)
+              slug // 所有语言版本使用相同的slug
             }))
           }
         },
@@ -99,6 +121,10 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return apiError('DUPLICATE_ERROR', 'A service with this name already exists', 409);
+    }
+
+    if (error instanceof Error) {
+      return apiError('SERVER_ERROR', error.message, 500);
     }
     
     return apiError('SERVER_ERROR', 'Failed to create service', 500);
@@ -146,14 +172,6 @@ export async function PATCH(request: NextRequest) {
     console.error('Error in batch operation:', error);
     return apiError('SERVER_ERROR', 'Failed to perform batch operation', 500);
   }
-}
-
-// Helper function: Generate slug
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 // Helper function: Get fallback services
