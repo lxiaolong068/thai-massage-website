@@ -30,18 +30,16 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, isSelected, onSelect
       onClick={() => onSelect(service)}
     >
       <div className="relative h-48 w-full">
-        {service.imageUrl ? (
-          <Image
-            src={service.imageUrl}
-            alt={service.name}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-400">无图片</span>
-          </div>
-        )}
+        <Image
+          src={service.imageUrl || '/images/placeholder-service.jpg'}
+          alt={service.name}
+          fill
+          className="object-cover"
+          onError={(e) => {
+            console.error('Image load error for:', e.currentTarget.src);
+            e.currentTarget.src = '/images/placeholder-service.jpg';
+          }}
+        />
       </div>
       
       <div className="p-4">

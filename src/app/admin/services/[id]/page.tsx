@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, X } from 'lucide-react';
 
 type ServiceTranslation = {
@@ -38,7 +36,7 @@ export default function ServiceDetailPage({
   const [service, setService] = useState<Service | null>(null);
   const [price, setPrice] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string>('/images/placeholder-service.jpg');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [imageLoading, setImageLoading] = useState(false);
@@ -46,9 +44,21 @@ export default function ServiceDetailPage({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<string>('zh');
 
   useEffect(() => {
     const fetchService = async () => {
+      if (isNewService) {
+        // 初始化新服务的翻译
+        setTranslations([
+          { locale: 'en', name: '', description: '', slug: '' },
+          { locale: 'zh', name: '', description: '', slug: '' },
+          { locale: 'ko', name: '', description: '', slug: '' }
+        ]);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`/api/services/${id}`);
         
@@ -76,7 +86,7 @@ export default function ServiceDetailPage({
         setService(serviceData);
         setPrice(serviceData.price);
         setDuration(serviceData.duration);
-        setImageUrl(serviceData.imageUrl);
+        setImageUrl(serviceData.imageUrl || '/images/placeholder-service.jpg');
         setTranslations(allTranslations);
       } catch (err: any) {
         setError(err.message || 'Failed to fetch service data');
@@ -86,7 +96,7 @@ export default function ServiceDetailPage({
     };
 
     fetchService();
-  }, [id]);
+  }, [id, isNewService]);
 
   const handleTranslationChange = (locale: string, field: keyof ServiceTranslation, value: string) => {
     setTranslations(prevTranslations =>
@@ -112,8 +122,13 @@ export default function ServiceDetailPage({
         }
       }
 
-      const response = await fetch(`/api/services/${id}`, {
-        method: 'PUT',
+      // 验证图片
+      if (!imageUrl) {
+        throw new Error('Please upload a service image');
+      }
+
+      const response = await fetch(isNewService ? '/api/services' : `/api/services/${id}`, {
+        method: isNewService ? 'POST' : 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -128,12 +143,12 @@ export default function ServiceDetailPage({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to update service');
+        throw new Error(data.error?.message || `Failed to ${isNewService ? 'create' : 'update'} service`);
       }
 
       router.push('/admin/services');
     } catch (err: any) {
-      setError(err.message || 'Failed to update service. Please try again later');
+      setError(err.message || `Failed to ${isNewService ? 'create' : 'update'} service. Please try again later`);
     } finally {
       setSaving(false);
     }
@@ -163,10 +178,11 @@ export default function ServiceDetailPage({
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview('');
+    setImageUrl('/images/placeholder-service.jpg');
     if (service) {
       setService({
         ...service,
-        imageUrl: '',
+        imageUrl: '/images/placeholder-service.jpg',
       });
     }
   };
@@ -203,15 +219,13 @@ export default function ServiceDetailPage({
 
       if (result.success) {
         const imageUrl = result.data.url.startsWith('/') ? result.data.url : `/${result.data.url}`;
-        
         setImageUrl(imageUrl);
         if (service) {
           setService({
             ...service,
-            imageUrl: imageUrl,
+            imageUrl,
           });
         }
-        
         toast.success('Image uploaded successfully');
       } else {
         console.error('Image upload failed:', result.error);
@@ -233,7 +247,7 @@ export default function ServiceDetailPage({
     );
   }
 
-  if (error && !service) {
+  if (error && !service && !isNewService) {
     return (
       <div className="bg-red-50 p-4 rounded-md">
         <div className="text-red-500">{error}</div>
@@ -266,21 +280,15 @@ export default function ServiceDetailPage({
             <div className="flex flex-col items-center space-y-4">
               <div className="relative w-40 h-40">
                 <img
-                  src={imagePreview || service?.imageUrl || '/images/placeholder-service.jpg'}
+                  src={imagePreview || imageUrl}
                   alt="Service photo"
                   className="object-cover rounded-lg w-full h-full"
                   onError={(e) => {
                     console.error('Image load error for:', e.currentTarget.src);
                     e.currentTarget.src = '/images/placeholder-service.jpg';
-                    if (e.currentTarget.src === service?.imageUrl) {
-                      setService(prev => ({
-                        ...prev,
-                        imageUrl: '/images/placeholder-service.jpg'
-                      }));
-                    }
                   }}
                 />
-                {(imagePreview || service?.imageUrl) && (
+                {(imagePreview || imageUrl !== '/images/placeholder-service.jpg') && (
                   <button
                     type="button"
                     onClick={handleRemoveImage}
@@ -295,12 +303,13 @@ export default function ServiceDetailPage({
               <div className="flex flex-col items-center space-y-2">
                 <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                   <Upload className="mr-2 h-4 w-4" />
-                  {imagePreview || service?.imageUrl ? 'Change image' : 'Upload image'}
+                  {imagePreview || imageUrl !== '/images/placeholder-service.jpg' ? 'Change image' : 'Upload image'}
                   <input
                     type="file"
                     className="hidden"
                     accept="image/*"
                     onChange={handleImageChange}
+                    disabled={imageLoading}
                   />
                 </label>
                 <p className="text-xs text-gray-500">
@@ -311,7 +320,7 @@ export default function ServiceDetailPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
               Price (THB)
@@ -340,18 +349,32 @@ export default function ServiceDetailPage({
           </div>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Translations</h2>
-          <div className="space-y-6">
+        <div>
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex">
+              {['zh', 'en', 'ko'].map((locale) => (
+                <button
+                  key={locale}
+                  type="button"
+                  onClick={() => setActiveTab(locale)}
+                  className={`py-2 px-4 text-sm font-medium ${
+                    activeTab === locale
+                      ? 'border-b-2 border-primary text-primary'
+                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {locale === 'zh' ? 'Chinese' : locale === 'en' ? 'English' : 'Korean'}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="mt-4">
             {translations.map((translation) => (
               <div
                 key={translation.locale}
-                className="border border-gray-200 rounded-lg p-4"
+                className={`${activeTab === translation.locale ? 'block' : 'hidden'}`}
               >
-                <h3 className="text-md font-medium text-gray-900 mb-3">
-                  {translation.locale === 'zh' ? 'Chinese' : translation.locale === 'en' ? 'English' : 'Korean'}
-                </h3>
-
                 <div className="mb-4">
                   <label htmlFor={`name-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
                     Name
@@ -365,8 +388,7 @@ export default function ServiceDetailPage({
                     required
                   />
                 </div>
-
-                <div className="mb-4">
+                <div>
                   <label htmlFor={`description-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
@@ -374,42 +396,29 @@ export default function ServiceDetailPage({
                     id={`description-${translation.locale}`}
                     value={translation.description}
                     onChange={(e) => handleTranslationChange(translation.locale, 'description', e.target.value)}
-                    rows={3}
+                    rows={4}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                     required
                   />
-                </div>
-
-                <div>
-                  <label htmlFor={`slug-${translation.locale}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    URL Slug
-                  </label>
-                  <input
-                    type="text"
-                    id={`slug-${translation.locale}`}
-                    value={translation.slug}
-                    readOnly
-                    disabled
-                    className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2 cursor-not-allowed text-gray-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    URL slug is automatically generated from the English service name and cannot be modified manually to ensure consistency.
-                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2">
-          <Button asChild variant="outline">
-            <Link href="/admin/services">Cancel</Link>
-          </Button>
+        {error && (
+          <div className="bg-red-50 p-4 rounded-md">
+            <div className="text-red-500">{error}</div>
+          </div>
+        )}
+
+        <div className="flex justify-end">
           <Button
             type="submit"
             disabled={saving || imageLoading}
+            className="w-full md:w-auto"
           >
-            {saving || imageLoading ? 'Processing...' : 'Save'}
+            {saving ? (isNewService ? 'Creating...' : 'Saving...') : (isNewService ? 'Create Service' : 'Save Changes')}
           </Button>
         </div>
       </form>

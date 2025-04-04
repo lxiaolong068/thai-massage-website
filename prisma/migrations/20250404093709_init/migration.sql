@@ -1,9 +1,3 @@
--- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
--- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
 -- CreateEnum
 CREATE TYPE "BookingStatus" AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED');
 
@@ -13,6 +7,9 @@ CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'MANAGER', 'STAFF');
 -- CreateEnum
 CREATE TYPE "MessageStatus" AS ENUM ('UNREAD', 'READ', 'REPLIED');
 
+-- CreateEnum
+CREATE TYPE "TherapistStatus" AS ENUM ('WORKING', 'AVAILABLE');
+
 -- CreateTable
 CREATE TABLE "therapists" (
     "id" TEXT NOT NULL,
@@ -21,6 +18,7 @@ CREATE TABLE "therapists" (
     "image_url" TEXT NOT NULL,
     "specialties" TEXT[],
     "experience_years" INTEGER NOT NULL,
+    "work_status" "TherapistStatus" NOT NULL DEFAULT 'AVAILABLE',
 
     CONSTRAINT "therapists_pkey" PRIMARY KEY ("id")
 );
@@ -132,6 +130,19 @@ CREATE TABLE "messages" (
     CONSTRAINT "messages_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "admins" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'admin',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "therapist_translations_therapist_id_locale_key" ON "therapist_translations"("therapist_id", "locale");
 
@@ -149,6 +160,9 @@ CREATE UNIQUE INDEX "shop_settings_key_key" ON "shop_settings"("key");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "shop_settings_translations_setting_id_locale_key" ON "shop_settings_translations"("setting_id", "locale");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admins_email_key" ON "admins"("email");
 
 -- AddForeignKey
 ALTER TABLE "therapist_translations" ADD CONSTRAINT "therapist_translations_therapist_id_fkey" FOREIGN KEY ("therapist_id") REFERENCES "therapists"("id") ON DELETE CASCADE ON UPDATE CASCADE;

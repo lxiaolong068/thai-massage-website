@@ -56,21 +56,26 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { price, duration, imageUrl, translations } = body;
 
-    // Validate required fields
+    // 验证必填字段
     if (!price || !duration || !imageUrl || !translations || !Array.isArray(translations)) {
       return apiError('INVALID_INPUT', 'Missing required fields', 400);
     }
 
-    // Validate translations
-    const requiredLocales = ['zh', 'en', 'ko'];
-    for (const requiredLocale of requiredLocales) {
-      const translation = translations.find((t: any) => t.locale === requiredLocale);
-      if (!translation || !translation.name || !translation.description) {
-        return apiError('INVALID_INPUT', `Missing ${requiredLocale} translation`, 400);
-      }
+    // 验证翻译数据
+    const requiredLocales = ['en', 'zh', 'ko'];
+    const missingLocales = requiredLocales.filter(
+      locale => !translations.some((t: any) => t.locale === locale && t.name && t.description)
+    );
+
+    if (missingLocales.length > 0) {
+      return apiError(
+        'INVALID_INPUT',
+        `Missing translations for: ${missingLocales.join(', ')}`,
+        400
+      );
     }
 
-    // Create service with translations
+    // 使用事务创建服务及其翻译
     const newService = await prisma.$transaction(async (tx) => {
       // 从英文翻译中获取名称并生成slug
       const englishTranslation = translations.find((t: any) => t.locale === 'en');

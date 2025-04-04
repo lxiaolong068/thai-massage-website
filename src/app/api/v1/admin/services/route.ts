@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { apiSuccess, apiServerError, apiValidationError, apiNotFoundError } from '@/utils/api/response';
 import { withAdminApi } from '../../middleware';
+import prisma from '@/lib/prisma';
 
 /**
  * 管理API - 获取所有服务
@@ -12,72 +13,35 @@ async function getServices(request: NextRequest) {
     const url = new URL(request.url);
     const locale = url.searchParams.get('locale') || 'zh';
     
-    // 模拟服务数据
-    const mockServices = [
-      {
-        id: '1',
-        price: 1200,
-        duration: 60,
-        imageUrl: '/images/traditional-thai-new.jpg',
-        translations: [
-          { locale: 'zh', name: '传统泰式按摩', description: '使用正宗技术的古老按摩方法，缓解身体紧张。' },
-          { locale: 'en', name: 'Traditional Thai Massage', description: 'Ancient massage method using authentic techniques to relieve body tension.' },
-          { locale: 'ko', name: '전통 태국 마사지', description: '정통 기법을 사용한 고대 마사지 방법으로 신체 긴장을 풀어줍니다.' }
-        ],
-        slug: 'traditional-thai-massage',
-        isActive: true,
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: '2023-10-15T08:30:00Z'
+    // 从数据库获取服务数据
+    const services = await prisma.service.findMany({
+      include: {
+        translations: {
+          where: {
+            locale: locale
+          }
+        }
       },
-      {
-        id: '2',
-        price: 1500,
-        duration: 90,
-        imageUrl: '/images/oil-massage-new.jpg',
-        translations: [
-          { locale: 'zh', name: '精油按摩', description: '使用芳香精油的放松按摩，舒缓您的身心。' },
-          { locale: 'en', name: 'Oil Massage', description: 'Relaxing massage using aromatic oils to soothe your body and mind.' },
-          { locale: 'ko', name: '오일 마사지', description: '향기로운 오일을 사용하는 편안한 마사지로 신체와 마음을 위로합니다.' }
-        ],
-        slug: 'oil-massage',
-        isActive: true,
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: '2023-10-15T08:30:00Z'
-      },
-      {
-        id: '3',
-        price: 1800,
-        duration: 120,
-        imageUrl: '/images/aromatherapy-massage.jpg',
-        translations: [
-          { locale: 'zh', name: '芳香疗法按摩', description: '使用精油的治疗按摩，带来深度放松。' },
-          { locale: 'en', name: 'Aromatherapy Massage', description: 'Therapeutic massage using essential oils for deep relaxation.' },
-          { locale: 'ko', name: '아로마테라피 마사지', description: '딥 릴랙스에 위한 에센셜 오일을 사용한 치료 마사지입니다.' }
-        ],
-        slug: 'aromatherapy-massage',
-        isActive: true,
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: '2023-10-15T08:30:00Z'
-      },
-      {
-        id: '4',
-        price: 1000,
-        duration: 45,
-        imageUrl: '/images/foot-massage.jpg',
-        translations: [
-          { locale: 'zh', name: '足部按摩', description: '反射区按摩技术，为您的双脚和身体注入活力。' },
-          { locale: 'en', name: 'Foot Massage', description: 'Reflexology techniques to energize your feet and body.' },
-          { locale: 'ko', name: '발 마사지', description: '발과 신체를 활기차게 하는 반사구학 기법입니다.' }
-        ],
-        slug: 'foot-massage',
-        isActive: true,
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: '2023-10-15T08:30:00Z'
+      orderBy: {
+        createdAt: 'desc'
       }
-    ];
+    });
+
+    // 格式化服务数据
+    const formattedServices = services.map(service => ({
+      id: service.id,
+      price: service.price,
+      duration: service.duration,
+      imageUrl: service.imageUrl,
+      name: service.translations[0]?.name || '',
+      description: service.translations[0]?.description || '',
+      slug: service.translations[0]?.slug || '',
+      createdAt: service.createdAt,
+      updatedAt: service.updatedAt
+    }));
     
     // 返回成功响应
-    return apiSuccess(mockServices);
+    return apiSuccess(formattedServices);
   } catch (error) {
     console.error('获取服务列表出错:', error);
     return apiServerError('获取服务列表失败');

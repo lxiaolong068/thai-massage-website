@@ -14,33 +14,37 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
-  // 在组件加载时检查用户是否已登录
+  // 在组件加载时检查用户是否已登录 - 移除自动重定向到admin路径
   useEffect(() => {
-    // 检查本地存储中是否有token
-    const adminToken = localStorage.getItem('adminToken');
+    // 防止重复初始化
+    if (initialized) return;
+    setInitialized(true);
     
-    // 检查cookie中是否有会话
-    const checkSession = async () => {
+    // 只在客户端运行
+    if (typeof window === 'undefined') return;
+    
+    // 简化逻辑，只检查本地存储中的token
+    const checkLocalToken = () => {
       try {
-        const response = await fetch('/api/admin/check-session', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        // 只检查本地存储中是否有token
+        const adminToken = localStorage.getItem('adminToken');
         
-        const data = await response.json();
-        
-        // 如果已登录，重定向到仪表盘
-        if (response.ok && data.success && (data.isLoggedIn || adminToken)) {
-          window.location.replace(callbackUrl);
+        if (adminToken) {
+          console.log('本地token存在，重定向到:', callbackUrl);
+          // 使用router.push代替window.location.replace
+          router.push(callbackUrl);
+        } else {
+          console.log('本地无token，保持登录页面');
         }
       } catch (err) {
-        console.error('Failed to check session:', err);
+        console.error('检查token出错:', err);
       }
     };
     
-    checkSession();
-  }, [callbackUrl]);
+    checkLocalToken();
+  }, [callbackUrl, router, initialized]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +52,7 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      console.log('登录: 开始提交表单');
       // 使用API路由进行登录
       const response = await fetch('/api/admin/login', {
         method: 'POST',
@@ -58,7 +63,11 @@ function LoginForm() {
         credentials: 'include', // 确保包含cookie
       });
 
+      console.log('登录: 请求状态:', response.status, response.statusText);
+      console.log('登录: 响应头:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('登录: 响应数据:', data);
 
       if (!response.ok) {
         throw new Error(data.error?.message || 'Login failed');
@@ -66,6 +75,7 @@ function LoginForm() {
 
       // 将token存储在本地存储中
       if (data.data?.token) {
+        console.log('登录: 将token存储到localStorage, token长度:', data.data.token.length);
         localStorage.setItem('adminToken', data.data.token);
         localStorage.setItem('adminUser', JSON.stringify({
           id: data.data.id,
@@ -73,14 +83,16 @@ function LoginForm() {
           name: data.data.name,
           role: data.data.role
         }));
+
+        // 检查cookie是否已设置
+        console.log('登录: 当前document.cookie:', document.cookie);
       }
 
-      // 登录成功，直接重定向到仪表盘
-      console.log('Login successful, redirecting to:', callbackUrl);
-      
-      // 使用强制页面刷新的方式重定向
-      window.location.replace(callbackUrl);
+      // 登录成功，使用window.location.href强制重定向
+      console.log('登录成功, 重定向到:', callbackUrl);
+      window.location.href = callbackUrl;
     } catch (err: any) {
+      console.error('登录失败:', err);
       setError(err.message || 'Login failed, please try again later');
     } finally {
       setLoading(false);

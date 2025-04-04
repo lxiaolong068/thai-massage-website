@@ -1,29 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    // 获取cookie存储
-    const cookieStore = cookies();
-    
-    // 删除admin_session cookie
-    cookieStore.delete('admin_session');
-    
-    // 返回成功响应
-    return NextResponse.json({
+    // 创建响应
+    const response = NextResponse.json({
       success: true,
-      message: '登出成功',
+      message: 'Logged out successfully'
     });
+    
+    // 直接在响应中删除cookie
+    response.cookies.delete('admin_token');
+    
+    return response;
   } catch (error) {
-    console.error('登出失败:', error);
+    console.error('Logout error:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: 'SERVER_ERROR',
-          message: '服务器错误，请稍后再试',
-        },
-      },
+      { success: false, error: { message: 'Failed to logout' } },
       { status: 500 }
     );
   }
