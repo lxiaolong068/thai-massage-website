@@ -26,22 +26,46 @@ function LoginForm() {
     if (typeof window === 'undefined') return;
     
     // 检查本地存储中的token
-    const checkLocalToken = () => {
+    const checkLocalToken = async () => {
       try {
         const adminToken = localStorage.getItem('admin_token');
         const adminUser = localStorage.getItem('adminUser');
         
         if (adminToken && adminUser) {
-          console.log('检测到有效登录状态，准备重定向');
-          router.push(callbackUrl);
+          console.log('检测到本地登录状态，正在验证...');
+          
+          // 验证token有效性
+          const response = await fetch('/api/admin/check-session', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${adminToken}`
+            },
+            credentials: 'include',
+            cache: 'no-store',
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            console.log('会话验证成功，准备重定向');
+            
+            // 解码callbackUrl
+            const decodedCallbackUrl = callbackUrl.startsWith('%2F') ? 
+              decodeURIComponent(callbackUrl) : callbackUrl;
+            
+            router.push(decodedCallbackUrl);
+          } else {
+            console.log('会话验证失败，清除无效凭证');
+            
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('adminUser');
+          }
         } else {
-          console.log('未检测到有效登录状态，保持登录页面');
-          // 清理可能存在的无效数据
-          localStorage.removeItem('admin_token');
-          localStorage.removeItem('adminUser');
+          console.log('未检测到本地登录状态，保持登录页面');
         }
       } catch (err) {
         console.error('检查登录状态出错:', err);
+        
         // 发生错误时清理存储
         localStorage.removeItem('admin_token');
         localStorage.removeItem('adminUser');
@@ -64,6 +88,7 @@ function LoginForm() {
         },
         body: JSON.stringify({ email, password }),
         credentials: 'include',
+        cache: 'no-store',
       });
       
       const data = await response.json();
@@ -72,30 +97,53 @@ function LoginForm() {
         throw new Error(data.error?.message || 'Login failed');
       }
 
-      // 将token和用户信息存储在本地
+      // 将用户信息存储在本地
+      // 注意：token可能为null，如果使用的是备用认证方式
+      const userData = {
+        id: data.data.id,
+        email: data.data.email,
+        name: data.data.name,
+        role: data.data.role
+      };
+      
+      localStorage.setItem('adminUser', JSON.stringify(userData));
+      
+      // 如果返回了JWT token，也存储它
       if (data.data?.token) {
-        // 存储到 localStorage
         localStorage.setItem('admin_token', data.data.token);
-        localStorage.setItem('adminUser', JSON.stringify({
-          id: data.data.id,
-          email: data.data.email,
-          name: data.data.name,
-          role: data.data.role
-        }));
-        
-        console.log('登录成功，准备重定向到:', callbackUrl);
-        
-        // 使用延时确保localStorage已更新
-        setTimeout(() => {
-          // 使用window.location直接重定向，确保完全刷新页面
-          window.location.href = callbackUrl;
-        }, 500);
       } else {
-        throw new Error('Login response missing token');
+        // 清除可能存在的旧token
+        localStorage.removeItem('admin_token');
       }
+      
+      console.log('登录成功，准备重定向到:', callbackUrl);
+      
+      // 解码callbackUrl
+      const decodedCallbackUrl = callbackUrl.startsWith('%2F') ? 
+        decodeURIComponent(callbackUrl) : callbackUrl;
+      
+      // 执行二次验证确认认证有效
+      try {
+        const verifyResponse = await fetch('/api/admin/check-session', {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        });
+        
+        await verifyResponse.json();
+      } catch (verifyErr) {
+        console.error('二次验证出错:', verifyErr);
+      }
+      
+      // 使用延时确保localStorage已更新
+      setTimeout(() => {
+        // 使用window.location直接重定向，确保完全刷新页面
+        window.location.href = decodedCallbackUrl;
+      }, 1000);
     } catch (err: any) {
       console.error('登录失败:', err);
       setError(err.message || 'Login failed, please try again later');
+      
       // 清理可能的部分存储
       localStorage.removeItem('admin_token');
       localStorage.removeItem('adminUser');

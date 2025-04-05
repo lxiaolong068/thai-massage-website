@@ -1,0 +1,181 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Thai Massage Admin Login System Rules
+
+## 1. Authentication Architecture
+
+### 1.1 Multi-layer Authentication
+- JWT (JSON Web Token) as primary authentication method
+- Session-based authentication as fallback mechanism
+- Support token transmission via both Cookie and Authorization header
+
+### 1.2 Authentication Flow
+```typescript
+// Recommended authentication check order
+const auth = {
+  1: 'JWT Validation',
+  2: 'Token Decoding (Fallback)',
+  3: 'Session Authentication (Backup)'
+};
+```
+
+## 2. Middleware Standards
+
+### 2.1 Route Protection
+- Clearly define public paths list (`publicPaths`)
+- Admin paths must start with `/admin` or `/api/admin`
+- Non-public paths require authentication checks
+
+### 2.2 Token Processing
+```typescript
+// Token retrieval priority
+const token = cookieToken || headerToken;
+```
+
+### 2.3 Authentication Failure Handling
+- API routes return 401 status code
+- Page routes redirect to login page with callback URL preserved
+
+## 3. Login Page Standards
+
+### 3.1 State Management
+```typescript
+const requiredStates = {
+  email: 'string',
+  password: 'string',
+  error: 'string',
+  loading: 'boolean'
+};
+```
+
+### 3.2 Login Flow
+1. Clear error state before form submission
+2. Set loading state
+3. Send login request
+4. Store user information and token
+5. Perform secondary validation
+6. Redirect to target page
+
+### 3.3 Local Storage Standards
+```typescript
+// Required storage information
+localStorage.setItem('adminUser', JSON.stringify({
+  id: string,
+  email: string,
+  name: string,
+  role: string
+}));
+
+// Optional storage (JWT mode)
+localStorage.setItem('admin_token', token);
+```
+
+## 4. API Interface Standards
+
+### 4.1 Login Endpoint
+- Path: `/api/admin/login`
+- Method: POST
+- Force dynamic route: `export const dynamic = 'force-dynamic'`
+
+### 4.2 Response Format
+```typescript
+interface LoginResponse {
+  success: boolean;
+  data?: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    token?: string;
+    authType: 'jwt' | 'session';
+  };
+  error?: {
+    message: string;
+    details?: string; // Development environment only
+  };
+}
+```
+
+## 5. Security Standards
+
+### 5.1 Cookie Configuration
+```typescript
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: '/',
+  maxAge: 86400 // 24 hours
+};
+```
+
+### 5.2 Password Handling
+- Use bcrypt for password verification
+- Prohibit password-related information logging on client side
+- Error messages should not expose specific reasons
+
+### 5.3 Session Security
+- Session ID includes timestamp and hash value
+- Regular session validity checks
+- Support for session logout and cleanup
+
+## 6. Error Handling Standards
+
+### 6.1 Client-side Errors
+- Form validation errors
+- Network request errors
+- Authentication failure errors
+
+### 6.2 Server-side Errors
+- Database query errors
+- Token generation errors
+- Session creation errors
+
+### 6.3 Error Response
+```typescript
+// Standard error response format
+{
+  success: false,
+  error: {
+    message: string;
+    details?: string; // Development environment only
+  }
+}
+```
+
+## 7. Performance Optimization
+
+### 7.1 Code Splitting
+- Wrap login form with Suspense
+- Lazy load non-critical components
+
+### 7.2 Caching Strategy
+- Force dynamic routes to avoid login endpoint caching
+- Set appropriate Cookie and Session expiration times
+
+### 7.3 Redirect Optimization
+- Use delay to ensure storage updates complete
+- Prefer window.location for full page refresh
+
+## 8. Best Practices
+
+### 8.1 Development Guidelines
+- Follow TypeScript strict mode
+- Implement proper error boundaries
+- Use proper type definitions for all components
+- Maintain consistent error handling patterns
+
+### 8.2 Testing Requirements
+- Unit tests for authentication logic
+- Integration tests for login flow
+- End-to-end tests for critical paths
+- Regular security testing
+
+### 8.3 Maintenance
+- Regular token rotation
+- Session cleanup routines
+- Audit logging for security events
+- Regular dependency updates
