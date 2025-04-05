@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { UserRole } from '@prisma/client';
-import createI18nMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from './i18n/config';
 import createMiddleware from 'next-intl/middleware';
+import { locales, defaultLocale } from '@/i18n/config';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
 // 创建国际化中间件
-const i18nMiddleware = createI18nMiddleware({
+const i18nMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'always'
+  localePrefix: 'as-needed'
 });
 
 // 需要保护的API路径
@@ -79,14 +78,34 @@ const publicPaths = [
 ];
 
 // 中间件函数
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   
   console.log('========= 中间件触发 =========');
   console.log('处理路径:', pathname);
   console.log('请求URL:', request.url);
   console.log('所有cookies:', request.cookies.getAll().map(c => `${c.name}=${c.value.substring(0,10)}...`));
   
+  // 处理国际化路由
+  const i18nResponse = i18nMiddleware(request);
+  if (i18nResponse) return i18nResponse;
+
+  // 检查是否是API请求
+  if (pathname.startsWith('/api/')) {
+    // API路由的认证检查
+    if (pathname.startsWith('/api/admin/')) {
+      const token = request.headers.get('authorization')?.split(' ')[1];
+      if (!token) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+      // 这里可以添加token验证逻辑
+    }
+    return NextResponse.next();
+  }
+
   // 检查是否是管理后台路径
   const isAdminPath = pathname.startsWith('/admin');
   
@@ -140,8 +159,5 @@ export function middleware(request: NextRequest) {
 
 // 配置中间件应用的路径
 export const config = {
-  matcher: [
-    // 只匹配管理后台路径，简化配置避免冲突
-    '/admin/:path*'
-  ],
+  matcher: ['/((?!_next|.*\\..*).*)']
 };

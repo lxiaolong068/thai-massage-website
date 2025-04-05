@@ -1,15 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 
-// 全局声明以避免开发环境中的连接池问题
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-// 创建或复用Prisma客户端实例
-const prisma = globalForPrisma.prisma || new PrismaClient({
-  log: ['error', 'warn'],
-});
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-// 在开发环境中保存客户端实例
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
 
 // 添加错误处理中间件
 prisma.$use(async (params, next) => {
