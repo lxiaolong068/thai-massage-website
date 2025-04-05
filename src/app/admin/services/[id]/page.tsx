@@ -123,9 +123,11 @@ export default function ServiceDetailPage({
       }
 
       // 验证图片
-      if (!imageUrl) {
+      if (!imageUrl || imageUrl === '/images/placeholder-service.jpg') {
         throw new Error('Please upload a service image');
       }
+
+      console.log('Submitting service with imageUrl:', imageUrl); // 添加日志
 
       const response = await fetch(isNewService ? '/api/services' : `/api/services/${id}`, {
         method: isNewService ? 'POST' : 'PUT',
@@ -141,11 +143,13 @@ export default function ServiceDetailPage({
       });
 
       const data = await response.json();
+      console.log('Server response:', data); // 添加日志
 
       if (!response.ok) {
         throw new Error(data.error?.message || `Failed to ${isNewService ? 'create' : 'update'} service`);
       }
 
+      toast.success(`Service ${isNewService ? 'created' : 'updated'} successfully`);
       router.push('/admin/services');
     } catch (err: any) {
       setError(err.message || `Failed to ${isNewService ? 'create' : 'update'} service. Please try again later`);
@@ -218,13 +222,15 @@ export default function ServiceDetailPage({
       toast.dismiss(loadingToastId);
 
       if (result.success) {
-        const imageUrl = result.data.url.startsWith('/') ? result.data.url : `/${result.data.url}`;
-        setImageUrl(imageUrl);
+        const newImageUrl = result.data.url.startsWith('/') ? result.data.url : `/${result.data.url}`;
+        setImageUrl(newImageUrl);
+        // 确保同时更新service对象
         if (service) {
-          setService({
+          const updatedService = {
             ...service,
-            imageUrl,
-          });
+            imageUrl: newImageUrl,
+          };
+          setService(updatedService);
         }
         toast.success('Image uploaded successfully');
       } else {
@@ -416,7 +422,7 @@ export default function ServiceDetailPage({
           <Button
             type="submit"
             disabled={saving || imageLoading}
-            className="w-full md:w-auto"
+            className="w-full md:w-auto px-8 py-3 text-lg bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all"
           >
             {saving ? (isNewService ? 'Creating...' : 'Saving...') : (isNewService ? 'Create Service' : 'Save Changes')}
           </Button>

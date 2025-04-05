@@ -38,11 +38,6 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    if (formattedServices.length === 0) {
-      const fallbackServices = getFallbackServices(locale);
-      return apiSuccess(fallbackServices);
-    }
-
     return apiSuccess(formattedServices);
   } catch (error) {
     console.error('Error fetching services:', error);

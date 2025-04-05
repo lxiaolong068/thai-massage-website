@@ -1,18 +1,91 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useImprovedTranslator } from '@/i18n/improved-client';
+
+type Service = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: number;
+  imageUrl?: string;
+};
 
 type ServicesProps = {
   locale?: string;
 };
 
 const Services = ({ locale = 'en' }: ServicesProps) => {
-  // 使用 useImprovedTranslator 钩子获取翻译
   const { t } = useImprovedTranslator(locale, 'services');
   const { t: commonT } = useImprovedTranslator(locale, 'common');
   
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/services?locale=${locale}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch services: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success || !result.data) {
+          throw new Error(result.error?.message || 'Failed to fetch services');
+        }
+        
+        setServices(result.data);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load services');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchServices();
+  }, [locale]);
+
+  if (loading) {
+    return (
+      <section className="section-container section-light" id="services">
+        <div className="container">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="section-container section-light" id="services">
+        <div className="container">
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            >
+              {t('retry', '重试')}
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="section-container section-light" id="services">
       <div className="container">
@@ -24,200 +97,34 @@ const Services = ({ locale = 'en' }: ServicesProps) => {
         </p>
         
         <div className="grid-responsive">
-          {/* Traditional Thai Massage */}
-          <div className="card card-hover">
-            <div className="image-container">
-              <Image
-                src="/images/traditional-thai-new.jpg"
-                alt={t('traditional.title', '传统泰式按摩')}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="title-md text-black">{t('traditional.title', '传统泰式按摩')}</h3>
-              <p className="text-gray-800 mb-4">
-                {t('traditional.description', '传统泰式按摩结合了特殊的按摩技巧和缓慢的运动，帮助放松身体和改善血液循环。')}
-              </p>
-              <div className="flex flex-col space-y-2 text-sm">
-                <div className="flex-between text-gray-900">
-                  <span>60 min..........</span>
-                  <span className="font-semibold">800 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>90 min..........</span>
-                  <span className="font-semibold">1200 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>120 min........</span>
-                  <span className="font-semibold">1500 baht</span>
+          {services.map((service) => (
+            <div key={service.id} className="card card-hover">
+              <div className="image-container">
+                <Image
+                  src={service.imageUrl || '/images/placeholder-service.jpg'}
+                  alt={service.name}
+                  fill
+                  className="object-cover"
+                  onError={(e) => {
+                    console.error('Image load error for:', e.currentTarget.src);
+                    e.currentTarget.src = '/images/placeholder-service.jpg';
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="title-md text-black">{service.name}</h3>
+                <p className="text-gray-800 mb-4">{service.description}</p>
+                <div className="flex flex-col space-y-2 text-sm">
+                  <div className="flex-between text-gray-900">
+                    <span>{service.duration} min..........</span>
+                    <span className="font-semibold">{service.price} baht</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Neck & Shoulder */}
-          <div className="card card-hover">
-            <div className="image-container">
-              <Image
-                src="/images/neck-shoulder-new.jpg"
-                alt={t('neck.title', '颈肩按摩')}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="title-md text-black">{t('neck.title', '颈肩按摩')}</h3>
-              <p className="text-gray-800 mb-4">
-                {t('neck.description', '专注于颈部和肩部区域，缓解因长时间使用电脑或手机导致的疲劳和疼痛。')}
-              </p>
-              <div className="flex flex-col space-y-2 text-sm">
-                <div className="flex-between text-gray-900">
-                  <span>60 min..........</span>
-                  <span className="font-semibold">800 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>90 min..........</span>
-                  <span className="font-semibold">1200 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>120 min........</span>
-                  <span className="font-semibold">1500 baht</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Oil Massage */}
-          <div className="card card-hover">
-            <div className="image-container">
-              <Image
-                src="/images/oil-massage-new.jpg"
-                alt={t('oil.title', '精油按摩')}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="title-md text-black">{t('oil.title', '精油按摩')}</h3>
-              <p className="text-gray-800 mb-4">
-                {t('oil.description', '使用特制按摩油，通过滑润的手法帮助放松肉肉，改善血液循环和皮肤质量。')}
-              </p>
-              <div className="flex flex-col space-y-2 text-sm">
-                <div className="flex-between text-gray-900">
-                  <span>60 min..........</span>
-                  <span className="font-semibold">800 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>90 min..........</span>
-                  <span className="font-semibold">1200 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>120 min........</span>
-                  <span className="font-semibold">1500 baht</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Aromatherapy Massage */}
-          <div className="card card-hover">
-            <div className="image-container">
-              <Image
-                src="/images/aromatherapy-massage.jpg"
-                alt={t('aromatherapy.title', '香薄疗法按摩')}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="title-md text-black">{t('aromatherapy.title', '香薄疗法按摩')}</h3>
-              <p className="text-gray-800 mb-4">
-                {t('aromatherapy.description', '结合精油按摩和芳香精油，通过吸入芳香和皮肤吸收来帮助放松身心。')}
-              </p>
-              <div className="flex flex-col space-y-2 text-sm">
-                <div className="flex-between text-gray-900">
-                  <span>60 min..........</span>
-                  <span className="font-semibold">800 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>90 min..........</span>
-                  <span className="font-semibold">1200 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>120 min........</span>
-                  <span className="font-semibold">1500 baht</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Deep Tissue Massage */}
-          <div className="card card-hover">
-            <div className="image-container">
-              <Image
-                src="/images/deep-tissue-new.jpg"
-                alt={t('deep.title', '深层组织按摩')}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="title-md text-black">{t('deep.title', '深层组织按摩')}</h3>
-              <p className="text-gray-800 mb-4">
-                {t('deep.description', '采用强度较大的按摩手法，针对深层肉肉和结缔组织，缓解慢性疼痛和紧张。')}
-              </p>
-              <div className="flex flex-col space-y-2 text-sm">
-                <div className="flex-between text-gray-900">
-                  <span>60 min..........</span>
-                  <span className="font-semibold">800 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>90 min..........</span>
-                  <span className="font-semibold">1200 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>120 min........</span>
-                  <span className="font-semibold">1500 baht</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Foot Massage */}
-          <div className="card card-hover">
-            <div className="image-container">
-              <Image
-                src="/images/foot-massage.jpg"
-                alt={t('foot.title', '足部按摩')}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className="title-md text-black">{t('foot.title', '足部按摩')}</h3>
-              <p className="text-gray-800 mb-4">
-                {t('foot.description', '通过按摩足部的反射区，帮助放松整个身体，缓解疲劳和改善血液循环。')}
-              </p>
-              <div className="flex flex-col space-y-2 text-sm">
-                <div className="flex-between text-gray-900">
-                  <span>60 min..........</span>
-                  <span className="font-semibold">800 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>90 min..........</span>
-                  <span className="font-semibold">1200 baht</span>
-                </div>
-                <div className="flex-between text-gray-900">
-                  <span>120 min........</span>
-                  <span className="font-semibold">1500 baht</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
         
-        {/* Book Now 按钮 */}
         <div className="mt-12 text-center">
           <Link 
             href={`/${locale}/therapists`} 

@@ -31,16 +31,19 @@ export default function ServicesPage() {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch('/api/services?locale=en');
+      const response = await fetch('/api/services');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch services: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('Fetched services:', data);
       setServices(data.data || []);
     } catch (err: any) {
+      console.error('Error fetching services:', err);
       setError(err.message || 'Failed to fetch services');
+      toast.error('Failed to fetch services');
     } finally {
       setLoading(false);
       setSelectedServices([]);
@@ -267,15 +270,19 @@ export default function ServicesPage() {
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0 relative">
                             <Image
-                              src={service.imageUrl}
-                              alt={service.name}
+                              src={service.imageUrl || '/images/placeholder-service.jpg'}
+                              alt={service.name || 'Service'}
                               fill
                               className="rounded-md object-cover"
                             />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{service.name}</div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">{service.description}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {service.name}
+                            </div>
+                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                              {service.description}
+                            </div>
                           </div>
                         </div>
                       </td>

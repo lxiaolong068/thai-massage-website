@@ -329,7 +329,7 @@ export default function NewServicePage() {
           <Button
             type="submit"
             disabled={loading || imageLoading}
-            className="w-full md:w-auto"
+            className="w-full md:w-auto px-8 py-3 text-lg bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all"
           >
             {loading ? 'Creating...' : 'Create Service'}
           </Button>
