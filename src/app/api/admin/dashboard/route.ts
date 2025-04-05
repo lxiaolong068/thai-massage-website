@@ -1,81 +1,58 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextRequest } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 // 指定这是一个动态路由
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs'; // 确保使用 Node.js 运行时
 
-export async function GET(request: NextRequest) {
-  // 在构建时返回静态响应
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return NextResponse.json({
-      success: true,
-      data: {
-        servicesCount: 0,
-        therapistsCount: 0,
-        bookingsCount: 0,
-        pendingBookingsCount: 0,
-        messagesCount: 0,
-        unreadMessagesCount: 0,
-        isStaticBuild: true
-      },
-    });
-  }
-
+export async function GET(req: NextRequest) {
   try {
-    // Get services count
+    // 1. 获取所有服务数量
     const servicesCount = await prisma.service.count();
     
-    // Get therapists count
+    // 2. 获取所有治疗师数量
     const therapistsCount = await prisma.therapist.count();
     
-    // Get bookings count
+    // 3. 获取所有预约数量
     const bookingsCount = await prisma.booking.count();
     
-    // Get pending bookings count
+    // 4. 获取等待中的预约数量
     const pendingBookingsCount = await prisma.booking.count({
       where: {
-        status: 'PENDING',
-      },
+        status: 'PENDING'
+      }
     });
     
-    // Get messages count
+    // 5. 获取所有消息数量
     const messagesCount = await prisma.message.count();
     
-    // Get unread messages count
+    // 6. 获取未读消息数量
     const unreadMessagesCount = await prisma.message.count({
       where: {
-        status: 'UNREAD',
-      },
+        status: 'UNREAD'
+      }
     });
-    
-    // Return statistics data
-    return NextResponse.json({
+
+    return Response.json({
       success: true,
       data: {
-        servicesCount,
-        therapistsCount,
-        bookingsCount,
-        pendingBookingsCount,
-        messagesCount,
-        unreadMessagesCount,
-      },
+        services: servicesCount,
+        therapists: therapistsCount,
+        bookings: bookingsCount,
+        pendingBookings: pendingBookingsCount,
+        messages: messagesCount,
+        unreadMessages: unreadMessagesCount
+      }
     });
-  } catch (error) {
-    console.error('Failed to fetch dashboard data:', error);
-    // 提供更详细的错误信息
-    const errorMessage = error instanceof Error 
-      ? `${error.message}\n${error.stack || ''}` 
-      : 'Unknown error';
-    
-    return NextResponse.json(
+  } catch (error: any) {
+    console.error('Dashboard API error:', error);
+    return Response.json(
       {
         success: false,
         error: {
-          code: 'SERVER_ERROR',
-          message: 'Server error, please try again later',
-          details: errorMessage,
-        },
+          message: error.message || 'Failed to get dashboard data',
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }
       },
       { status: 500 }
     );

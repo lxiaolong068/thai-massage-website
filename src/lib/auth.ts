@@ -1,9 +1,7 @@
 import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { verifyToken, generateToken as createJwtToken } from './jwt';
 
 export interface AdminUser {
   id: string;
@@ -26,14 +24,13 @@ export async function verifyAuth(request: NextRequest) {
 
     // 验证token
     console.log('验证认证: 开始验证token, 前20个字符:', token.substring(0, 20));
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as AdminUser;
-      console.log('验证认证: token有效, 用户:', decoded.email);
-      return decoded;
-    } catch (jwtError) {
-      console.error('验证认证: JWT验证失败:', jwtError);
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      console.error('验证认证: JWT验证失败');
       return null;
     }
+    console.log('验证认证: token有效, 用户:', decoded.email);
+    return decoded;
   } catch (error) {
     console.error('验证认证: 出现异常:', error);
     return null;
@@ -64,9 +61,9 @@ export function withAuth(handler: Function) {
   }
 }
 
-export function generateToken(user: AdminUser) {
+export function generateToken(user: AdminUser): string {
   console.log('生成token: 用户:', user.email);
-  const token = jwt.sign(user, JWT_SECRET, { expiresIn: '24h' });
+  const token = createJwtToken(user);
   console.log('生成token: 完成, token长度:', token.length);
   return token;
 }

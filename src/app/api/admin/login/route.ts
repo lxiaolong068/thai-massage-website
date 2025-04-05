@@ -1,95 +1,112 @@
 import { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import { generateToken } from '@/lib/auth';
-import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
+import { signToken } from '@/lib/jwt';
 
 // 指定这是一个动态路由
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
+  console.log('[Login API] 请求开始处理');
+  
   try {
-    const body = await request.json();
+    // 获取请求体
+    const body = await req.json();
     const { email, password } = body;
-
-    // 验证输入
+    
+    console.log(`[Login API] 登录尝试: ${email}`);
+    
+    // 参数验证
     if (!email || !password) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Email and password are required' } },
+      console.log(`[Login API] 缺少参数: email=${!!email}, password=${!!password}`);
+      return Response.json(
+        { 
+          success: false, 
+          error: { message: '邮箱和密码不能为空' } 
+        }, 
         { status: 400 }
       );
     }
-
-    // 查找用户 - 使用 findFirst 而不是 findUnique 来避免类型问题
-    const user = await prisma.admin.findFirst({
+    
+    // 查找管理员
+    const admin = await prisma.admin.findUnique({
       where: { email },
     });
-
-    console.log('登录尝试:', email);
-    console.log('找到用户:', user ? 'Yes' : 'No');
-
-    if (!user) {
-      // 获取所有管理员邮箱用于调试
-      const allAdmins = await prisma.admin.findMany({
-        select: { email: true }
-      });
-      console.log('系统中的管理员邮箱:', allAdmins.map(a => a.email));
-      
-      return NextResponse.json(
-        { success: false, error: { message: 'Invalid email or password' } },
+    
+    if (!admin) {
+      console.log(`[Login API] 未找到管理员: ${email}`);
+      return Response.json(
+        { 
+          success: false, 
+          error: { message: '邮箱或密码不正确' } 
+        }, 
         { status: 401 }
       );
     }
-
+    
+    console.log(`[Login API] 找到管理员: ${admin.id}, ${admin.name}`);
+    
     // 验证密码
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    console.log('密码验证结果:', isValidPassword ? '成功' : '失败');
-
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Invalid email or password' } },
+    const isValid = await bcrypt.compare(password, admin.password);
+    
+    console.log(`[Login API] 密码验证结果: ${isValid}`);
+    
+    if (!isValid) {
+      return Response.json(
+        { 
+          success: false, 
+          error: { message: '邮箱或密码不正确' } 
+        }, 
         { status: 401 }
       );
     }
-
-    // 生成token
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
+    
+    // 创建JWT令牌
+    const token = signToken({
+      id: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: admin.role,
     });
-
-    // 创建响应
-    const response = NextResponse.json({
+    
+    console.log(`[Login API] 生成token: 长度=${token.length}`);
+    
+    // 更新最后登录时间
+    await prisma.admin.update({
+      where: { id: admin.id },
+      data: { updatedAt: new Date() },
+    });
+    
+    // 设置cookie和返回
+    const response = Response.json({
       success: true,
       data: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+        role: admin.role,
         token,
       },
     });
-
-    // 直接在响应中设置cookie
-    console.log('LOGIN: 设置cookie admin_token，token长度:', token.length);
-    response.cookies.set('admin_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 24 hours
-      path: '/',
-    });
     
-    // 输出设置后的所有cookies
-    console.log('LOGIN: 响应包含的所有cookies:', response.cookies.getAll().map(c => c.name));
-
+    // 设置cookie
+    const cookie = `admin_token=${token}; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax`;
+    response.headers.set('Set-Cookie', cookie);
+    
+    console.log(`[Login API] 登录成功: 设置Cookie=${!!cookie}`);
+    
     return response;
-  } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.json(
-      { success: false, error: { message: 'Internal server error' } },
+  } catch (error: any) {
+    console.error('[Login API] 登录出错:', error);
+    
+    return Response.json(
+      {
+        success: false,
+        error: {
+          message: '登录失败，请重试',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        },
+      },
       { status: 500 }
     );
   }
