@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { useTheme, themeColors } from '@/contexts/ThemeContext';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import ClientUtils from '@/components/clientUtils';
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,11 +13,19 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   
   // If on login page, show content directly without admin layout
   if (isLoginPage) {
-    return <>{children}</>;
+    return (
+      <>
+        <ClientUtils />
+        {children}
+      </>
+    );
   }
   
   return (
     <div className="flex h-screen" style={{ backgroundColor: themeColors[theme].secondary }}>
+      {/* 添加ClientUtils组件，不会在UI中显示但会进行拦截器设置 */}
+      <ClientUtils />
+      
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-md">
         <div className="p-6 text-white" style={{ backgroundColor: themeColors[theme].primary }}>

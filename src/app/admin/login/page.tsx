@@ -16,7 +16,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  // 在组件加载时检查用户是否已登录 - 移除自动重定向到admin路径
+  // 在组件加载时检查用户是否已登录
   useEffect(() => {
     // 防止重复初始化
     if (initialized) return;
@@ -25,21 +25,26 @@ function LoginForm() {
     // 只在客户端运行
     if (typeof window === 'undefined') return;
     
-    // 简化逻辑，只检查本地存储中的token
+    // 检查本地存储中的token
     const checkLocalToken = () => {
       try {
-        // 只检查本地存储中是否有token
         const adminToken = localStorage.getItem('admin_token');
+        const adminUser = localStorage.getItem('adminUser');
         
-        if (adminToken) {
-          console.log('本地token存在，重定向到:', callbackUrl);
-          // 使用router.push代替window.location.replace
+        if (adminToken && adminUser) {
+          console.log('检测到有效登录状态，准备重定向');
           router.push(callbackUrl);
         } else {
-          console.log('本地无token，保持登录页面');
+          console.log('未检测到有效登录状态，保持登录页面');
+          // 清理可能存在的无效数据
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('adminUser');
         }
       } catch (err) {
-        console.error('检查token出错:', err);
+        console.error('检查登录状态出错:', err);
+        // 发生错误时清理存储
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('adminUser');
       }
     };
     
@@ -52,34 +57,24 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      console.log('登录: 开始提交表单');
-      console.log('登录: 提交数据:', { email, password });
-      
-      // 使用API路由进行登录
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        credentials: 'include', // 确保包含cookie
+        credentials: 'include',
       });
-
-      console.log('登录: 请求状态:', response.status, response.statusText);
-      console.log('登录: 响应头:', Object.fromEntries(response.headers.entries()));
       
       const data = await response.json();
-      console.log('登录: 响应数据:', data);
 
       if (!response.ok) {
-        console.error('登录失败: 状态码:', response.status);
-        console.error('登录失败: 错误信息:', data.error);
         throw new Error(data.error?.message || 'Login failed');
       }
 
-      // 将token存储在本地存储中
+      // 将token和用户信息存储在本地
       if (data.data?.token) {
-        console.log('登录: 将token存储到localStorage, token长度:', data.data.token.length);
+        // 存储到 localStorage
         localStorage.setItem('admin_token', data.data.token);
         localStorage.setItem('adminUser', JSON.stringify({
           id: data.data.id,
@@ -87,30 +82,23 @@ function LoginForm() {
           name: data.data.name,
           role: data.data.role
         }));
-
-        // 检查cookie是否已设置
-        console.log('登录: 当前document.cookie:', document.cookie);
         
-        // 仅用于调试
-        const storedToken = localStorage.getItem('admin_token');
-        console.log('登录: localStorage中的token存在:', !!storedToken);
-        if (storedToken) {
-          console.log('登录: localStorage中的token长度:', storedToken.length);
-        }
+        console.log('登录成功，准备重定向到:', callbackUrl);
+        
+        // 使用延时确保localStorage已更新
+        setTimeout(() => {
+          // 使用window.location直接重定向，确保完全刷新页面
+          window.location.href = callbackUrl;
+        }, 500);
+      } else {
+        throw new Error('Login response missing token');
       }
-
-      // 强制设置token到cookie (仅用于调试)
-      document.cookie = `admin_token=${data.data.token}; path=/; max-age=86400`;
-      console.log('登录: 手动设置cookie后的document.cookie:', document.cookie);
-
-      // 登录成功，使用同步重定向方式
-      console.log('登录成功, 重定向到:', callbackUrl);
-      setTimeout(() => {
-        window.location.href = callbackUrl;
-      }, 500);
     } catch (err: any) {
       console.error('登录失败:', err);
       setError(err.message || 'Login failed, please try again later');
+      // 清理可能的部分存储
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('adminUser');
     } finally {
       setLoading(false);
     }
@@ -184,65 +172,6 @@ function LoginForm() {
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
-          </div>
-
-          {/* 调试功能区 */}
-          <div className="mt-4 border-t pt-4">
-            <p className="text-sm text-gray-600 mb-2">调试功能</p>
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const response = await fetch(`/api/test/password?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
-                    const data = await response.json();
-                    console.log('密码验证测试结果:', data);
-                    alert(data.success ? 
-                      `密码验证${data.passwordTest.isValid ? '成功' : '失败'} (bcrypt自测: ${data.passwordTest.testCompareResult ? '成功' : '失败'})` : 
-                      `测试失败: ${data.error}`);
-                  } catch (err) {
-                    console.error('密码验证测试错误:', err);
-                    alert(`测试出错: ${err instanceof Error ? err.message : String(err)}`);
-                  }
-                }}
-                className="text-xs bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-              >
-                测试密码
-              </button>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const loginResponse = await fetch('/api/admin/login', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email, password }),
-                      credentials: 'include'
-                    });
-                    
-                    const loginData = await loginResponse.json();
-                    console.log('登录API响应:', loginData);
-                    
-                    alert(loginData.success ? 
-                      `登录API成功! token长度: ${loginData.data.token.length}` : 
-                      `登录API失败: ${loginData.error?.message || '未知错误'}`);
-                    
-                    if (loginData.success && loginData.data?.token) {
-                      // 尝试手动存储token
-                      localStorage.setItem('admin_token', loginData.data.token);
-                      console.log('Token已存储到localStorage');
-                    }
-                  } catch (err) {
-                    console.error('登录API测试错误:', err);
-                    alert(`测试出错: ${err instanceof Error ? err.message : String(err)}`);
-                  }
-                }}
-                className="text-xs bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded"
-              >
-                测试登录API
-              </button>
-            </div>
           </div>
         </form>
       </div>

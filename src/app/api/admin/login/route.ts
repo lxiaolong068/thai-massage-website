@@ -7,18 +7,13 @@ import { signToken } from '@/lib/jwt';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  console.log('[Login API] 请求开始处理');
-  
   try {
     // 获取请求体
     const body = await req.json();
     const { email, password } = body;
     
-    console.log(`[Login API] 登录尝试: ${email}`);
-    
     // 参数验证
     if (!email || !password) {
-      console.log(`[Login API] 缺少参数: email=${!!email}, password=${!!password}`);
       return Response.json(
         { 
           success: false, 
@@ -34,7 +29,6 @@ export async function POST(req: NextRequest) {
     });
     
     if (!admin) {
-      console.log(`[Login API] 未找到管理员: ${email}`);
       return Response.json(
         { 
           success: false, 
@@ -44,12 +38,8 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    console.log(`[Login API] 找到管理员: ${admin.id}, ${admin.name}`);
-    
     // 验证密码
     const isValid = await bcrypt.compare(password, admin.password);
-    
-    console.log(`[Login API] 密码验证结果: ${isValid}`);
     
     if (!isValid) {
       return Response.json(
@@ -69,15 +59,13 @@ export async function POST(req: NextRequest) {
       role: admin.role,
     });
     
-    console.log(`[Login API] 生成token: 长度=${token.length}`);
-    
     // 更新最后登录时间
     await prisma.admin.update({
       where: { id: admin.id },
       data: { updatedAt: new Date() },
     });
     
-    // 设置cookie和返回
+    // 准备响应
     const response = Response.json({
       success: true,
       data: {
@@ -88,13 +76,13 @@ export async function POST(req: NextRequest) {
         token,
       },
     });
-    
-    // 设置cookie
-    const cookie = `admin_token=${token}; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax`;
-    response.headers.set('Set-Cookie', cookie);
-    
-    console.log(`[Login API] 登录成功: 设置Cookie=${!!cookie}`);
-    
+
+    // 设置 HttpOnly cookie
+    response.headers.set(
+      'Set-Cookie',
+      `admin_token=${token}; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax; ${process.env.NODE_ENV === 'production' ? 'Secure;' : ''}`
+    );
+
     return response;
   } catch (error: any) {
     console.error('[Login API] 登录出错:', error);
