@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import * as jose from 'jose';
 
 // 定义Token载荷类型
 export interface TokenPayload {
@@ -6,6 +6,7 @@ export interface TokenPayload {
   email: string;
   name: string;
   role: string;
+  [key: string]: unknown; // 允许其他属性
 }
 
 // 获取JWT密钥，确保存在
@@ -19,14 +20,18 @@ const getJwtSecret = () => {
 };
 
 // 生成JWT令牌
-export function signToken(payload: TokenPayload): string {
+export async function signToken(payload: TokenPayload): Promise<string> {
   try {
-    console.log(`正在为用户 ${payload.email} 生成JWT令牌`);
-    const token = jwt.sign(payload, getJwtSecret(), {
-      expiresIn: '24h', // 令牌24小时后过期
-    });
-    console.log(`令牌生成成功，长度: ${token.length}`);
-    return token;
+    const secret = new TextEncoder().encode(getJwtSecret());
+    const alg = 'HS256';
+    
+    const jwt = await new jose.SignJWT({ ...payload })
+      .setProtectedHeader({ alg })
+      .setIssuedAt()
+      .setExpirationTime('24h')
+      .sign(secret);
+    
+    return jwt;
   } catch (error) {
     console.error('JWT签名错误:', error);
     if (error instanceof Error) {
@@ -37,31 +42,32 @@ export function signToken(payload: TokenPayload): string {
 }
 
 // 验证JWT令牌
-export function verifyToken(token: string): TokenPayload {
+export async function verifyToken(token: string): Promise<TokenPayload> {
   if (!token) {
     console.error('JWT验证错误: 令牌为空');
     throw new Error('令牌不能为空');
   }
   
   try {
-    console.log(`正在验证JWT令牌, 长度: ${token.length}`);
-    const decoded = jwt.verify(token, getJwtSecret()) as TokenPayload;
-    console.log(`令牌验证成功，用户: ${decoded.email}, 角色: ${decoded.role}`);
-    return decoded;
-  } catch (error) {
-    console.error('JWT验证错误:', error);
+    const secret = new TextEncoder().encode(getJwtSecret());
+    const { payload } = await jose.jwtVerify(token, secret);
     
-    // 详细记录错误类型和原因
-    if (error instanceof jwt.JsonWebTokenError) {
-      console.error(`JWT错误类型: ${error.name}, 原因: ${error.message}`);
-    } else if (error instanceof jwt.TokenExpiredError) {
-      console.error(`JWT令牌已过期, 过期时间: ${error.expiredAt}`);
-    } else if (error instanceof jwt.NotBeforeError) {
-      console.error(`JWT令牌尚未生效`);
-    } else if (error instanceof Error) {
-      console.error(`一般错误: ${error.name}, 消息: ${error.message}`);
+    // 验证必需的字段
+    const { id, email, name, role } = payload as any;
+    if (!id || !email || !name || !role) {
+      throw new Error('令牌缺少必需的字段');
     }
     
+    return payload as TokenPayload;
+  } catch (error) {
+    console.error('JWT验证错误:', error);
+    if (error instanceof jose.errors.JWTExpired) {
+      console.error('JWT令牌已过期');
+    } else if (error instanceof jose.errors.JWTInvalid) {
+      console.error('JWT令牌无效');
+    } else if (error instanceof Error) {
+      console.error(`错误类型: ${error.name}, 消息: ${error.message}`);
+    }
     throw new Error('无效的令牌');
   }
 }
@@ -74,14 +80,15 @@ export function decodeToken(token: string): TokenPayload | null {
   }
   
   try {
-    console.log(`正在解码JWT令牌, 长度: ${token.length}`);
-    const decoded = jwt.decode(token) as TokenPayload;
-    if (decoded) {
-      console.log(`令牌解码成功，用户: ${decoded.email}`);
-    } else {
-      console.log(`令牌解码结果为空`);
+    const decoded = jose.decodeJwt(token);
+    
+    // 验证必需的字段
+    const { id, email, name, role } = decoded as any;
+    if (!id || !email || !name || !role) {
+      return null;
     }
-    return decoded;
+    
+    return decoded as TokenPayload;
   } catch (error) {
     console.error('JWT解码错误:', error);
     if (error instanceof Error) {

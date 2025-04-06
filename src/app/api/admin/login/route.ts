@@ -65,9 +65,9 @@ export async function POST(req: NextRequest) {
     
     // 尝试生成JWT令牌
     try {
-      token = signToken(userData);
+      token = await signToken(userData);
       // 设置JWT认证cookie
-      setAuthCookie(token);
+      await setAuthCookie(token);
     } catch (jwtError) {
       console.error('JWT生成失败，切换到备选认证方式');
       jwtSuccess = false;
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     // 无论JWT是否成功，都设置备用会话认证
     // 这是一种降级策略，确保即使JWT出问题，用户仍然可以登录
     try {
-      setSessionCookie(userData);
+      await setSessionCookie(userData);
     } catch (sessionError) {
       console.error('设置备用会话失败');
       

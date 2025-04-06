@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { verifyToken, generateToken as createJwtToken, decodeToken } from './jwt';
+import { verifyToken, generateToken as createJwtToken, decodeToken, TokenPayload } from './jwt';
 
-export interface AdminUser {
+export interface AdminUser extends TokenPayload {
   id: string;
   email: string;
   name: string;
@@ -32,7 +32,7 @@ export async function verifyAuth(request: NextRequest) {
         if (decodedContent) {
           // 尝试使用JWT验证
           try {
-            const decoded = verifyToken(token);
+            const decoded = await verifyToken(token);
             return decoded;
           } catch (jwtError) {
             // JWT验证失败但解码成功，可以尝试备选方案 - 简单返回解码内容
@@ -61,7 +61,7 @@ export async function verifyAuth(request: NextRequest) {
         
         if (!isNaN(sessionTime) && (now - sessionTime) < ADMIN_SESSION_DURATION) {
           // 简单的会话验证 - 检查哈希是否匹配
-          const expectedHash = generateSessionHash(timestamp, SESSION_KEY);
+          const expectedHash = await generateSessionHash(timestamp, SESSION_KEY);
           
           if (hash === expectedHash) {
             // 解析会话数据
@@ -107,12 +107,12 @@ export function withAuth(handler: Function) {
   }
 }
 
-export function generateToken(user: AdminUser): string {
-  const token = createJwtToken(user);
+export async function generateToken(user: AdminUser): Promise<string> {
+  const token = await createJwtToken(user);
   return token;
 }
 
-export function setAuthCookie(token: string) {
+export async function setAuthCookie(token: string): Promise<void> {
   cookies().set('admin_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -122,16 +122,16 @@ export function setAuthCookie(token: string) {
   });
 }
 
-export function clearAuthCookie() {
+export function clearAuthCookie(): void {
   cookies().delete('admin_token');
   cookies().delete('admin_session');
   cookies().delete('admin_session_data');
 }
 
 // 生成备用会话ID
-export function generateSessionId(user: AdminUser): { sessionId: string, sessionData: string } {
+export async function generateSessionId(user: AdminUser): Promise<{ sessionId: string, sessionData: string }> {
   const timestamp = Date.now().toString();
-  const hash = generateSessionHash(timestamp, SESSION_KEY);
+  const hash = await generateSessionHash(timestamp, SESSION_KEY);
   const sessionId = `${timestamp}.${hash}`;
   
   // 编码用户数据
@@ -146,8 +146,8 @@ export function generateSessionId(user: AdminUser): { sessionId: string, session
 }
 
 // 设置备用会话cookie
-export function setSessionCookie(user: AdminUser) {
-  const { sessionId, sessionData } = generateSessionId(user);
+export async function setSessionCookie(user: AdminUser): Promise<void> {
+  const { sessionId, sessionData } = await generateSessionId(user);
   
   cookies().set('admin_session', sessionId, {
     httpOnly: true,
@@ -167,14 +167,11 @@ export function setSessionCookie(user: AdminUser) {
 }
 
 // 生成会话哈希
-function generateSessionHash(timestamp: string, key: string): string {
-  // 简单的哈希函数，仅用于演示
-  let hash = 0;
-  const str = timestamp + key;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash).toString(16);
+async function generateSessionHash(timestamp: string, key: string): Promise<string> {
+  // 使用 Web Crypto API 生成更安全的哈希
+  const encoder = new TextEncoder();
+  const data = encoder.encode(timestamp + key);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 } 

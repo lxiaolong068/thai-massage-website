@@ -30,9 +30,13 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
   experimental: {
-    optimizeCss: false,
-    isrFlushToDisk: false,
+    optimizeCss: true,
+    isrFlushToDisk: true,
   },
+  // 优化生产环境构建
+  poweredByHeader: false,
+  compress: true,
+  generateEtags: true,
   async rewrites() {
     return [
       {
