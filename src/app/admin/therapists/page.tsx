@@ -35,6 +35,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Therapist = {
   id: string;
@@ -390,10 +396,10 @@ export default function TherapistsPage() {
                   />
                 </TableHead>
                 <TableHead className="w-[250px]">Name</TableHead>
-                <TableHead>Experience</TableHead>
-                <TableHead>Specialties</TableHead>
+                <TableHead className="w-[100px]">Experience</TableHead>
+                <TableHead className="w-[150px]">Specialties</TableHead>
                 <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                <TableHead className="w-[120px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -429,17 +435,28 @@ export default function TherapistsPage() {
                     </div>
                   </TableCell>
                   <TableCell>{therapist.experienceYears} years</TableCell>
-                  <TableCell>
+                  <TableCell className="w-[150px]">
                     <div className="flex flex-wrap gap-1">
-                      {therapist.specialties.slice(0, 3).map((specialty, index) => (
-                        <Badge key={index} variant="secondary">
+                      {therapist.specialties.slice(0, 2).map((specialty, index) => (
+                        <Badge key={index} variant="secondary" className="truncate max-w-[65px] text-xs">
                           {specialty}
                         </Badge>
                       ))}
-                      {therapist.specialties.length > 3 && (
-                        <Badge variant="secondary">
-                          +{therapist.specialties.length - 3}
-                        </Badge>
+                      {therapist.specialties.length > 2 && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="secondary" className="cursor-help text-xs">
+                                +{therapist.specialties.length - 2}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="max-w-[200px]">
+                                {therapist.specialties.slice(2).join(', ')}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
                     </div>
                   </TableCell>
@@ -450,31 +467,29 @@ export default function TherapistsPage() {
                       {therapist.workStatus === 'AVAILABLE' ? '✓ Available' : '⌛ Working'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/therapists/${therapist.id}/edit`}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteClick(therapist.id)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <TableCell>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        asChild
+                      >
+                        <Link href={`/admin/therapists/${therapist.id}/edit`}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteClick(therapist.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

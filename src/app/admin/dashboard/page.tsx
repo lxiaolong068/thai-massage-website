@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { FaUsers, FaCalendarCheck, FaServicestack, FaEnvelope } from 'react-icons/fa';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -118,63 +119,71 @@ export default function DashboardPage() {
       
       {!loading && !error && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Services</CardTitle>
-              <FaServicestack className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.services}</div>
-              <p className="text-xs text-muted-foreground">Total services available</p>
-            </CardContent>
-          </Card>
+          <Link href="/admin/services" className="block transition-transform hover:scale-105">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Services</CardTitle>
+                <FaServicestack className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.services}</div>
+                <p className="text-xs text-muted-foreground">Total services available</p>
+              </CardContent>
+            </Card>
+          </Link>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Therapists</CardTitle>
-              <FaUsers className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.therapists}</div>
-              <p className="text-xs text-muted-foreground">Active therapists</p>
-            </CardContent>
-          </Card>
+          <Link href="/admin/therapists" className="block transition-transform hover:scale-105">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Therapists</CardTitle>
+                <FaUsers className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.therapists}</div>
+                <p className="text-xs text-muted-foreground">Active therapists</p>
+              </CardContent>
+            </Card>
+          </Link>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Bookings</CardTitle>
-              <FaCalendarCheck className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.bookings}</div>
-              <p className="text-xs text-muted-foreground">
-                Total bookings
-                {stats.pendingBookings > 0 && (
-                  <span className="ml-2 bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full text-xs">
-                    {stats.pendingBookings} pending
-                  </span>
-                )}
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/admin/bookings" className="block transition-transform hover:scale-105">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Bookings</CardTitle>
+                <FaCalendarCheck className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.bookings}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total bookings
+                  {stats.pendingBookings > 0 && (
+                    <span className="ml-2 bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full text-xs">
+                      {stats.pendingBookings} pending
+                    </span>
+                  )}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Messages</CardTitle>
-              <FaEnvelope className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.messages}</div>
-              <p className="text-xs text-muted-foreground">
-                Total messages
-                {stats.unreadMessages > 0 && (
-                  <span className="ml-2 bg-red-100 text-red-800 px-1.5 py-0.5 rounded-full text-xs">
-                    {stats.unreadMessages} unread
-                  </span>
-                )}
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/admin/messages" className="block transition-transform hover:scale-105">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Messages</CardTitle>
+                <FaEnvelope className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.messages}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total messages
+                  {stats.unreadMessages > 0 && (
+                    <span className="ml-2 bg-red-100 text-red-800 px-1.5 py-0.5 rounded-full text-xs">
+                      {stats.unreadMessages} unread
+                    </span>
+                  )}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       )}
     </div>

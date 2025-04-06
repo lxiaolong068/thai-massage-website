@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -40,7 +40,6 @@ const SUPPORTED_LOCALES = [
   { code: 'en', name: 'English' },
   { code: 'zh', name: '中文' },
   { code: 'ko', name: '한국어' },
-  { code: 'th', name: 'ไทย' }
 ];
 
 export default function TherapistDetailPage({
@@ -75,6 +74,10 @@ export default function TherapistDetailPage({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [imageLoading, setImageLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isNewTherapist) {
@@ -93,7 +96,9 @@ export default function TherapistDetailPage({
         // 检查是否所有请求都成功
         const hasError = responses.some(res => !res.success);
         if (hasError) {
-          throw new Error('Failed to fetch some translations');
+          const errors = responses.filter(res => !res.success).map(res => res.error?.message || `Locale ${res.locale} fetch failed`);
+          console.error("Error fetching translations:", errors);
+          throw new Error(`Failed to fetch some translations: ${errors.join(', ')}`);
         }
 
         // 合并所有语言版本的数据
@@ -103,6 +108,9 @@ export default function TherapistDetailPage({
           bio: res.data.bio || '',
           specialties: res.data.specialties || []
         }));
+        
+        // 调试：打印获取到的翻译数据
+        console.log("Fetched Translations:", translations);
 
         // 使用第一个响应（英文）的基本数据
         const baseData = responses[0].data;
@@ -115,10 +123,21 @@ export default function TherapistDetailPage({
           imageUrl: baseData.imageUrl || '',
         });
         
+        // 调试：打印更新后的 therapistData 状态
+        console.log("Updated Therapist Data State:", {
+          id: baseData.id,
+          translations,
+          experienceYears: baseData.experienceYears || 0,
+          workStatus: baseData.workStatus || 'AVAILABLE',
+          imageUrl: baseData.imageUrl || '',
+        });
+        
         setImageUrl(baseData.imageUrl || '');
         setImagePreview(baseData.imageUrl || '');
       } catch (err: any) {
+        console.error("Error in fetchTherapist:", err);
         setError(err.message || 'Failed to fetch therapist data');
+        toast.error('Failed to load therapist data: ' + err.message);
       } finally {
         setLoading(false);
       }
@@ -126,6 +145,59 @@ export default function TherapistDetailPage({
 
     fetchTherapist();
   }, [id, isNewTherapist]);
+
+  // 添加点击外部关闭建议列表的处理
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // 获取服务建议
+  const fetchSuggestions = async (query: string, locale: string) => {
+    if (query.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/specialties?locale=${locale}&query=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error('Failed to fetch suggestions');
+      
+      const data = await response.json();
+      if (data.success) {
+        setSuggestions(data.data);
+        setShowSuggestions(true);
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // 处理输入变化
+  const handleSpecialtyInputChange = (e: React.ChangeEvent<HTMLInputElement>, locale: string) => {
+    const value = e.target.value;
+    setInputValue(value);
+    fetchSuggestions(value, locale);
+  };
+
+  // 处理建议选择
+  const handleSuggestionClick = (locale: string, specialty: string) => {
+    handleAddSpecialty(locale, specialty);
+    setInputValue('');
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   const handleTranslationChange = (locale: string, field: keyof Omit<TherapistTranslation, 'locale'>, value: any) => {
     setTherapistData(prevData => ({
@@ -456,32 +528,55 @@ export default function TherapistDetailPage({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Specialties ({locale.name})
                 </label>
-                <div className="flex">
-                  <Input
-                    type="text"
-                    id={`specialty-input-${locale.code}`}
-                    className="flex-1 rounded-r-none"
-                    placeholder={`Enter specialty in ${locale.name}`}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const input = e.target as HTMLInputElement;
-                        handleAddSpecialty(locale.code, input.value);
-                        input.value = '';
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const input = document.getElementById(`specialty-input-${locale.code}`) as HTMLInputElement;
-                      handleAddSpecialty(locale.code, input.value);
-                      input.value = '';
-                    }}
-                    className="rounded-l-none"
-                  >
-                    Add
-                  </Button>
+                <div className="relative">
+                  <div className="flex">
+                    <Input
+                      type="text"
+                      id={`specialty-input-${locale.code}`}
+                      className="flex-1 rounded-r-none"
+                      placeholder={`Enter specialty in ${locale.name}`}
+                      value={inputValue}
+                      onChange={(e) => handleSpecialtyInputChange(e, locale.code)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddSpecialty(locale.code, inputValue);
+                          setInputValue('');
+                          setSuggestions([]);
+                          setShowSuggestions(false);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        handleAddSpecialty(locale.code, inputValue);
+                        setInputValue('');
+                        setSuggestions([]);
+                        setShowSuggestions(false);
+                      }}
+                      className="rounded-l-none"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div
+                      ref={suggestionsRef}
+                      className="absolute z-10 w-full bg-white mt-1 border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                    >
+                      {suggestions.map((suggestion, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleSuggestionClick(locale.code, suggestion)}
+                        >
+                          {suggestion}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {therapistData.translations.find(t => t.locale === locale.code)?.specialties.map((specialty, index) => (
