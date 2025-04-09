@@ -5,6 +5,10 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useImprovedTranslator } from '@/i18n/improved-client';
 import BookingForm from './BookingForm';
+import { getTranslations } from 'next-intl/server'; // Corrected import
+import prisma from '@/lib/prisma';
+import { Therapist, TherapistStatus, TherapistTranslation } from '@prisma/client'; // Import necessary types
+import TherapistCardWrapper from './TherapistCardWrapper'; // NOTE: This component needs to be created
 
 // 内置的Modal组件
 interface ModalProps {
@@ -89,175 +93,143 @@ const Modal: React.FC<ModalProps> = ({
   );
 };
 
-type TherapistsProps = {
-  locale?: string;
+// Define a type for the processed therapist data
+type ProcessedTherapist = {
+  id: string;
+  imageUrl: string | null;
+  experienceYears: number;
+  workStatus: TherapistStatus;
+  // Add other non-translated fields from Therapist model if needed
+  name: string; // Translated name
+  bio: string;  // Translated bio
+  // specialties removed for now due to schema uncertainty
 };
 
-const Therapists = ({ locale = 'en' }: TherapistsProps) => {
-  // 使用 useImprovedTranslator 钩子获取翻译
-  const { t } = useImprovedTranslator(locale, 'therapists');
-  const { t: commonT } = useImprovedTranslator(locale, 'common');
-  
-  // 预约模态框状态
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedTherapist, setSelectedTherapist] = useState<{id: number, name: string} | null>(null);
-  
-  const therapists = [
-    {
-      id: 1,
-      name: 'Somying',
-      age: 28,
-      measurements: '34/24/36',
-      weight: '52 kg',
-      height: '165 cm',
-      experience: '8 years',
-      image: '/images/therapist-1.jpg',
-    },
-    {
-      id: 2,
-      name: 'Nattaya',
-      age: 32,
-      measurements: '36/26/38',
-      weight: '55 kg',
-      height: '170 cm',
-      experience: '10 years',
-      image: '/images/therapist-2.jpg',
-    },
-    {
-      id: 3,
-      name: 'Pranee',
-      age: 25,
-      measurements: '32/23/34',
-      weight: '48 kg',
-      height: '160 cm',
-      experience: '7 years',
-      image: '/images/therapist-3.jpg',
-    },
-    {
-      id: 4,
-      name: 'Malai',
-      age: 30,
-      measurements: '38/28/40',
-      weight: '60 kg',
-      height: '175 cm',
-      experience: '9 years',
-      image: '/images/therapist-4.jpg',
-    },
-  ];
+// Define type for Therapist with specific translations included
+type TherapistWithTranslations = Therapist & {
+  translations: Pick<TherapistTranslation, 'locale' | 'name' | 'bio'>[]; // Select only needed fields
+};
+
+type TherapistsProps = {
+  locale: string;
+};
+
+const Therapists = async ({ locale }: TherapistsProps) => {
+  // Correct usage: Provide namespace, locale is inferred or explicitly passed
+  const t = await getTranslations('therapists');
+  const commonT = await getTranslations('common');
+
+  let therapists: ProcessedTherapist[] = [];
+  try {
+    // Use `include` to fetch the full Therapist object and related translations
+    const fetchedTherapists: TherapistWithTranslations[] = await prisma.therapist.findMany({
+      where: {
+        // Use WORKING based on previous error message
+        workStatus: TherapistStatus.WORKING,
+      },
+      include: { // Use include instead of select here
+        translations: {
+          where: {
+            locale: locale,
+          },
+          select: { // Select only needed fields from the translation
+            locale: true,
+            name: true,
+            bio: true,
+            // specialties removed for now
+          },
+        },
+      },
+      // No top-level select needed when using include for the full object
+      // Removed orderBy as 'order' field seems incorrect
+    });
+
+    // Map fetched data to the ProcessedTherapist type
+    therapists = fetchedTherapists.map((therapist): ProcessedTherapist => {
+      // Find the correct translation for the current locale
+      const translation = therapist.translations.find((tr: { locale: string }) => tr.locale === locale);
+      return {
+        // Base fields
+        id: therapist.id,
+        imageUrl: therapist.imageUrl,
+        experienceYears: therapist.experienceYears,
+        workStatus: therapist.workStatus,
+        // Translated fields with fallbacks
+        name: translation?.name ?? 'Name unavailable',
+        bio: translation?.bio ?? 'Bio unavailable',
+        // specialties removed
+      };
+    });
+
+  } catch (error) {
+    console.error("Failed to fetch therapists:", error);
+    therapists = [];
+  }
+
+  const clientTranslations = {
+    bookNow: commonT('buttons.bookNow'), // Assuming fallback is in common.json
+    bookingModalTitle: t('bookingModal.title'), // Assuming fallback is in therapists.json
+    therapistAltText: t('therapist'), // Assuming fallback is in therapists.json
+  };
 
   return (
-    <section className="section-container section-light" id="therapists">
-      {/* 预约模态框 */}
-      {isBookingModalOpen && selectedTherapist && (
-        <Modal 
-          isOpen={isBookingModalOpen} 
-          onClose={() => setIsBookingModalOpen(false)}
-          title={t('bookingModal.title', '预约按摩服务')}
-          size="large"
-        >
-          <BookingForm 
-            initialTherapistId={String(selectedTherapist.id)} 
-            initialTherapistName={selectedTherapist.name} 
-            inModal={true}
-            onComplete={() => setIsBookingModalOpen(false)}
-          />
-        </Modal>
-      )}
-      
-      <div className="container">
-        <h2 className="section-title text-center mb-4 text-black">
-          {t('title', '我们的按摩师')}
+    <section className="section-container section-light py-16 md:py-24" id="therapists">
+      <div className="container mx-auto px-4">
+        <h2 className="section-title text-center mb-4 text-gray-900">
+          {t('title')}
         </h2>
-        <p className="text-gray-800 text-center mb-12">
-          {t('subtitle', '我们的按摩师都经过专业训练，拥有多年经验，能够提供高质量的按摩服务。')}
+        <p className="text-gray-700 text-center mb-12 max-w-2xl mx-auto">
+          {t('subtitle')}
         </p>
-        
-        <div className="grid-responsive">
-          {therapists.map((therapist) => (
-            <div key={therapist.id} className="card card-hover">
-              <div className="image-container">
-                <Image
-                  src={therapist.image}
-                  alt={`${t('therapist', '按摩师')} ${therapist.name}`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold text-primary mb-2">{therapist.name}</h3>
-                <div className="text-gray-700 mb-4">
-                  <p>{t('age', '年龄')}: {therapist.age}</p>
-                  <p>{t('measurements', '三围')}: {therapist.measurements}</p>
-                  <p>{t('weight', '体重')}: {therapist.weight}</p>
-                  <p>{t('height', '身高')}: {therapist.height}</p>
-                  <p>{t('experience', '经验')}: {therapist.experience}</p>
-                </div>
-                <button 
-                  onClick={() => {
-                    setSelectedTherapist({id: therapist.id, name: therapist.name});
-                    setIsBookingModalOpen(true);
-                  }}
-                  className="block w-full primary-button text-center py-2"
-                >
-                  {commonT('buttons.bookNow', '立即预约')}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="mt-12 bg-light p-8 rounded-lg">
-          <h3 className="title-lg text-center text-black">{t('whyChoose.title', '为什么选择我们的按摩师')}</h3>
-          <div className="grid-responsive">
-            <div className="flex-col-center text-center">
-              <div className="icon-circle mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8 text-primary">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-semibold mb-2 text-black">{t('whyChoose.certified.title', '专业认证')}</h4>
-              <p className="text-gray-800">
-                {t('whyChoose.certified.description', '所有按摩师都持有专业资格证书，确保服务质量。')}
-              </p>
-            </div>
-            
-            <div className="flex-col-center text-center">
-              <div className="icon-circle mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8 text-primary">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-semibold mb-2 text-black">{t('whyChoose.personalized.title', '个性化服务')}</h4>
-              <p className="text-gray-800">
-                {t('whyChoose.personalized.description', '根据您的需求和喜好提供定制化按摩服务。')}
-              </p>
-            </div>
-            
-            <div className="flex-col-center text-center">
-              <div className="icon-circle mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8 text-primary">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-semibold mb-2 text-black">{t('whyChoose.punctual.title', '准时可靠')}</h4>
-              <p className="text-gray-800">
-                {t('whyChoose.punctual.description', '我们的按摩师始终准时，尊重您的时间。')}
-              </p>
-            </div>
+
+        {therapists.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {therapists.map((therapist) => (
+              <TherapistCardWrapper
+                key={therapist.id}
+                therapist={therapist} // Pass the processed data
+                locale={locale}
+                translations={clientTranslations}
+              />
+            ))}
           </div>
-        </div>
-        
-        <div className="mt-12 text-center">
-          <Link 
-            href="/therapists"
-            className="primary-button inline-flex items-center"
-          >
-            {t('viewAll', '查看全部按摩师')}
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
-        </div>
+        ) : (
+           <p className="text-center text-gray-600">{t('noTherapists')}</p>
+        )}
+
+        {/* Static "Why Choose Us" section */}
+        <div className="mt-16 bg-white p-8 rounded-lg shadow-md">
+           <h3 className="text-2xl font-semibold text-center text-gray-900 mb-8">{t('whyChoose.title')}</h3>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+             <div className="text-center">
+               <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-gold-100 text-gold-600">
+                 {/* Placeholder for Icon */}
+               </div>
+               <h4 className="text-lg font-semibold mb-2 text-gray-900">{t('whyChoose.certified.title')}</h4>
+               <p className="text-gray-600">
+                 {t('whyChoose.certified.description')}
+               </p>
+             </div>
+             <div className="text-center">
+               <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-gold-100 text-gold-600">
+                  {/* Placeholder for Icon */}
+               </div>
+               <h4 className="text-lg font-semibold mb-2 text-gray-900">{t('whyChoose.personalized.title')}</h4>
+               <p className="text-gray-600">
+                 {t('whyChoose.personalized.description')}
+               </p>
+             </div>
+             <div className="text-center">
+               <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-gold-100 text-gold-600">
+                 {/* Placeholder for Icon */}
+               </div>
+               <h4 className="text-lg font-semibold mb-2 text-gray-900">{t('whyChoose.punctual.title')}</h4>
+               <p className="text-gray-600">
+                 {t('whyChoose.punctual.description')}
+               </p>
+             </div>
+           </div>
+         </div>
       </div>
     </section>
   );

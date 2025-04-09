@@ -49,9 +49,20 @@ function LoginForm() {
           if (data.success) {
             console.log('会话验证成功，准备重定向');
             
-            // 解码callbackUrl
-            const decodedCallbackUrl = callbackUrl.startsWith('%2F') ? 
-              decodeURIComponent(callbackUrl) : callbackUrl;
+            // 确保完全解码callbackUrl - 修改这里，处理任何格式的URL
+            let decodedCallbackUrl = callbackUrl;
+            try {
+              // 尝试解码，可能需要多次解码
+              while (decodedCallbackUrl.includes('%')) {
+                const newDecoded = decodeURIComponent(decodedCallbackUrl);
+                if (newDecoded === decodedCallbackUrl) break; // 如果解码没有变化，说明已经完全解码
+                decodedCallbackUrl = newDecoded;
+              }
+            } catch (e) {
+              console.error('解码URL出错:', e);
+              // 解码失败则使用默认值
+              decodedCallbackUrl = '/admin/dashboard';
+            }
             
             router.push(decodedCallbackUrl);
           } else {
@@ -118,9 +129,20 @@ function LoginForm() {
       
       console.log('登录成功，准备重定向到:', callbackUrl);
       
-      // 解码callbackUrl
-      const decodedCallbackUrl = callbackUrl.startsWith('%2F') ? 
-        decodeURIComponent(callbackUrl) : callbackUrl;
+      // 确保完全解码callbackUrl - 修改这里，处理任何格式的URL
+      let decodedCallbackUrl = callbackUrl;
+      try {
+        // 尝试解码，可能需要多次解码
+        while (decodedCallbackUrl.includes('%')) {
+          const newDecoded = decodeURIComponent(decodedCallbackUrl);
+          if (newDecoded === decodedCallbackUrl) break; // 如果解码没有变化，说明已经完全解码
+          decodedCallbackUrl = newDecoded;
+        }
+      } catch (e) {
+        console.error('解码URL出错:', e);
+        // 解码失败则使用默认值
+        decodedCallbackUrl = '/admin/dashboard';
+      }
       
       // 执行二次验证确认认证有效
       try {

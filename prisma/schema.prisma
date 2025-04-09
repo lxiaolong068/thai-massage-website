@@ -144,6 +144,18 @@ model Admin {
   @@map("admins")
 }
 
+model ContactMethod {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  type      String   @unique // WeChat, WhatsApp, Line, Telegram
+  qrCode    String?  @map("qr_code") // QR code image URL (改为可选)
+  value     String?  // Contact information (e.g. phone number, username)
+  isActive  Boolean  @default(true) @map("is_active")
+
+  @@map("contact_methods")
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED

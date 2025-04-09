@@ -58,7 +58,8 @@ export function middleware(request: NextRequest) {
         );
       } else {
         const url = new URL('/admin/login', request.url);
-        url.searchParams.set('callbackUrl', encodeURIComponent(request.url));
+        // 只使用路径作为回调URL，而不是完整URL，避免双重编码问题
+        url.searchParams.set('callbackUrl', request.nextUrl.pathname + request.nextUrl.search);
         return NextResponse.redirect(url);
       }
     }

@@ -4,6 +4,7 @@ import '../globals.css';
 import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { registerGlobalImageErrorHandler } from '@/lib/image-fix';
+import { Toaster } from '@/components/ui/toaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -49,6 +50,7 @@ export default function AdminLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <AdminLayoutClient>{children}</AdminLayoutClient>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

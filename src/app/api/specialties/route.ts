@@ -23,32 +23,30 @@ export async function GET(request: NextRequest) {
       ]);
     }
 
-    // 从数据库中获取所有该语言的服务项目
-    const translations = await prisma.therapistTranslation.findMany({
+    // 从 ServiceTranslation 表中获取符合条件的服务名称
+    const serviceTranslations = await prisma.serviceTranslation.findMany({
       where: {
         locale,
+        name: {
+          contains: query,
+          mode: 'insensitive', // 忽略大小写
+        },
       },
       select: {
-        specialtiesTranslation: true
-      }
+        name: true, // 只选择服务名称
+      },
+      orderBy: {
+        name: 'asc', // 按名称排序
+      },
+      take: 10, // 限制建议数量
     });
 
-    // 提取所有服务项目并去重
-    const allSpecialtiesSet = new Set<string>();
-    translations.forEach(t => {
-      t.specialtiesTranslation.forEach(s => allSpecialtiesSet.add(s));
-    });
+    // 提取服务名称列表
+    const suggestions = serviceTranslations.map(st => st.name);
 
-    // 根据查询过滤
-    const filteredSpecialties = Array.from(allSpecialtiesSet)
-      .filter(specialty => 
-        query ? specialty.toLowerCase().includes(query.toLowerCase()) : true
-      )
-      .sort();
-
-    return apiSuccess(filteredSpecialties);
+    return apiSuccess(suggestions);
   } catch (error) {
-    console.error('Error fetching specialties:', error);
+    console.error('Error fetching service specialties suggestions:', error);
     return apiError(
       'SERVER_ERROR',
       'Failed to fetch specialties. Please try again later.',

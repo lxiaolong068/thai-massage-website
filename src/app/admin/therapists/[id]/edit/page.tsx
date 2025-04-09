@@ -555,7 +555,7 @@ export default function TherapistDetailPage({
                         setSuggestions([]);
                         setShowSuggestions(false);
                       }}
-                      className="rounded-l-none"
+                      className="rounded-l-none bg-[#22C55E] text-white hover:bg-[#16A34A] shadow-[0_4px_12px_rgba(34,197,94,0.4)] hover:shadow-[0_4px_16px_rgba(34,197,94,0.5)]"
                     >
                       Add
                     </Button>
@@ -609,6 +609,7 @@ export default function TherapistDetailPage({
           <Button
             type="submit"
             disabled={saving || imageLoading}
+            className="bg-[#22C55E] text-white hover:bg-[#16A34A] shadow-[0_4px_12px_rgba(34,197,94,0.4)] hover:shadow-[0_4px_16px_rgba(34,197,94,0.5)]"
           >
             {saving || imageLoading ? 'Processing...' : (isNewTherapist ? 'Create Therapist' : 'Save Changes')}
           </Button>

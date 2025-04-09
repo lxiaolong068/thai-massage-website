@@ -271,13 +271,15 @@ export default function TherapistsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Therapist Management</h1>
         <div className="flex items-center space-x-4">
-          <Link
-            href="/admin/therapists/new"
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base"
+          <Button
+            asChild
+            className="bg-[#22C55E] text-white hover:bg-[#16A34A] shadow-[0_4px_12px_rgba(34,197,94,0.4)] hover:shadow-[0_4px_16px_rgba(34,197,94,0.5)]"
           >
-            <PlusCircle className="w-5 h-5" />
-            Add Therapist
-          </Link>
+            <Link href="/admin/therapists/new" className="flex items-center gap-2">
+              <PlusCircle className="w-5 h-5" />
+              Add Therapist
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -369,13 +371,15 @@ export default function TherapistsPage() {
           <h3 className="mt-2 text-sm font-semibold text-gray-900">No Therapists</h3>
           <p className="mt-1 text-sm text-gray-500">Get started by creating a new therapist.</p>
           <div className="mt-6">
-            <Link
-              href="/admin/therapists/new"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base mx-auto w-fit"
+            <Button
+              asChild
+              className="bg-[#22C55E] text-white hover:bg-[#16A34A] shadow-[0_4px_12px_rgba(34,197,94,0.4)] hover:shadow-[0_4px_16px_rgba(34,197,94,0.5)] mx-auto"
             >
-              <PlusCircle className="w-5 h-5" />
-              Add First Therapist
-            </Link>
+              <Link href="/admin/therapists/new" className="flex items-center gap-2">
+                <PlusCircle className="w-5 h-5" />
+                Add First Therapist
+              </Link>
+            </Button>
           </div>
         </div>
       ) : (
