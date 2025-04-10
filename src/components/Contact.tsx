@@ -37,8 +37,8 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
   useEffect(() => {
     const fetchContactMethods = async () => {
       try {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const apiUrl = `${appUrl}/api/v1/public/contact-methods`;
+        // 使用相对URL，移除对process.env.NEXT_PUBLIC_APP_URL的依赖
+        const apiUrl = `/api/v1/public/contact-methods`;
 
         const response = await fetch(apiUrl, {
           cache: 'no-store', // 确保获取最新数据
