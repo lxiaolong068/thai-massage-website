@@ -96,7 +96,7 @@ export default async function RootLayout({
           <main className="flex-grow">
             {children}
           </main>
-          <Footer locale={locale} />
+          <Footer />
           <Toaster position="top-center" />
         </NextIntlClientProvider>
       </body>
