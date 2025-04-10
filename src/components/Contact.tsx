@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useImprovedTranslator } from '@/i18n/improved-client';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type ContactProps = {
   locale?: string;
@@ -32,6 +39,9 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
   // 添加：状态来存储联系方式和错误
   const [activeMethods, setActiveMethods] = useState<ActiveContactMethod[]>([]);
   const [fetchError, setFetchError] = useState(false);
+  // 添加：弹窗状态和当前二维码 URL
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentQrCodeUrl, setCurrentQrCodeUrl] = useState<string | null>(null);
 
   // 添加：useEffect 来获取联系方式数据
   useEffect(() => {
@@ -61,6 +71,14 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
 
     fetchContactMethods();
   }, []);
+
+  // 添加：处理二维码点击事件
+  const handleQrCodeClick = (qrCodeUrl: string | null) => {
+    if (qrCodeUrl) {
+      setCurrentQrCodeUrl(qrCodeUrl);
+      setIsModalOpen(true);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -98,7 +116,11 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
               {activeMethods.map((method) => (
                 <div key={method.id} className="flex flex-col items-center text-center">
                   {method.qrCode && (
-                    <div className="relative w-32 h-32 md:w-36 md:h-36 mb-4 bg-white p-2 rounded-lg shadow-lg overflow-hidden">
+                    <div
+                      className="relative w-32 h-32 md:w-36 md:h-36 mb-4 bg-white p-2 rounded-lg shadow-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105"
+                      onClick={() => handleQrCodeClick(method.qrCode)}
+                      title={t('viewLargerQr', '点击查看大图')}
+                    >
                       <Image
                         src={method.qrCode}
                         alt={`${method.type} QR Code`}
@@ -121,6 +143,29 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
           ) : null}
         </div>
       </section>
+
+      {/* 添加：二维码放大弹窗 */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px] md:max-w-[500px] lg:max-w-[600px] bg-white p-6 rounded-lg shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-semibold text-gray-900 mb-4">
+              {t('qrCodeTitle', '二维码')}
+            </DialogTitle>
+          </DialogHeader>
+          {currentQrCodeUrl && (
+            <div className="relative w-full aspect-square max-w-[400px] mx-auto">
+              <Image
+                src={currentQrCodeUrl}
+                alt={t('enlargedQrAlt', '放大的二维码')}
+                fill
+                sizes="400px"
+                className="object-contain"
+                unoptimized={currentQrCodeUrl.startsWith('data:')}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* 反馈表单部分 */}
       <section className="section-container section-light" id="contact">
