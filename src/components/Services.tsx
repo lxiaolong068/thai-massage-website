@@ -32,22 +32,32 @@ const Services = ({ locale = 'en' }: ServicesProps) => {
         setLoading(true);
         setError(null);
         
+        console.log(`[Client] [services] 开始获取服务数据，语言: ${locale}`);
         const response = await fetch(`/api/services?locale=${locale}`);
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch services: ${response.status}`);
+          const errorData = await response.json().catch(() => null);
+          const errorMessage = errorData?.error?.message || `状态码: ${response.status}`;
+          console.error(`[Client] [services] API响应错误:`, { 
+            status: response.status, 
+            statusText: response.statusText,
+            error: errorData 
+          });
+          throw new Error(`获取服务失败: ${errorMessage}`);
         }
         
         const result = await response.json();
         
         if (!result.success || !result.data) {
-          throw new Error(result.error?.message || 'Failed to fetch services');
+          console.error(`[Client] [services] API返回格式错误:`, result);
+          throw new Error(result.error?.message || '获取服务数据失败');
         }
         
+        console.log(`[Client] [services] 成功获取${result.data.length}个服务`);
         setServices(result.data);
       } catch (err) {
-        console.error('Error fetching services:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load services');
+        console.error('[Client] [services] 获取服务数据错误:', err);
+        setError(err instanceof Error ? err.message : '加载服务失败');
       } finally {
         setLoading(false);
       }
