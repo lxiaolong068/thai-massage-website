@@ -46,6 +46,3 @@ prisma-check.log
 
 # 临时文件
 /temp
-
-# 上传文件
-/public/uploads
