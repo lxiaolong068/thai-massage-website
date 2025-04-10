@@ -10,15 +10,7 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const locale = url.searchParams.get('locale') || 'en';
     
-    console.log(`[API] [services] Fetching services for locale: ${locale}`);
-    console.log(`[API] [services] DATABASE_URL prefix: ${process.env.DATABASE_URL?.substring(0, 20)}...`);
-    console.log(`[API] [services] Environment: ${process.env.NODE_ENV}`);
-    
     try {
-      // 测试数据库连接
-      await prisma.$queryRaw`SELECT 1`;
-      console.log(`[API] [services] Database connection test successful`);
-      
       const services = await prisma.service.findMany({
         include: {
           translations: {
@@ -31,15 +23,6 @@ export async function GET(request: NextRequest) {
           updatedAt: 'desc'
         }
       });
-
-      console.log(`[API] [services] Found ${services.length} services`);
-      
-      // 检查数据有效性
-      const invalidServices = services.filter(service => !service.translations || service.translations.length === 0);
-      if (invalidServices.length > 0) {
-        console.warn(`[API] [services] Warning: ${invalidServices.length} services have no translations for locale: ${locale}`);
-        console.warn(`[API] [services] Service IDs without translations: ${invalidServices.map(s => s.id).join(', ')}`);
-      }
       
       const formattedServices = services.map(service => {
         const translation = service.translations[0] || { name: '', description: '', slug: '' };
@@ -58,50 +41,11 @@ export async function GET(request: NextRequest) {
 
       return apiSuccess(formattedServices);
     } catch (error: any) {
-      // 详细记录数据库错误
-      console.error('=====================================================');
-      console.error('[API] [services] Database error details:');
-      console.error('[API] [services] Request URL:', request.url);
-      console.error('[API] [services] Error name:', error.name);
-      console.error('[API] [services] Error message:', error.message);
-      console.error('[API] [services] Error stack:', error.stack);
-      
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        console.error('[API] [services] Prisma error code:', error.code);
-        console.error('[API] [services] Prisma error meta:', error.meta);
-      }
-      
-      if (error instanceof Prisma.PrismaClientInitializationError) {
-        console.error('[API] [services] Database initialization error');
-        console.error('[API] [services] Client version:', error.clientVersion);
-      }
-      
-      console.error('=====================================================');
-      
-      // 直接抛出错误，不使用回退机制，以便更好地诊断
-      return apiError(
-        'DATABASE_ERROR', 
-        `Database error: ${error.message || 'Unknown database error'}`, 
-        500
-      );
+      console.error('Database error occurred');
+      return apiError('DATABASE_ERROR', 'Database connection error', 500);
     }
   } catch (error) {
-    console.error('=====================================================');
-    console.error('[API] [services] General error fetching services:');
-    console.error('[API] [services] Request URL:', request.url);
-    console.error('[API] [services] Error type:', typeof error);
-    console.error('[API] [services] Error:', error);
-    
-    if (error instanceof Error) {
-      console.error('[API] [services] Error name:', error.name);
-      console.error('[API] [services] Error message:', error.message);
-      console.error('[API] [services] Error stack:', error.stack);
-    }
-    console.error('=====================================================');
-    
-    if (error instanceof Error) {
-      return apiError('SERVER_ERROR', `Failed to fetch services: ${error.message}`, 500);
-    }
+    console.error('Error fetching services');
     return apiError('SERVER_ERROR', 'Failed to fetch services', 500);
   }
 }
