@@ -29,6 +29,7 @@
 - [next-intl](https://next-intl-docs.vercel.app/) - Next.js的国际化解决方案
 - [Prisma](https://www.prisma.io/) - 下一代ORM，用于数据库访问
 - [PostgreSQL](https://www.postgresql.org/) - 强大的开源关系型数据库
+- [Vercel Blob](https://vercel.com/storage/blob) - 用于云端文件存储（例如上传的图片）
 - [Jest](https://jestjs.io/) - JavaScript测试框架
 - [ESLint](https://eslint.org/) - 代码质量工具，确保代码一致性
 - [pnpm](https://pnpm.io/) - 快速、节省磁盘空间的包管理器
@@ -258,7 +259,7 @@ pnpm start
 cp .env.example .env
 ```
 
-2. 编辑`.env`文件，填入实际的数据库连接信息和其他必要配置。
+2. 编辑`.env`文件，填入实际的数据库连接信息、`BLOB_READ_WRITE_TOKEN`（用于文件上传到Vercel Blob）和其他必要配置。
 
 ### 必要的环境变量
 
@@ -288,6 +289,23 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api|https://your-production-domain.com
 ```
 NEXTAUTH_URL=http://localhost:3000|https://your-production-domain.com
 NEXTAUTH_SECRET=your-nextauth-secret
+```
+
+#### Vercel Blob文件存储（必需）
+
+```
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_YOUR_PRODUCTION_TOKEN_HERE
+```
+
+#### 如果使用Supabase（可选）
+
+```
+SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_JWT_SECRET=your-jwt-secret
+SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
 ## Vercel部署说明
@@ -325,6 +343,9 @@ Vercel是部署Next.js应用的最佳平台，提供了无缝集成和自动部�
    # NextAuth配置（必需）
    NEXTAUTH_URL=https://your-vercel-domain.vercel.app
    NEXTAUTH_SECRET=your-nextauth-secret
+   
+   # Vercel Blob 文件存储（必需 - 请使用真实的生产环境Token）
+   BLOB_READ_WRITE_TOKEN=vercel_blob_rw_YOUR_PRODUCTION_TOKEN_HERE
    
    # 如果使用Supabase（可选）
    SUPABASE_URL=https://your-project-id.supabase.co
