@@ -245,9 +245,10 @@ pnpm start
 
 ### 环境变量文件
 
-- `.env` - 默认环境配置，包含开发环境基础设置（不应提交到版本控制）
-- `.env.development` - 开发环境特定配置
-- `.env.production` - 生产环境特定配置，敏感信息在Vercel中设置
+- `.env` - 默认环境配置，包含开发环境基础设置（**重要：此文件包含敏感信息，已在`.gitignore`中配置忽略，请勿提交到版本控制**）
+- `.env.development` - 开发环境特定配置（通常不含敏感信息，可提交）
+- `.env.production` - 生产环境特定配置模板（**重要：此文件可能包含敏感信息占位符或真实值，已在`.gitignore`中配置忽略，请勿提交到版本控制。生产环境的实际变量必须在部署平台设置**）
+- `.env.example` - 环境变量示例文件（不含敏感信息，必须提交）
 
 ### 设置本地开发环境
 
@@ -305,10 +306,10 @@ Vercel是部署Next.js应用的最佳平台，提供了无缝集成和自动部�
    - 设置环境变量（见下文）
 
 3. **设置环境变量**
-   - 在Vercel项目设置中，添加以下环境变量：
+   - 在Vercel项目设置中，添加以下环境变量。**注意：这些是生产环境的实际敏感值，绝不能存储在 `.env.production` 文件中并提交到 Git。`.env.production` 文件仅供参考或本地生产构建模拟，且必须被 `.gitignore` 忽略。**
 
    ```
-   # 数据库连接（必需）
+   # 数据库连接（必需 - 请使用真实的生产环境值）
    POSTGRES_URL=postgres://username:password@host:port/database?sslmode=require
    POSTGRES_PRISMA_URL=postgres://username:password@host:port/database?sslmode=require
    POSTGRES_URL_NON_POOLING=postgres://username:password@host:port/database?sslmode=require
