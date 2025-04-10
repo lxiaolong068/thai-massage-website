@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { TherapistStatus } from '@prisma/client';
-import BookingModal from './BookingModal';
 
 type TherapistProps = {
   therapist: {
@@ -23,31 +22,26 @@ type TherapistProps = {
 };
 
 export default function TherapistCardWrapper({ therapist, locale, translations }: TherapistProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleBooking = () => {
-    setIsModalOpen(true);
-  };
-
   return (
     <>
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-full">
         <div className="relative h-64 w-full">
           <Image
             src={therapist.imageUrl || '/images/placeholder-therapist.jpg'}
             alt={`${translations.therapistAltText} ${therapist.name}`}
             fill
             className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/images/placeholder-therapist.jpg';
             }}
           />
         </div>
-        <div className="p-6">
+        <div className="p-6 flex flex-col flex-grow">
           <h3 className="text-xl font-semibold mb-2">{therapist.name}</h3>
-          <p className="text-gray-600 mb-4">{therapist.bio}</p>
-          <div className="flex justify-between items-center">
+          <p className="text-gray-600 mb-4 flex-grow line-clamp-4">{therapist.bio}</p>
+          <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
             <span className="text-sm text-gray-500">
               {therapist.experienceYears} {translations.therapistAltText === '按摩师' ? '年经验' : 'years experience'}
             </span>
@@ -61,27 +55,20 @@ export default function TherapistCardWrapper({ therapist, locale, translations }
                 : (translations.therapistAltText === '按摩师' ? '忙碌' : 'Busy')}
             </span>
           </div>
-          <button
-            onClick={handleBooking}
-            disabled={therapist.workStatus !== 'AVAILABLE'}
-            className={`mt-4 w-full py-2 px-4 rounded-md text-white transition-colors ${
+          <Link 
+            href={`/${locale}/contact`} 
+            className={`mt-4 w-full py-2 px-4 rounded-md text-white text-center transition-colors ${
               therapist.workStatus === 'AVAILABLE'
                 ? 'bg-blue-600 hover:bg-blue-700'
-                : 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gray-400 pointer-events-none opacity-50'
             }`}
+            aria-disabled={therapist.workStatus !== 'AVAILABLE'}
+            tabIndex={therapist.workStatus !== 'AVAILABLE' ? -1 : undefined}
           >
             {translations.bookNow}
-          </button>
+          </Link>
         </div>
       </div>
-
-      <BookingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        therapist={therapist}
-        locale={locale}
-        title={translations.bookingModalTitle}
-      />
     </>
   );
 } 
