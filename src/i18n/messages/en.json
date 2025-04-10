@@ -107,7 +107,7 @@
   },
   "contact": {
     "getInTouch": "Get In Touch",
-    "feedbackIntro": "Have suggestions or feedback about our services? We'd love to hear from you. Your input helps us improve and provide better experiences for all our clients.",
+    "feedbackIntro": "We welcome your feedback and suggestions. Please fill out the form below, and we will get back to you as soon as possible.",
     "location": "Location",
     "locationValue": "Bangkok, Thailand",
     "phone": "Phone",
@@ -132,7 +132,7 @@
     "messageLabel": "Your Message",
     "messagePlaceholder": "Please share your feedback, suggestions, or concerns...",
     "submitButton": "Submit Feedback",
-    "feedbackAlert": "Thank you for your feedback! We will consider your suggestions carefully.",
+    "feedbackAlert": "Thank you for your feedback! We will get back to you soon.",
     "title": "Contact Us",
     "subtitle": "Get in touch with our team",
     "name": "Name",
@@ -148,7 +148,13 @@
     "contactInfo": "Contact Information",
     "address": "Bangkok, Thailand",
     "phoneValueContact": "+66 84 503 5702",
-    "followUs": "Follow Us"
+    "followUs": "Follow Us",
+    "connectWithUsTitle": "Connect With Us",
+    "connectError": "Could not load contact methods.",
+    "loadingContacts": "Loading contact methods...",
+    "sendFeedbackTitle": "Send Feedback",
+    "privacyNotice": "We respect your privacy, and your information will be kept strictly confidential.",
+    "feedbackFormTitle": "Feedback Form"
   },
   "footer": {
     "title": "Top Secret Bangkok",
@@ -164,7 +170,25 @@
     },
     "copyright": "© {year} Top Secret Bangkok. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "termsOfService": "Terms of Service",
+    "contactUs": "Contact Us",
+    "contact": "Contact Page",
+    "location": "Location",
+    "locationValue": "Bangkok, Thailand",
+    "phone": "Phone",
+    "email": "Email",
+    "quickLinks": "Quick Links",
+    "home": "Home",
+    "services": "Services",
+    "therapists": "Therapists",
+    "booking": "Booking",
+    "policies": "Policies",
+    "termsConditions": "Terms & Conditions",
+    "refundPolicy": "Refund Policy",
+    "faq": "FAQ",
+    "friendlyLinks": "Friendly Links",
+    "allRightsReserved": "All rights reserved",
+    "developedBy": "Developed by"
   },
   "home": {
     "hero": {

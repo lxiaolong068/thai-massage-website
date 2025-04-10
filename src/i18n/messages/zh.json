@@ -163,7 +163,25 @@
     },
     "copyright": "© {year} 绝密曼谷。保留所有权利。",
     "privacyPolicy": "隐私政策",
-    "termsOfService": "服务条款"
+    "termsOfService": "服务条款",
+    "contactUs": "联系我们",
+    "contact": "联系页面",
+    "location": "地址",
+    "locationValue": "泰国曼谷",
+    "phone": "电话",
+    "email": "电子邮箱",
+    "quickLinks": "快速链接",
+    "home": "首页",
+    "services": "服务项目",
+    "therapists": "按摩师",
+    "booking": "预约",
+    "policies": "政策",
+    "termsConditions": "条款与条件",
+    "refundPolicy": "退款政策",
+    "faq": "常见问题",
+    "friendlyLinks": "友情链接",
+    "allRightsReserved": "版权所有",
+    "developedBy": "开发者"
   },
   "home": {
     "hero": {

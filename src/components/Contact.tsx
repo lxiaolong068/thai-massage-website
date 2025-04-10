@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useImprovedTranslator } from '@/i18n/improved-client';
 
 type ContactProps = {
   locale?: string;
 };
+
+// 添加：定义联系方式接口
+interface ActiveContactMethod {
+  id: string;
+  type: string;
+  value: string | null;
+  qrCode: string | null;
+}
 
 const Contact = ({ locale = 'en' }: ContactProps) => {
   // 使用 useImprovedTranslator 钩子获取翻译
@@ -20,6 +28,39 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
     subject: '',
     message: '',
   });
+
+  // 添加：状态来存储联系方式和错误
+  const [activeMethods, setActiveMethods] = useState<ActiveContactMethod[]>([]);
+  const [fetchError, setFetchError] = useState(false);
+
+  // 添加：useEffect 来获取联系方式数据
+  useEffect(() => {
+    const fetchContactMethods = async () => {
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const apiUrl = `${appUrl}/api/v1/public/contact-methods`;
+
+        const response = await fetch(apiUrl, {
+          cache: 'no-store', // 确保获取最新数据
+        });
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          // 仅显示包含二维码的方法
+          setActiveMethods(data.data.filter((method: ActiveContactMethod) => method.qrCode));
+        } else {
+          throw new Error(data.error?.message || "Failed to parse contact methods data");
+        }
+      } catch (error) {
+        console.error("Failed to load contact methods for contact page:", error);
+        setFetchError(true);
+      }
+    };
+
+    fetchContactMethods();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -45,71 +86,59 @@ const Contact = ({ locale = 'en' }: ContactProps) => {
 
   return (
     <>
-      {/* 联系表单部分 */}
+      {/* 联系方式和二维码部分 */}
+      <section className="section-container section-light">
+        <div className="container">
+          <h2 className="title-lg text-center mb-12 text-black">{t('connectWithUsTitle', '与我们联系')}</h2>
+          {fetchError && (
+            <p className="text-red-500 text-center mb-8">{t('connectError', '无法加载联系方式。')}</p>
+          )}
+          {activeMethods.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
+              {activeMethods.map((method) => (
+                <div key={method.id} className="flex flex-col items-center text-center">
+                  {method.qrCode && (
+                    <div className="relative w-32 h-32 md:w-36 md:h-36 mb-4 bg-white p-2 rounded-lg shadow-lg overflow-hidden">
+                      <Image
+                        src={method.qrCode}
+                        alt={`${method.type} QR Code`}
+                        fill
+                        sizes="(max-width: 768px) 128px, 144px"
+                        className="object-contain"
+                        unoptimized={method.qrCode.startsWith('data:')}
+                      />
+                    </div>
+                  )}
+                  <h4 className="text-lg font-semibold mb-1 capitalize text-black">{method.type.toLowerCase()}</h4>
+                  {method.value && (
+                    <p className="text-sm text-gray-600 break-all" title={method.value}>{method.value}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : !fetchError ? (
+            <p className="text-center text-gray-600">{t('loadingContacts', '正在加载联系方式...')}</p>
+          ) : null}
+        </div>
+      </section>
+
+      {/* 反馈表单部分 */}
       <section className="section-container section-light" id="contact">
         <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-16">
             <div>
-              <h3 className="title-lg text-black">{t('getInTouch', '联系我们')}</h3>
+              <h3 className="title-lg text-black">{t('sendFeedbackTitle', '发送反馈')}</h3>
               <p className="text-black mb-8">
-                {t('feedbackIntro', '我们随时欢迎您的反馈和建议。请使用以下任何方式与我们联系。')}
+                {t('feedbackIntro', '我们随时欢迎您的反馈和建议。请填写下方的表格，我们会尽快回复您。')}
               </p>
-              
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="icon-circle mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6 text-primary">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold mb-1">{t('location', '地址')}</h4>
-                    <p className="text-black">{t('locationValue', '泰国曼谷素坎维区')}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="icon-circle mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6 text-primary">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold mb-1">{t('phone', '电话')}</h4>
-                    <p className="text-black">{t('phoneValue', '+66 84 503 5702')}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="icon-circle mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6 text-primary">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold mb-1">{t('email', '电子邮箱')}</h4>
-                    <p className="text-black">{t('emailValue', 'info@thaimassage.com')}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="icon-circle mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6 text-primary">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold mb-1">{t('workingHours', '营业时间')}</h4>
-                    <p className="text-black">{t('workingHoursValue', '周一至周日，上午10:00 - 下午10:00')}</p>
-                  </div>
-                </div>
-              </div>
+              <p className="text-black">
+                {t('privacyNotice', '我们尊重您的隐私，您的信息将严格保密。')}
+              </p>
             </div>
             
             <div>
               <form onSubmit={handleSubmit} className="card p-8">
-                <h3 className="title-lg text-black text-center">{t('feedbackTitle', '发送反馈')}</h3>
+                <h3 className="title-lg text-black text-center mb-6">{t('feedbackFormTitle', '反馈表单')}</h3>
                 
                 <div className="mb-4">
                   <label htmlFor="name" className="block text-black font-medium mb-2">{t('nameLabel', '姓名')}</label>

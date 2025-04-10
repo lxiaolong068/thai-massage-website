@@ -1,139 +1,126 @@
 'use client';
 
-import { Link } from '@/i18n/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 import { useImprovedTranslator } from '@/i18n/improved-client';
 
-type FooterProps = {
-  locale: string;
-};
-
-const Footer = ({ locale }: FooterProps) => {
-  // 使用 useImprovedTranslator 钩子获取翻译
+export default function Footer() {
+  const params = useParams();
+  const locale = typeof params.locale === 'string' ? params.locale : 'en';
+  
+  // 使用翻译钩子
   const { t } = useImprovedTranslator(locale, 'footer');
-  const { t: commonT } = useImprovedTranslator(locale, 'common');
+  
+  // 定义友情链接
+  const friendlyLinks = [
+    { name: 'Bangkok Tourism', url: 'https://www.bangkoktourism.com' },
+    { name: 'Thailand Travel', url: 'https://www.tourismthailand.org' },
+    { name: 'Thai Massage Association', url: 'https://www.thaimassage.or.th' },
+  ];
 
   return (
-    <footer className="bg-dark text-white pt-12 pb-6">
-      <div className="container">
-        {/* 顶部信息区域 */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl title-serif mb-4 text-primary">
-            {t('title', '泰式按摩')}
-          </h2>
-          
-          <p className="text-primary text-lg mb-4">
-            {t('address', '泰国曼谷素坎维区')}
-          </p>
-          
-          <p className="text-primary text-lg mb-8">
-            {t('tel', '电话')}: +66845035702
-          </p>
-          
-          {/* Contact Us Now 按钮 */}
-          <div className="flex-center mb-12">
-            <Link 
-              href="/contact"
-              className="primary-button"
-            >
-              {t('contactButton', '立即联系我们')}
-            </Link>
+    <footer className="bg-gray-900 text-gray-300 py-12">
+      <div className="container mx-auto px-4">
+        {/* 页脚导航链接 */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* 联系信息 */}
+          <div>
+            <h4 className="text-white text-lg font-semibold mb-4">{t('contactUs', '联系我们')}</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href={`/${locale}/contact`} className="hover:text-primary transition duration-300">
+                  {t('contact', '联系页面')}
+                </Link>
+              </li>
+              {/* <li>{t('location', '地址')}: {t('locationValue', '泰国曼谷')}</li> */}
+              {/* <li>{t('phone', '电话')}: +66 84 503 5702</li> */}
+              {/* <li>{t('email', '邮箱')}: info@topsecret-bangkok.com</li> */}
+            </ul>
           </div>
-        </div>
-        
-        {/* 二维码区域 */}
-        <div className="mb-12">
-          <h3 className="title-md text-center mb-6">{t('connectWithUs', '关注我们')}</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            <div className="flex-col-center">
-              <div className="bg-white p-2 rounded-lg mb-3">
-                <Image 
-                  src="/images/line-qr-1.png"
-                  alt={t('qrCodes.line', 'Line二维码')}
-                  width={120}
-                  height={120}
-                  className="w-24 h-24 sm:w-28 sm:h-28"
-                />
-              </div>
-              <span className="text-sm">Line</span>
-            </div>
-            
-            <div className="flex-col-center">
-              <div className="bg-white p-2 rounded-lg mb-3">
-                <Image 
-                  src="/images/wechat-qr.jpg"
-                  alt={t('qrCodes.wechat', '微信二维码')}
-                  width={120}
-                  height={120}
-                  className="w-24 h-24 sm:w-28 sm:h-28"
-                />
-              </div>
-              <span className="text-sm">WeChat</span>
-            </div>
-            
-            <div className="flex-col-center">
-              <div className="bg-white p-2 rounded-lg mb-3">
-                <Image 
-                  src="/images/whatsapp-qr.png"
-                  alt={t('qrCodes.whatsapp', 'WhatsApp二维码')}
-                  width={120}
-                  height={120}
-                  className="w-24 h-24 sm:w-28 sm:h-28"
-                />
-              </div>
-              <span className="text-sm">WhatsApp</span>
-            </div>
-            
-            <div className="flex-col-center">
-              <div className="bg-white p-2 rounded-lg mb-3">
-                <Image 
-                  src="/images/tg-qr.jpg"
-                  alt={t('qrCodes.telegram', 'Telegram二维码')}
-                  width={120}
-                  height={120}
-                  className="w-24 h-24 sm:w-28 sm:h-28"
-                />
-              </div>
-              <span className="text-sm">Telegram</span>
-            </div>
+          
+          {/* 快速链接 */}
+          <div>
+            <h4 className="text-white text-lg font-semibold mb-4">{t('quickLinks', '快速链接')}</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href={`/${locale}`} className="hover:text-primary transition duration-300">
+                  {t('home', '首页')}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/services`} className="hover:text-primary transition duration-300">
+                  {t('services', '服务')}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/therapists`} className="hover:text-primary transition duration-300">
+                  {t('therapists', '按摩师')}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/booking`} className="hover:text-primary transition duration-300">
+                  {t('booking', '预约')}
+                </Link>
+              </li>
+            </ul>
           </div>
-        </div>
-        
-        {/* 导航链接 */}
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-8">
-          <Link href="/" className="text-white/80 hover:text-primary transition">
-            {commonT('navigation.home', '首页')}
-          </Link>
-          <Link href="/about" className="text-white/80 hover:text-primary transition">
-            {commonT('navigation.about', '关于我们')}
-          </Link>
-          <Link href="/services" className="text-white/80 hover:text-primary transition">
-            {commonT('navigation.services', '服务')}
-          </Link>
-          <Link href="/therapists" className="text-white/80 hover:text-primary transition">
-            {commonT('navigation.therapists', '按摩师')}
-          </Link>
-          <Link href="/contact" className="text-white/80 hover:text-primary transition">
-            {commonT('navigation.contact', '联系我们')}
-          </Link>
+          
+          {/* 政策链接 */}
+          <div>
+            <h4 className="text-white text-lg font-semibold mb-4">{t('policies', '政策')}:</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href={`/${locale}/privacy-policy`} className="hover:text-primary transition duration-300">
+                  {t('privacyPolicy', '隐私政策')}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/terms-conditions`} className="hover:text-primary transition duration-300">
+                  {t('termsConditions', '条款与条件')}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/refund-policy`} className="hover:text-primary transition duration-300">
+                  {t('refundPolicy', '退款政策')}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/faq`} className="hover:text-primary transition duration-300">
+                  {t('faq', '常见问题')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+          
+          {/* 友情链接 */}
+          <div>
+            <h4 className="text-white text-lg font-semibold mb-4">{t('friendlyLinks', '友情链接')}</h4>
+            <ul className="space-y-2">
+              {friendlyLinks.map((link, index) => (
+                <li key={index}>
+                  <a 
+                    href={link.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-primary transition duration-300"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         
         {/* 版权信息 */}
-        <div className="text-center text-white/60 text-sm">
-          <p>{t('copyright', '版权所有 © {year} 泰式按摩。保留所有权利。', { year: new Date().getFullYear() })}</p>
-          <p className="mt-1">
-            <Link href="/privacy-policy" className="hover:text-primary transition">
-              {t('privacyPolicy', '隐私政策')}
-            </Link>
-            {' | '}
-            <Link href="/terms-of-service" className="hover:text-primary transition">
-              {t('termsOfService', '服务条款')}
-            </Link>
-          </p>
+        <div className="border-t border-gray-700 pt-8 text-sm text-center">
+          <p>&copy; {new Date().getFullYear()} Top Secret Massage. {t('allRightsReserved', '版权所有')}</p>
+          <div className="mt-2">
+            <span>{t('developedBy', '开发')}: <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary">TopSecret Dev Team</a></span>
+          </div>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer; 
+} 

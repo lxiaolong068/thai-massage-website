@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { FileInput } from "@/components/ui/file-input";
 import Image from 'next/image';
-import { Loader2 } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 
 interface ContactMethod {
   id: string;
@@ -331,9 +331,9 @@ export default function SettingsPage() {
         });
       } else {
         toast({
-          title: "Partial Success",
+          title: "Partial Save",
           description: `Saved some settings, but failed for: ${failedSaves.map(f => f.type).join(', ')}. Errors: ${failedSaves.map(f=>f.error).join('; ')}`,
-          variant: "warning",
+          variant: "default",
           duration: 7000
         });
       }
@@ -360,9 +360,13 @@ export default function SettingsPage() {
         <Button 
           onClick={handleSaveAll} 
           disabled={isSaving || loading}
-          size="lg"
+          className="bg-green-500 hover:bg-green-600 text-white"
         >
-          {isSaving ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+          {isSaving ? (
+             <Loader2 className="mr-2 h-5 w-5 animate-spin" /> 
+          ) : (
+             <Save className="mr-2 h-5 w-5" />
+          )}
           {isSaving ? 'Saving...' : 'Save All Settings'}
         </Button>
       </div>
