@@ -10,37 +10,53 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const locale = url.searchParams.get('locale') || 'en';
     
-    const services = await prisma.service.findMany({
-      include: {
-        translations: {
-          where: {
-            locale: locale
+    console.log(`Fetching services for locale: ${locale}`);
+    
+    try {
+      const services = await prisma.service.findMany({
+        include: {
+          translations: {
+            where: {
+              locale: locale
+            }
           }
+        },
+        orderBy: {
+          updatedAt: 'desc'
         }
-      },
-      orderBy: {
-        updatedAt: 'desc'
-      }
-    });
+      });
 
-    const formattedServices = services.map(service => {
-      const translation = service.translations[0] || { name: '', description: '', slug: '' };
-      return {
-        id: service.id,
-        price: service.price,
-        duration: service.duration,
-        imageUrl: service.imageUrl,
-        createdAt: service.createdAt,
-        updatedAt: service.updatedAt,
-        name: translation.name,
-        description: translation.description,
-        slug: translation.slug
-      };
-    });
+      console.log(`Found ${services.length} services`);
+      
+      const formattedServices = services.map(service => {
+        const translation = service.translations[0] || { name: '', description: '', slug: '' };
+        return {
+          id: service.id,
+          price: service.price,
+          duration: service.duration,
+          imageUrl: service.imageUrl,
+          createdAt: service.createdAt,
+          updatedAt: service.updatedAt,
+          name: translation.name,
+          description: translation.description,
+          slug: translation.slug
+        };
+      });
 
-    return apiSuccess(formattedServices);
+      return apiSuccess(formattedServices);
+    } catch (dbError) {
+      console.error('Database error fetching services:', dbError);
+      
+      // 数据库连接失败时返回备用数据
+      console.log('Returning fallback services for locale:', locale);
+      const fallbackServices = getFallbackServices(locale);
+      return apiSuccess(fallbackServices);
+    }
   } catch (error) {
     console.error('Error fetching services:', error);
+    if (error instanceof Error) {
+      return apiError('SERVER_ERROR', `Failed to fetch services: ${error.message}`, 500);
+    }
     return apiError('SERVER_ERROR', 'Failed to fetch services', 500);
   }
 }
