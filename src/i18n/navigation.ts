@@ -36,6 +36,10 @@ export const pathnames = {
   '/server-test': '/server-test',
   '/privacy-policy': '/privacy-policy',
   '/terms-of-service': '/terms-of-service',
+  '/booking': '/booking',
+  '/faq': '/faq',
+  '/terms-conditions': '/terms-conditions',
+  '/refund-policy': '/refund-policy',
 };
 
 // 创建本地化的导航工具

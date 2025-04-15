@@ -188,7 +188,13 @@
     "faq": "FAQ",
     "friendlyLinks": "Friendly Links",
     "allRightsReserved": "All rights reserved",
-    "developedBy": "Developed by"
+    "developedBy": "Developed by",
+    "qrTitle": "Scan QR Code to Contact Us",
+    "qrDescription": "Long press or screenshot the QR code to quickly get in touch",
+    "line": "LINE",
+    "wechat": "WeChat",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp"
   },
   "home": {
     "hero": {

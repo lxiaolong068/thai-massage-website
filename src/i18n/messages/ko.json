@@ -165,7 +165,7 @@
     "copyright": "© {year} Top Secret 방콕. 모든 권리 보유.",
     "privacyPolicy": "개인정보 처리방침",
     "termsOfService": "서비스 이용약관",
-    "contactUs": "연락처",
+    "contactUs": "문의하기",
     "contact": "연락처 페이지",
     "location": "위치",
     "locationValue": "방콕, 태국",
@@ -177,12 +177,18 @@
     "therapists": "테라피스트",
     "booking": "예약",
     "policies": "정책",
-    "termsConditions": "이용약관",
+    "termsConditions": "이용 약관",
     "refundPolicy": "환불 정책",
-    "faq": "자주 묻는 질문",
-    "friendlyLinks": "관련 링크",
+    "faq": "FAQ",
+    "friendlyLinks": "친선 링크",
     "allRightsReserved": "모든 권리 보유",
-    "developedBy": "개발자"
+    "developedBy": "개발자",
+    "qrTitle": "QR 코드로 문의하기",
+    "qrDescription": "QR 코드를 길게 누르거나 스크린샷하여 빠르게 문의하세요",
+    "line": "라인",
+    "wechat": "위챗",
+    "telegram": "텔레그램",
+    "whatsapp": "WhatsApp"
   },
   "home": {
     "hero": {

@@ -181,7 +181,13 @@
     "faq": "常见问题",
     "friendlyLinks": "友情链接",
     "allRightsReserved": "版权所有",
-    "developedBy": "开发者"
+    "developedBy": "开发者",
+    "qrTitle": "扫码联系我们",
+    "qrDescription": "长按二维码或截图识别，快速与我们取得联系",
+    "line": "LINE",
+    "wechat": "微信",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp"
   },
   "home": {
     "hero": {
