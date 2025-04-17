@@ -3,7 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
- # Thai Massage Website - Project Development Guidelines
+# Thai Massage Website - Project Development Guidelines
 
 ## 1. Overview & Core Technologies
 
@@ -84,4 +84,4 @@ alwaysApply: true
 *   **Package Management**: Use `pnpm` commands (`pnpm install`, `pnpm add`, `pnpm dev`, `pnpm build`). Use the `-w` flag if adding dependencies to the workspace root.
 *   **Testing**: Conduct tests after each significant development step to ensure functionality is error-free. (Refer to `tests/` directory if setup).
 *   **Prisma Client**: Run `pnpm prisma generate` after modifying `schema.prisma` to update client types. Restart the TS server or editor if type errors persist.
-*   **Cache**: If encountering persistent type or build issues, try clearing the Next.js cache (`rm -rf .next`) and restarting the dev server.
+*   **Cache**: If encountering persistent type or build issues, try clearing the Next.js cache (`rm -rf .next`) and restarting the dev server. 
