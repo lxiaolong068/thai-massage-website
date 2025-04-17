@@ -152,22 +152,42 @@ export default function ServicesPage() {
 
   // 处理拖拽结束，重新排序并同步到后台
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination || searchQuery) return;
+    if (!result.destination) {
+      return;
+    }
+    if (searchQuery) {
+      toast('Drag-and-drop sorting is disabled while searching.');
+      return;
+    }
+
     const items = Array.from(services);
     const [removed] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, removed);
-    setServices(items);
-    // 更新 sortOrder 同步后台
-    const serviceOrders = items.map((s, idx) => ({ id: s.id, sortOrder: idx }));
+
+    // Update sortOrder property within each item in the new array
+    const updatedItemsWithSortOrder = items.map((item, index) => ({
+      ...item,
+      sortOrder: index // Assign the new index as the sortOrder
+    }));
+
+    setServices(updatedItemsWithSortOrder); // Update state with the array containing correct sortOrder values
+
+    // Prepare data for API call (use the updated items)
+    const serviceOrders = updatedItemsWithSortOrder.map(s => ({ id: s.id, sortOrder: s.sortOrder }));
+
     try {
       const res = await fetch('/api/services', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reorder', serviceOrders })
       });
-      if (!res.ok) throw new Error('Failed to update sort order');
+
+      if (!res.ok) {
+        throw new Error(`Failed to update sort order: ${res.statusText}`);
+      }
       toast.success('Sort order updated');
     } catch (err: any) {
+      // Consider reverting state or refetching on error
       toast.error(err.message || 'Error updating sort order');
     }
   };

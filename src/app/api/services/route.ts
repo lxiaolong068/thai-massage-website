@@ -139,6 +139,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Define an interface for the expected structure in serviceOrders
+interface ServiceOrder { 
+  id: string;
+  sortOrder: number;
+}
+
 // Batch operations for services
 export async function PATCH(request: NextRequest) {
   try {
@@ -180,12 +186,12 @@ export async function PATCH(request: NextRequest) {
         }
         // Batch update sortOrder for each service
         await prisma.$transaction(
-          serviceOrders.map((so: any) =>
-            prisma.service.update({
+          serviceOrders.map((so: ServiceOrder) => {
+            return prisma.service.update({
               where: { id: so.id },
               data: { sortOrder: so.sortOrder }
             })
-          )
+          })
         );
         return apiSuccess(
           { updatedCount: serviceOrders.length },
