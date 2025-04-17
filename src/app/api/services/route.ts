@@ -19,9 +19,10 @@ export async function GET(request: NextRequest) {
             }
           }
         },
-        orderBy: {
-          updatedAt: 'desc'
-        }
+        orderBy: [
+          { sortOrder: 'asc' },
+          { updatedAt: 'desc' }
+        ]
       });
       
       const formattedServices = services.map(service => {
@@ -35,7 +36,8 @@ export async function GET(request: NextRequest) {
           updatedAt: service.updatedAt,
           name: translation.name,
           description: translation.description,
-          slug: translation.slug
+          slug: translation.slug,
+          sortOrder: service.sortOrder
         };
       });
 
@@ -54,7 +56,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { price, duration, imageUrl, translations } = body;
+    const { price, duration, imageUrl, translations, sortOrder = 0 } = body;
 
     // 验证必填字段
     if (!price || !duration || !imageUrl || !translations || !Array.isArray(translations)) {
@@ -103,6 +105,7 @@ export async function POST(request: NextRequest) {
           price,
           duration,
           imageUrl,
+          sortOrder,
           translations: {
             create: translations.map((translation: any) => ({
               locale: translation.locale,

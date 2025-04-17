@@ -30,6 +30,7 @@ export default function NewServicePage() {
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sortOrder, setSortOrder] = useState<number>(0);
 
   const handleTranslationChange = (locale: string, field: keyof ServiceTranslation, value: string) => {
     setTranslations(prevTranslations =>
@@ -85,6 +86,7 @@ export default function NewServicePage() {
           price,
           duration,
           imageUrl,
+          sortOrder,
           translations,
         }),
       });
@@ -233,7 +235,7 @@ export default function NewServicePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
               Price (THB)
@@ -256,6 +258,19 @@ export default function NewServicePage() {
               id="duration"
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="sortOrder" className="block text-sm font-medium text-gray-700 mb-1">
+              Sort Order
+            </label>
+            <input
+              type="number"
+              id="sortOrder"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(Number(e.target.value))}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />

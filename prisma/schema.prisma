@@ -41,6 +41,7 @@ model Service {
   price        Float
   duration     Int
   imageUrl     String               @map("image_url")
+  sortOrder    Int                  @default(0) @map("sort_order")
   bookings     Booking[]
   translations ServiceTranslation[]
 
