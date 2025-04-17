@@ -22,6 +22,7 @@ type Service = {
   translations: ServiceTranslation[];
   createdAt: string;
   updatedAt: string;
+  sortOrder: number;
 };
 
 export default function ServiceDetailPage({
@@ -37,6 +38,7 @@ export default function ServiceDetailPage({
   const [price, setPrice] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState<string>('/images/placeholder-service.jpg');
+  const [sortOrder, setSortOrder] = useState<number>(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [imageLoading, setImageLoading] = useState(false);
@@ -88,6 +90,7 @@ export default function ServiceDetailPage({
         setDuration(serviceData.duration);
         setImageUrl(serviceData.imageUrl || '/images/placeholder-service.jpg');
         setTranslations(allTranslations);
+        setSortOrder(serviceData.sortOrder);
       } catch (err: any) {
         setError(err.message || 'Failed to fetch service data');
       } finally {
@@ -138,6 +141,7 @@ export default function ServiceDetailPage({
           price,
           duration,
           imageUrl,
+          sortOrder,
           translations,
         }),
       });
@@ -326,7 +330,7 @@ export default function ServiceDetailPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
               Price (THB)
@@ -349,6 +353,19 @@ export default function ServiceDetailPage({
               id="duration"
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="sortOrder" className="block text-sm font-medium text-gray-700 mb-1">
+              Sort Order
+            </label>
+            <input
+              type="number"
+              id="sortOrder"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(Number(e.target.value))}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
