@@ -12,6 +12,7 @@ type Service = {
   price: number;
   duration: number;
   imageUrl?: string;
+  sortOrder: number;
 };
 
 type ServicesProps = {
@@ -44,7 +45,12 @@ const Services = ({ locale = 'en' }: ServicesProps) => {
           throw new Error('服务数据格式错误');
         }
         
-        setServices(result.data);
+        // 调试：打印从 API 获取的原始服务列表
+        console.log('Services fetched from API:', result.data);
+        // 根据后端提供的 sortOrder 在前端进行排序
+        const servicesData = result.data as Service[];
+        const sortedServices = servicesData.sort((a, b) => a.sortOrder - b.sortOrder);
+        setServices(sortedServices);
       } catch (err) {
         console.error('获取服务数据失败');
         setError(err instanceof Error ? err.message : '加载服务失败');
