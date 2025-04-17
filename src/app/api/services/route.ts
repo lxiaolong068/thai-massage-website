@@ -143,9 +143,10 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, serviceIds } = body;
+    const { action, serviceIds, serviceOrders } = body;
     
-    if (!action || !serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
+    // Validate basic batch request
+    if (!action) {
       return apiError('INVALID_INPUT', 'Invalid batch operation request', 400);
     }
     
@@ -172,7 +173,24 @@ export async function PATCH(request: NextRequest) {
           { deletedCount: serviceIds.length },
           `${serviceIds.length} services deleted successfully`
         );
-        
+      case 'reorder':
+        // Expect serviceOrders: [{ id: string; sortOrder: number }]
+        if (!serviceOrders || !Array.isArray(serviceOrders) || serviceOrders.length === 0) {
+          return apiError('INVALID_INPUT', 'Invalid reorder request', 400);
+        }
+        // Batch update sortOrder for each service
+        await prisma.$transaction(
+          serviceOrders.map((so: any) =>
+            prisma.service.update({
+              where: { id: so.id },
+              data: { sortOrder: so.sortOrder }
+            })
+          )
+        );
+        return apiSuccess(
+          { updatedCount: serviceOrders.length },
+          'Services reordered successfully'
+        );
       default:
         return apiError('INVALID_ACTION', 'Unsupported batch operation', 400);
     }

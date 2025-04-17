@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { PlusCircle } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DraggableProvided } from '@hello-pangea/dnd';
 
 type Service = {
   id: string;
@@ -149,183 +150,217 @@ export default function ServicesPage() {
     );
   });
 
+  // 处理拖拽结束，重新排序并同步到后台
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination || searchQuery) return;
+    const items = Array.from(services);
+    const [removed] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, removed);
+    setServices(items);
+    // 更新 sortOrder 同步后台
+    const serviceOrders = items.map((s, idx) => ({ id: s.id, sortOrder: idx }));
+    try {
+      const res = await fetch('/api/services', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reorder', serviceOrders })
+      });
+      if (!res.ok) throw new Error('Failed to update sort order');
+      toast.success('Sort order updated');
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating sort order');
+    }
+  };
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Services Management</h1>
-        <div className="flex items-center space-x-4">
-          <Link
-            href="/admin/services/new"
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base"
-          >
-            <PlusCircle className="w-5 h-5" />
-            Add Service
-          </Link>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 p-4 mb-6 rounded-md">
-          <div className="text-red-500">{error}</div>
-        </div>
-      )}
-      
-      {!loading && services.length > 0 && (
-        <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center space-x-3">
-            {selectedServices.length > 0 && (
-              <button
-                onClick={handleBatchDelete}
-                disabled={isBatchDeleting}
-                className="flex items-center bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isBatchDeleting ? 'Processing...' : `Delete Selected (${selectedServices.length})`}
-              </button>
-            )}
-            <button
-              onClick={fetchServices}
-              disabled={loading}
-              className="flex items-center bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition-colors"
-            >
-              Refresh
-            </button>
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearch}
-              placeholder="Search services..."
-              className="border border-gray-300 rounded-md py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-primary w-64"
-            />
-          </div>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-xl text-gray-600">Loading...</div>
-        </div>
-      ) : (
-        services.length === 0 ? (
-          <div className="bg-yellow-50 p-6 rounded-lg text-center">
-            <p className="text-yellow-700">No services found</p>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold">Services Management</h1>
+          <div className="flex items-center space-x-4">
             <Link
               href="/admin/services/new"
-              className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium text-base"
             >
-              Add First Service
+              <PlusCircle className="w-5 h-5" />
+              Add Service
             </Link>
           </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="w-12 px-4 py-3">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedServices.length > 0 && selectedServices.length === filteredServices.length}
-                        onChange={handleSelectAll}
-                        className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-                      />
-                    </div>
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Service
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Sort Order
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredServices.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                      No matching services found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredServices.map((service) => (
-                    <tr key={service.id} className="hover:bg-gray-50">
-                      <td className="w-12 px-4 py-4">
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedServices.includes(service.id)}
-                            onChange={() => handleSelectService(service.id)}
-                            className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0 relative">
-                            <Image
-                              src={service.imageUrl || '/images/placeholder-service.jpg'}
-                              alt={service.name || 'Service'}
-                              fill
-                              className="rounded-md object-cover"
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {service.name}
-                            </div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {service.description}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{service.price.toLocaleString()} THB</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{service.duration} minutes</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="text-sm text-gray-900">{service.sortOrder}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link
-                          href={`/admin/services/${service.id}`}
-                          className="text-primary hover:text-primary-dark mr-4"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(service.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            {filteredServices.length > 0 && (
-              <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
-                Showing {filteredServices.length} services {searchQuery ? `(filtered from ${services.length})` : ''}
-              </div>
-            )}
+        </div>
+
+        {error && (
+          <div className="bg-red-50 p-4 mb-6 rounded-md">
+            <div className="text-red-500">{error}</div>
           </div>
-        )
-      )}
-    </div>
+        )}
+        
+        {!loading && services.length > 0 && (
+          <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
+            <div className="flex items-center space-x-3">
+              {selectedServices.length > 0 && (
+                <button
+                  onClick={handleBatchDelete}
+                  disabled={isBatchDeleting}
+                  className="flex items-center bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isBatchDeleting ? 'Processing...' : `Delete Selected (${selectedServices.length})`}
+                </button>
+              )}
+              <button
+                onClick={fetchServices}
+                disabled={loading}
+                className="flex items-center bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearch}
+                placeholder="Search services..."
+                className="border border-gray-300 rounded-md py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-primary w-64"
+              />
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-xl text-gray-600">Loading...</div>
+          </div>
+        ) : (
+          services.length === 0 ? (
+            <div className="bg-yellow-50 p-6 rounded-lg text-center">
+              <p className="text-yellow-700">No services found</p>
+              <Link
+                href="/admin/services/new"
+                className="mt-4 inline-block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition-colors"
+              >
+                Add First Service
+              </Link>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="w-12 px-4 py-3">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.length > 0 && selectedServices.length === filteredServices.length}
+                          onChange={handleSelectAll}
+                          className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        />
+                      </div>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Service
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Price
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Duration
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Sort Order
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <Droppable droppableId="services">
+                  {(provided: DroppableProvided) => (
+                    <tbody
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="bg-white divide-y divide-gray-200"
+                    >
+                      {filteredServices.map((service, index) => (
+                        <Draggable key={service.id} draggableId={service.id} index={index}>
+                          {(provided: DraggableProvided) => (
+                            <tr
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="hover:bg-gray-50"
+                            >
+                              <td className="w-12 px-4 py-4">
+                                <div className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedServices.includes(service.id)}
+                                    onChange={() => handleSelectService(service.id)}
+                                    className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                  />
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="h-10 w-10 flex-shrink-0 relative">
+                                    <Image
+                                      src={service.imageUrl || '/images/placeholder-service.jpg'}
+                                      alt={service.name || 'Service'}
+                                      fill
+                                      className="rounded-md object-cover"
+                                    />
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {service.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500 truncate max-w-xs">
+                                      {service.description}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{service.price.toLocaleString()} THB</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{service.duration} minutes</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right">
+                                <div className="text-sm text-gray-900">{service.sortOrder}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <Link
+                                  href={`/admin/services/${service.id}`}
+                                  className="text-primary hover:text-primary-dark mr-4"
+                                >
+                                  Edit
+                                </Link>
+                                <button
+                                  onClick={() => handleDelete(service.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </tbody>
+                  )}
+                </Droppable>
+              </table>
+              {filteredServices.length > 0 && (
+                <div className="px-6 py-3 bg-gray-50 text-xs text-gray-500">
+                  Showing {filteredServices.length} services {searchQuery ? `(filtered from ${services.length})` : ''}
+                </div>
+              )}
+            </div>
+          )
+        )}
+      </div>
+    </DragDropContext>
   );
 }
