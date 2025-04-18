@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import MobileContactBar from '@/components/MobileContactBar';
 import { Toaster } from 'react-hot-toast';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
@@ -97,6 +98,7 @@ export default async function RootLayout({
             {children}
           </main>
           <Footer />
+          <MobileContactBar />
           <Toaster position="top-center" />
         </NextIntlClientProvider>
       </body>

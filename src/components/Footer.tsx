@@ -20,7 +20,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300 py-12">
+    <footer className="bg-gray-900 text-gray-300 py-12 md:pb-12 pb-20">
       <div className="container mx-auto px-4">
         {/* 二维码联系方式区域 */}
         <div className="max-w-4xl mx-auto mb-10">

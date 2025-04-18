@@ -36,3 +36,28 @@ img {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 } 
+
+/* 移动端联系栏动画 */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+/* 为底部联系栏添加一些底部间距，防止被遮挡 */
+@media (max-width: 768px) {
+  .pb-mobile-contact {
+    padding-bottom: 3.5rem;
+  }
+  
+  footer {
+    padding-bottom: 4rem;
+  }
+}
