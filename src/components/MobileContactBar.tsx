@@ -1,14 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Phone, X } from 'lucide-react';
 import Link from 'next/link';
 
+interface ContactMethod { id: string; type: string; qrCode: string; value?: string; }
+
 const MobileContactBar: React.FC = () => {
   const t = useTranslations('booking');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [methods, setMethods] = useState<ContactMethod[]>([]);
+  const order = ['Line','Telegram','WeChat','WhatsApp'];
+  const colorMap: Record<string,string> = { Line: '#06C755', Telegram: '#0088cc', WeChat: '#07C160', WhatsApp: '#25D366' };
+
+  useEffect(() => {
+    fetch('/api/v1/public/contact-methods')
+      .then(res => res.json())
+      .then(json => { if (json.success) setMethods(json.data); });
+  }, []);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -29,73 +40,30 @@ const MobileContactBar: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-4 gap-2">
-            {/* LINE */}
-            <a href="https://line.me/ti/p/~topsecretbkk" target="_blank" rel="noopener noreferrer" className="block">
-              <div className="bg-white rounded-lg text-center border hover:border-[#06C755] transition-colors">
-                <div className="bg-[#06C755] text-white py-1 rounded-t-md">
-                  <h4 className="text-xs font-semibold">LINE</h4>
-                </div>
-                <div className="relative w-full h-16 p-1">
-                  <Image 
-                    src="/images/line-qr-1.png" 
-                    alt="LINE QR Code" 
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            </a>
-
-            {/* Telegram */}
-            <a href="https://t.me/topsecretbkk" target="_blank" rel="noopener noreferrer" className="block">
-              <div className="bg-white rounded-lg text-center border hover:border-[#0088cc] transition-colors">
-                <div className="bg-[#0088cc] text-white py-1 rounded-t-md">
-                  <h4 className="text-xs font-semibold">Telegram</h4>
-                </div>
-                <div className="relative w-full h-16 p-1">
-                  <Image 
-                    src="/images/tg-qr.jpg" 
-                    alt="Telegram QR Code" 
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            </a>
-
-            {/* WeChat */}
-            <a href="#" onClick={(e) => {e.preventDefault(); alert('请扫描二维码添加微信')}} className="block">
-              <div className="bg-white rounded-lg text-center border hover:border-[#07C160] transition-colors">
-                <div className="bg-[#07C160] text-white py-1 rounded-t-md">
-                  <h4 className="text-xs font-semibold">WeChat</h4>
-                </div>
-                <div className="relative w-full h-16 p-1">
-                  <Image 
-                    src="/images/wechat-qr.jpg" 
-                    alt="WeChat QR Code" 
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            </a>
-
-            {/* WhatsApp */}
-            <a href="https://wa.me/66845035702" target="_blank" rel="noopener noreferrer" className="block">
-              <div className="bg-white rounded-lg text-center border hover:border-[#25D366] transition-colors">
-                <div className="bg-[#25D366] text-white py-1 rounded-t-md">
-                  <h4 className="text-xs font-semibold">WhatsApp</h4>
-                </div>
-                <div className="relative w-full h-16 p-1">
-                  <Image 
-                    src="/images/whatsapp-qr.png" 
-                    alt="WhatsApp QR Code" 
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            </a>
+            {order.map(type => {
+              const method = methods.find(m => m.type === type);
+              if (!method) return null;
+              const href = type === 'WeChat'
+                ? '#'
+                : type === 'Line'
+                  ? method.value?.startsWith('http') ? method.value : `https://line.me/ti/p/~${method.value}`
+                  : type === 'Telegram'
+                    ? `https://t.me/${method.value}`
+                    : `https://wa.me/${(method.value || '').replace(/\D/g, '')}`;
+              const onClick = type === 'WeChat' ? (e: React.MouseEvent) => { e.preventDefault(); alert(t('contact.scanToChat')); } : undefined;
+              return (
+                <a key={method.id} href={href} target={type !== 'WeChat' ? '_blank' : undefined} rel={type !== 'WeChat' ? 'noopener noreferrer' : undefined} onClick={onClick} className="block">
+                  <div className="bg-white rounded-lg text-center border transition-colors hover:opacity-90">
+                    <div style={{ backgroundColor: colorMap[type] }} className="text-white py-1 rounded-t-md">
+                      <h4 className="text-xs font-semibold">{type}</h4>
+                    </div>
+                    <div className="relative w-full h-16 p-1">
+                      <Image src={method.qrCode} alt={`${type} QR Code`} fill className="object-contain" />
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
       ) : (
