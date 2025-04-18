@@ -12,6 +12,7 @@ const MobileContactBar: React.FC = () => {
   const t = useTranslations('booking');
   const [isExpanded, setIsExpanded] = useState(false);
   const [methods, setMethods] = useState<ContactMethod[]>([]);
+  const lineMethod = methods.find(m => m.type === 'Line');
   const order = ['Line','Telegram','WeChat','WhatsApp'];
   const colorMap: Record<string,string> = { Line: '#06C755', Telegram: '#0088cc', WeChat: '#07C160', WhatsApp: '#25D366' };
 
@@ -69,7 +70,7 @@ const MobileContactBar: React.FC = () => {
       ) : (
         <div className="pointer-events-auto flex w-full divide-x divide-gray-300 border-t border-gray-300 bg-white/75 shadow-lg">
           <a 
-            href="https://line.me/ti/p/~topsecretbkk" 
+            href={lineMethod ? (lineMethod.value?.startsWith('http') ? lineMethod.value : `https://line.me/ti/p/~${lineMethod.value}`) : '#'}
             target="_blank" 
             rel="noopener noreferrer" 
             className="flex-1 py-3 flex items-center justify-center gap-1 text-gray-700 hover:bg-gray-50"
