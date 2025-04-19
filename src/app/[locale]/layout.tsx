@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+// 动态导入 i18n/messages/<locale>.json，以加载所有翻译命名空间
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MobileContactBar from '@/components/MobileContactBar';
@@ -31,8 +31,8 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  // 加载翻译消息
-  const messages = await getMessages();
+  // 动态加载对应语言的所有翻译文件
+  const messages = (await import(`../../i18n/messages/${locale}.json`)).default;
 
   return (
     <html lang={locale} suppressHydrationWarning className={`${inter.className} scroll-smooth`}>

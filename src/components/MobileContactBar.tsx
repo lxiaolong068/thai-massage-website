@@ -17,6 +17,7 @@ interface ContactMethod { id: string; type: string; qrCode: string; value?: stri
 
 const MobileContactBar: React.FC = () => {
   const t = useTranslations('booking');
+  const tFooter = useTranslations('footer');
   const [isExpanded, setIsExpanded] = useState(false);
   const [methods, setMethods] = useState<ContactMethod[]>([]);
   // 改进：不区分大小写的匹配，处理数据库可能存储"LINE"而不是"Line"的情况
@@ -155,7 +156,9 @@ const MobileContactBar: React.FC = () => {
       {/* Dialog Content for QR Code */}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{`扫描${currentMethodType}二维码`}</DialogTitle>
+          <DialogTitle>{
+            currentMethodType ? tFooter(`qrCodes.${currentMethodType.toLowerCase()}`) : ''
+          }</DialogTitle>
         </DialogHeader>
         <div className="py-4">
           {currentQrCode && (
