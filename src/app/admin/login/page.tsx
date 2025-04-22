@@ -109,7 +109,7 @@ function LoginForm() {
       }
 
       // 将用户信息存储在本地
-      // 注意：token可能为null，如果使用的是备用认证方式
+      // 确保使用统一的键名
       const userData = {
         id: data.data.id,
         email: data.data.email,
@@ -117,10 +117,11 @@ function LoginForm() {
         role: data.data.role
       };
       
+      // 为了兼容性同时存储用户信息和令牌
       localStorage.setItem('adminUser', JSON.stringify(userData));
       
-      // 如果返回了JWT token，也存储它
-      if (data.data?.token) {
+      // 如果返回了JWT token，存储它
+      if (data.data.token) {
         localStorage.setItem('admin_token', data.data.token);
       } else {
         // 清除可能存在的旧token

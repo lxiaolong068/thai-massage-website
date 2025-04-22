@@ -1,16 +1,21 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { verifyToken, decodeToken } from '@/lib/jwt';
 
 export default function AdminRedirect() {
-  // Check if user is logged in
+  // 获取所有可能的认证cookie
   const cookieStore = cookies();
   const adminSession = cookieStore.get('admin_session');
+  const adminToken = cookieStore.get('admin_token');
   
-  // If no session cookie, redirect to login page
-  if (!adminSession) {
+  // 检查是否有任何认证信息
+  const hasAuth = adminSession || adminToken;
+  
+  // 如果没有认证信息，重定向到登录页面
+  if (!hasAuth) {
     redirect('/admin/login');
   }
   
-  // If has session cookie, redirect to dashboard
+  // 如果有认证信息，重定向到仪表盘
   redirect('/admin/dashboard');
 }

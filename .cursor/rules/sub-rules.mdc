@@ -3,7 +3,6 @@ description:
 globs: 
 alwaysApply: true
 ---
-
 # Your rule content
 
 - use pnpm instead of npm

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { handleAuthFailure } from '@/lib/fetch';
+import { getAdminToken } from '@/lib/client/authUtils';
 
 /**
  * 客户端工具组件，处理全局请求拦截和token管理
@@ -29,7 +30,7 @@ export default function ClientUtils() {
       // 如果是admin相关请求，添加Authorization头
       const urlStr = String(url || '');
       if (urlStr.includes('/admin') || urlStr.includes('/api/admin')) {
-        const token = localStorage.getItem('admin_token');
+        const token = getAdminToken();
         if (token) {
           this.setRequestHeader('Authorization', `Bearer ${token}`);
         }

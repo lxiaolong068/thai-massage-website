@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiAuthError } from '@/utils/api/response';
+import { verifyAuth } from '@/lib/auth';
 
 /**
  * API版本控制中间件
@@ -65,18 +66,23 @@ export function withClientApi(handler: (req: NextRequest) => Promise<NextRespons
  */
 export function withAdminApi(handler: (req: NextRequest) => Promise<NextResponse>) {
   return withApiVersion(async (req: NextRequest) => {
-    // 获取管理员授权令牌
-    const token = req.cookies.get('admin_session')?.value;
-    
-    // 如果没有令牌，返回未授权错误
-    if (!token) {
-      return apiAuthError('需要管理员授权');
+    try {
+      // 使用统一的认证逻辑进行验证
+      const user = await verifyAuth(req);
+
+      // 如果没有有效用户或用户不是管理员，返回未授权错误
+      if (!user || user.role?.toLowerCase() !== 'admin') {
+        return apiAuthError('需要管理员授权');
+      }
+
+      // 将用户信息添加到请求中
+      (req as any).user = user;
+      
+      // 继续处理请求
+      return handler(req);
+    } catch (error) {
+      console.error('管理API授权验证失败:', error);
+      return apiAuthError('授权验证失败');
     }
-    
-    // TODO: 验证令牌有效性和管理员角色
-    // 这里应该添加令牌验证和角色检查逻辑
-    
-    // 继续处理请求
-    return handler(req);
   });
 } 

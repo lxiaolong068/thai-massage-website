@@ -1,7 +1,7 @@
 ---
-description: 
+description: Apply this rule when handling login logic.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Thai Massage Admin Login System Rules
 
