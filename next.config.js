@@ -15,7 +15,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'example.com',
+        hostname: 'www.tarabkkmassage.com',
       },
     ],
     domains: ['localhost'],
@@ -45,7 +45,7 @@ const nextConfig = {
           {
             type: 'query',
             key: 'url',
-            value: '(^/http|example\.com)',
+            value: '(^/http|www\.tarabkkmassage\.com)',
           }
         ],
         destination: '/images/placeholder-therapist.jpg'

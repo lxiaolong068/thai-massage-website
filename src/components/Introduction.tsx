@@ -30,7 +30,7 @@ const Introduction = ({ locale = 'en' }: IntroductionProps) => {
           <div className="md:w-1/2 order-2 md:order-1">
             <div className="bg-cream border-l-4 border-primary pl-6 py-2 mb-6">
               <h3 className="title-md md:text-2xl text-primary">
-                {t('subtitle', "Top Secret Outcall Massage: Gateway to Renewal")}
+                {t('subtitle', "Tara Outcall Massage: Gateway to Renewal")}
               </h3>
             </div>
             

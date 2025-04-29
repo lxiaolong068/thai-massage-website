@@ -182,11 +182,11 @@ const DefaultAboutContent: React.FC<{locale?: string}> = ({ locale = 'en' }) => 
   return (
     <div className="flex flex-col md:flex-row items-start gap-12 mt-4">
       <div className="md:w-2/5 mb-8 md:mb-0">
-        <h2 className="title-lg text-3xl md:text-4xl leading-tight text-black">Top Secret Outcall Massage</h2>
+        <h2 className="title-lg text-3xl md:text-4xl leading-tight text-black">Tara Outcall Massage</h2>
         <div className="relative mb-8 rounded-lg overflow-hidden shadow-xl">
           <Image
             src="/images/topsecret-massage.png"
-            alt="Top Secret Outcall Massage"
+            alt="Tara Outcall Massage"
             width={600}
             height={400}
             className="w-full h-auto object-cover"
@@ -210,9 +210,9 @@ const DefaultAboutContent: React.FC<{locale?: string}> = ({ locale = 'en' }) => 
                 <Image src="/images/icon-1.png" alt="Icon 1" width={40} height={40} />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">Top Secret Bangkok</h3>
+                <h3 className="text-base sm:text-lg font-semibold mb-2 text-black">Tara Bangkok</h3>
                 <p className="text-gray-700">
-                  Top Secret Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.
+                  Tara Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.
                 </p>
               </div>
             </div>

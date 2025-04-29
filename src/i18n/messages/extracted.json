@@ -15,10 +15,10 @@
     }
   },
   "metadata": {
-    "title": "Top Secret Outcall Massage | Professional Thai Massage in Bangkok",
+    "title": "Tara Outcall Massage | Professional Thai Massage in Bangkok",
     "description": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep with personalized massage therapy.",
     "keywords": "Thai massage, Bangkok massage, outcall massage, professional massage, relaxation therapy, Thai therapists",
-    "ogTitle": "Top Secret Outcall Massage | Professional Thai Massage in Bangkok",
+    "ogTitle": "Tara Outcall Massage | Professional Thai Massage in Bangkok",
     "ogDescription": "Experience premium Thai massage services in Bangkok. Our professional therapists bring relaxation and rejuvenation to your doorstep."
   },
   "notFound": {
@@ -27,13 +27,13 @@
     "backHome": "Return to Home"
   },
   "about": {
-    "title": "Top Secret Outcall Massage",
-    "imageAlt": "Top Secret Outcall Massage",
+    "title": "Tara Outcall Massage",
+    "imageAlt": "Tara Outcall Massage",
     "learnMoreButton": "LEARN MORE ABOUT US",
     "card1": {
-      "title": "Top Secret Bangkok",
-      "description": "Top Secret Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.",
-      "imageAlt": "Top Secret Bangkok"
+      "title": "Tara Bangkok",
+      "description": "Tara Bangkok is a Professional outcall massage service in Bangkok. All of our therapists are totally qualified and possess a diploma.",
+      "imageAlt": "Tara Bangkok"
     },
     "card2": {
       "title": "Professional Outcall Massage Service in Bangkok",
@@ -106,12 +106,12 @@
     "feedbackIntro": "Have suggestions or feedback about our services? We'd love to hear from you. Your input helps us improve and provide better experiences for all our clients.",
     "location": "Location",
     "locationValue": "Bangkok, Thailand",
-    "phone": "Phone",
-    "phoneValue": "+66 XX XXX XXXX",
     "email": "Email",
-    "emailValue": "info@topsecret-bangkok.com",
+    "emailValue": "info@tara-bangkok.com",
     "workingHours": "Working Hours",
     "workingHoursValue": "Available 24/7",
+    "phone": "Phone",
+    "phoneValue": "+66 84 503 5702",
     "feedbackTitle": "Feedback & Suggestions",
     "nameLabel": "Your Name",
     "emailLabel": "Email Address",
@@ -143,11 +143,10 @@
     "messageRequired": "Message is required",
     "contactInfo": "Contact Information",
     "address": "Bangkok, Thailand",
-    "phoneValue": "+66 84 503 5702",
     "followUs": "Follow Us"
   },
   "footer": {
-    "title": "Top Secret Bangkok",
+    "title": "Tara Bangkok",
     "address": "Sukhumvit Soi 13, Klongtoey Nua, Watthana, Bangkok, 10110",
     "tel": "Tel",
     "contactButton": "Contact Us Now",
@@ -158,7 +157,7 @@
       "whatsapp": "WhatsApp QR Code",
       "telegram": "Telegram QR Code"
     },
-    "copyright": "© {year} Top Secret Bangkok. All rights reserved.",
+    "copyright": "  {year} Tara Bangkok. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
   },
@@ -173,10 +172,10 @@
       "viewAll": "View All Services"
     },
     "introduction": {
-      "title": "Welcome to Top Secret Thai Massage",
+      "title": "Welcome to Tara Thai Massage",
       "description": "We bring the authentic Thai massage experience directly to you. Our skilled therapists are trained in traditional techniques that have been perfected over centuries.",
-      "subtitle": "Top Secret Outcall Massage: Gateway to Renewal",
-      "content": "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Top Secret's outcall massage was more than just a service; it was a gateway to physical and mental renewal.",
+      "subtitle": "Tara Outcall Massage: Gateway to Renewal",
+      "content": "Service was renowned for its exceptional quality and professional therapists. Each session was tailored to meet the individual needs of the client, ensuring a deeply relaxing and rejuvenating experience, the therapists brought their expertise and care right to the client's doorstep. The convenience and luxury of at-home service made it a popular choice. With a focus on holistic well-being, Tara's outcall massage was more than just a service; it was a gateway to physical and mental renewal.",
       "imageAlt": "Thai massage introduction"
     },
     "testimonials": {
@@ -187,7 +186,7 @@
   "booking": {
     "title": "Book Your Massage",
     "subtitle": "Complete the form below to schedule your personalized massage therapy session",
-    "success": "Thank you for booking with Top Secret Outcall Massage. We have received your request and will contact you shortly to confirm your appointment.",
+    "success": "Thank you for booking with Tara Outcall Massage. We have received your request and will contact you shortly to confirm your appointment.",
     "bookAnother": "Book Another Session",
     "personalInfo": "Personal Information",
     "nameLabel": "Your Name *",
@@ -209,4 +208,4 @@
     "nextStep": "Next Step",
     "bookNow": "Book Now"
   }
-} 
+}

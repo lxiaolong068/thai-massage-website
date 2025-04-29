@@ -152,7 +152,7 @@ export default function Footer() {
         <div className="border-t border-gray-700 pt-8 text-sm text-center">
           <p>&copy; {new Date().getFullYear()} Top Secret Massage. {t('allRightsReserved', '版权所有')}</p>
           <div className="mt-2">
-            <span>{t('developedBy', '开发')}: <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary">TopSecret Dev Team</a></span>
+            <span>{t('developedBy', '开发')}: <a href="https://www.tarabkkmassage.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary">TopSecret Dev Team</a></span>
           </div>
         </div>
       </div>
