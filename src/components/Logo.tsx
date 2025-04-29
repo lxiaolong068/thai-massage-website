@@ -9,7 +9,7 @@ const Logo = ({ className = '' }: { className?: string }) => {
       </div>
       <div className="ml-2 flex flex-col justify-center">
         <span className="text-sm md:text-base font-medium block leading-tight">Tara Massage</span>
-        <span className="text-xs md:text-sm text-muted-foreground block leading-tight">Bangkok</span>
+        <span className="text-xs md:text-sm text-white block leading-tight">Bangkok</span>
       </div>
     </Link>
   );
