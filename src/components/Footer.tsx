@@ -147,13 +147,8 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        
-        {/* 版权信息 */}
-        <div className="border-t border-gray-700 pt-8 text-sm text-center">
-          <p>&copy; {new Date().getFullYear()} Top Secret Massage. {t('allRightsReserved', '版权所有')}</p>
-          <div className="mt-2">
-            <span>{t('developedBy', '开发')}: <a href="https://www.tarabkkmassage.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary">TopSecret Dev Team</a></span>
-          </div>
+        <div className="container mx-auto text-center text-gray-400 text-sm">
+          <p>&copy; {new Date().getFullYear()} Tara Massage Massage. {t('allRightsReserved', '版权所有')}</p>
         </div>
       </div>
     </footer>

@@ -16,7 +16,7 @@ const testimonials = [
     id: 2,
     name: 'Michael Chen',
     location: 'Singapore',
-    text: 'I was in Bangkok for business and booked a massage through Top Secret. The therapist came to my hotel room on time and provided an excellent service. Will definitely use again on my next trip!',
+    text: 'I was in Bangkok for business and booked a massage through Tara Massage. The therapist came to my hotel room on time and provided an excellent service. Will definitely use again on my next trip!',
     image: '/images/testimonial-2.jpg',
     rating: 5,
   },

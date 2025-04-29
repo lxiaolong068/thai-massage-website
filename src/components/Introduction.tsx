@@ -11,18 +11,105 @@ const Introduction = ({ locale = 'en' }: IntroductionProps) => {
   // 使用优化后的翻译Hook，自动处理服务器/客户端一致性
   const { t } = useImprovedTranslator(locale, 'home.introduction');
   
+  const introSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Tara Massage Thai Massage",
+    "description": t('schemaDescription', "Tara Massage offers professional outcall Thai massage services in Bangkok, delivering authentic relaxation and therapeutic treatments to your location."),
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Bangkok",
+      "addressCountry": "TH"
+    },
+    "telephone": "+66-XXX-XXX-XXXX", // Replace with actual phone number if available
+    "image": "/images/placeholder-service.jpg", // Replace with a relevant image URL
+    "url": "https://yourwebsite.com", // Replace with your actual website URL
+    "priceRange": "$$", // Example price range
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "10:00",
+        "closes": "22:00"
+      }
+    ],
+    "sameAs": [
+      // Add social media links if available
+      // "https://www.facebook.com/yourpage",
+      // "https://www.instagram.com/yourprofile"
+    ],
+    "potentialAction": {
+      "@type": "ReserveAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://yourwebsite.com/book", // Replace with your booking page URL
+        "inLanguage": "en",
+        "actionPlatform": [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/IOSPlatform",
+          "http://schema.org/AndroidPlatform"
+        ]
+      },
+      "result": {
+        "@type": "Reservation",
+        "name": "Book a Massage"
+      }
+    },
+    // Add founder information if relevant and desired for SEO
+    // "founder": {
+    //   "@type": "Person",
+    //   "name": "Founder Name"
+    // },
+    "areaServed": {
+      "@type": "City",
+      "name": "Bangkok"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Massage Services",
+      "itemListElement": [
+        // Add specific services if desired for SEO
+        // {
+        //   "@type": "Offer",
+        //   "itemOffered": {
+        //     "@type": "Service",
+        //     "name": "Traditional Thai Massage"
+        //   }
+        // },
+        // {
+        //   "@type": "Offer",
+        //   "itemOffered": {
+        //     "@type": "Service",
+        //     "name": "Foot Massage"
+        //   }
+        // }
+      ]
+    }
+  };
+
+  // Detailed historical description - kept for reference but maybe shortened or moved
+  const historicalDescription = t('historicalDesc', "Originating from a vision to make traditional Thai wellness accessible, the service began by offering outcall massages. With a focus on holistic well-being, Tara Massage outcall massage was more than just a service; it was a gateway to physical and mental renewal.");
+
   return (
     <section className="section-container section-cream">
       <div className="container">
-        <h2 className="title-lg text-3xl md:text-4xl text-center text-black">
-          {t('title', "Welcome to Top Secret Thai Massage")}
-        </h2>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          {t('title', "Welcome to Tara Massage Thai Massage")}
+        </h1>
         
         {/* 黄色下划线装饰 */}
         <div className="w-24 h-1 bg-primary mx-auto mb-8"></div>
         
-        <p className="text-black italic text-center text-lg md:text-xl mb-12 max-w-3xl mx-auto">
-          &quot;{t('description', "We bring the authentic Thai massage experience directly to you. Our skilled therapists are trained in traditional techniques that have been perfected over centuries.")}&quot;
+        <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          {t('description', "Experience authentic Thai massage in the comfort of your own space. Our professional therapists bring relaxation and rejuvenation right to your doorstep.")}
         </p>
         
         <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
