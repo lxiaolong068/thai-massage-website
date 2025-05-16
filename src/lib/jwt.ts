@@ -28,7 +28,7 @@ export async function signToken(payload: TokenPayload): Promise<string> {
     const jwt = await new jose.SignJWT({ ...payload })
       .setProtectedHeader({ alg })
       .setIssuedAt()
-      .setExpirationTime('24h')
+      .setExpirationTime(process.env.NODE_ENV === 'production' ? '24h' : '30d')
       .sign(secret);
     
     return jwt;

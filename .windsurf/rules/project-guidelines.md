@@ -1,0 +1,87 @@
+---
+trigger: always_on
+description: 
+globs: 
+---
+# Thai Massage Website - Project Development Guidelines
+
+## 1. Overview & Core Technologies
+
+*   **Project**: A multi-lingual Thai massage service website with an admin panel.
+*   **Framework**: Next.js 14 (App Router)
+*   **Language**: TypeScript (Strict mode preferred)
+*   **Styling**: Tailwind CSS
+*   **UI Components**: shadcn/ui (Primary UI library)
+*   **Database**: PostgreSQL
+*   **ORM**: Prisma
+*   **Package Manager**: `pnpm` (Use this for all package operations)
+*   **Internationalization (i18n)**: `next-intl` (v3.2+)
+
+## 2. Directory Structure Highlights
+
+*   `src/app/[locale]/`: Frontend user-facing pages (multi-lingual).
+*   `src/app/admin/`: Admin panel pages (English only).
+*   `src/app/api/`: Backend API routes (English only).
+*   `src/components/`: Shared React components (use shadcn/ui components).
+*   `src/lib/`: Shared utilities, Prisma client instance, API response helpers.
+*   `src/i18n/`: Internationalization configuration and message files (`messages/*.json`).
+*   `prisma/`: Database schema (`schema.prisma`) and migrations.
+*   `public/images/`: Static image assets.
+*   `scripts/`: Utility scripts for maintenance tasks.
+
+## 3. Coding Standards
+
+*   **Language**: Use TypeScript consistently. Avoid `any` where possible.
+*   **Formatting**: Adhere to ESLint and Prettier configurations present in the project.
+*   **Naming**:
+    *   Files/Directories: `kebab-case.ts` (e.g., `service-list.tsx`)
+    *   Components: `PascalCase` (e.g., `ServiceCard`)
+    *   Variables/Functions: `camelCase` (e.g., `fetchServices`)
+    *   Constants: `UPPER_SNAKE_CASE` (e.g., `DEFAULT_LOCALE`)
+*   **Comments**:
+    *   Backend/API (`src/app/api`, `src/lib`, `prisma`): English only.
+    *   Frontend (`src/app/[locale]`, `src/components`): Can be multi-lingual if explaining UI logic specific to a language, otherwise English preferred.
+
+## 4. Frontend Development (`src/app/[locale]`, `src/components`)
+
+*   **UI Library**: **Strongly prefer** using `shadcn/ui` components for consistency. Install via `pnpm dlx shadcn-ui@latest add [component...]`.
+*   **State Management**: Prioritize React Context API and built-in hooks (`useState`, `useEffect`, etc.). Use libraries like Zustand or Jotai only if complexity demands it.
+*   **Internationalization (i18n)**:
+    *   **Scope**: Only user-facing UI text in `src/app/[locale]` and related components needs translation.
+    *   **Implementation**: Use `next-intl` hooks (`useTranslations`, `useMessages`) and configuration (`src/i18n`).
+    *   **Files**: Add translations to `src/i18n/messages/{en,zh,th,ko}.json`.
+    *   **Admin Panel**: The admin UI (`src/app/admin`) is **English only** and does not require i18n.
+
+## 5. Backend & API Development (`src/app/api`)
+
+*   **Language & Communication**: All code, comments, variable names, API responses (success messages, error messages) **must be in English**.
+*   **Design**: Follow RESTful principles where applicable.
+*   **Response Format**: Use the helper functions in `src/lib/api-response.ts` (`apiSuccess`, `apiError`) to ensure consistent JSON response structure.
+*   **Authentication**:
+    *   Admin routes (`/api/admin/*`) are protected.
+    *   Authentication relies on JWT (from Cookie or Authorization header) and potentially Session fallback (refer to `login-rules.mdc` and `middleware.ts` in `src/` or `src/app/api/` if applicable).
+*   **Error Handling**: Provide clear English error messages. Use standard HTTP status codes (400, 401, 404, 500, etc.).
+
+## 6. Database (Prisma)
+
+*   **Schema**: Define all models in `prisma/schema.prisma`.
+    *   Table Names: Plural, `snake_case` (e.g., `services`, `therapist_translations`). Prisma maps these to `PascalCase` models.
+    *   Field Names: `camelCase` (e.g., `sortOrder`, `imageUrl`). Use `@map` for explicit column names if needed (e.g., `@map("sort_order")`).
+    *   Required Fields: Ensure `id`, `createdAt`, `updatedAt` are present unless explicitly not needed.
+*   **Migrations**: Always use `pnpm prisma migrate dev --name <migration_name>` to apply schema changes. **Do not** use `db push` on the production database.
+*   **Production DB**: **Exercise extreme caution** when interacting with the database, as it's connected to production (NeonDB). Avoid destructive operations.
+*   **Manual Sorting**: For models requiring manual ordering (like Services), add an `Int` field named `sortOrder` with `@default(0)`. Fetch these models using `orderBy: { sortOrder: 'asc' }`. Update this field via API when reordering occurs.
+
+## 7. Assets (`public/images`)
+
+*   Store static images here.
+*   Use placeholders when actual images are missing:
+    *   Therapists: `public/images/placeholder-therapist.jpg`
+    *   Services: `public/images/placeholder-service.jpg` (or create one if it doesn't exist)
+
+## 8. Workflow & Tools
+
+*   **Package Management**: Use `pnpm` commands (`pnpm install`, `pnpm add`, `pnpm dev`, `pnpm build`). Use the `-w` flag if adding dependencies to the workspace root.
+*   **Testing**: Conduct tests after each significant development step to ensure functionality is error-free. (Refer to `tests/` directory if setup).
+*   **Prisma Client**: Run `pnpm prisma generate` after modifying `schema.prisma` to update client types. Restart the TS server or editor if type errors persist.
+*   **Cache**: If encountering persistent type or build issues, try clearing the Next.js cache (`rm -rf .next`) and restarting the dev server. 
