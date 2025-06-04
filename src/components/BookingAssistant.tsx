@@ -602,9 +602,9 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
 
   // 移动端优化的样式
   const mobileStyles = {
-    container: "booking-assistant fixed bottom-0 left-0 right-0 z-50 md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto",
-    chatWrapper: "h-screen max-h-[70vh] md:h-auto md:max-h-none",
-    popup: "bottom-4 right-4 md:bottom-8 md:right-8"
+    container: "booking-assistant",
+    chatWrapper: "",
+    popup: ""
   };
 
   const desktopStyles = {
@@ -626,26 +626,14 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       }
     };
 
-    if (isMobile) {
-      // 移动端使用弹窗界面
-      return (
-        <div className={styles.chatWrapper}>
-          <CopilotPopup
-            {...commonProps}
-            className="mobile-optimized"
-            defaultOpen={false}
-          />
-        </div>
-      );
-    } else {
-      // 桌面端使用侧边栏
-      return (
-        <CopilotSidebar
-          {...commonProps}
-          defaultOpen={false}
-        />
-      );
-    }
+    // 统一使用CopilotPopup，并设置正确的定位
+    return (
+      <CopilotPopup
+        {...commonProps}
+        className="booking-assistant-popup"
+        defaultOpen={false}
+      />
+    );
   };
 
   return (
@@ -667,90 +655,105 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
         />
       )}
       
-      {/* 移动端专用样式 */}
-      {isMobile && (
-        <style jsx global>{`
-          .mobile-optimized {
-            /* 确保移动端触摸交互正常 */
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
+      {/* 预约助手弹窗样式 */}
+      <style jsx global>{`
+        /* 预约助手弹窗基础定位 */
+        .booking-assistant-popup {
+          position: fixed !important;
+          bottom: 20px !important;
+          right: 20px !important;
+          z-index: 9999 !important;
+          width: auto !important;
+          height: auto !important;
+        }
+
+        /* 桌面端样式 */
+        @media (min-width: 769px) {
+          .booking-assistant-popup {
+            bottom: 30px !important;
+            right: 30px !important;
+            max-width: 400px !important;
+            max-height: 600px !important;
           }
-          
-          .mobile-optimized input,
-          .mobile-optimized textarea,
-          .mobile-optimized button {
-            /* 移动端表单元素优化 */
-            font-size: 16px !important; /* 防止iOS缩放 */
-            touch-action: manipulation;
-            -webkit-appearance: none;
-            appearance: none;
+        }
+
+        /* 移动端样式 */
+        @media (max-width: 768px) {
+          .booking-assistant-popup {
+            bottom: 20px !important;
+            right: 20px !important;
+            left: 20px !important;
+            max-width: calc(100vw - 40px) !important;
+            max-height: 70vh !important;
           }
-          
-          .mobile-optimized button {
-            /* 确保按钮在移动端可点击 */
-            min-height: 44px;
-            min-width: 44px;
-            padding: 12px;
+        }
+
+        /* 小屏移动端样式 */
+        @media (max-width: 480px) {
+          .booking-assistant-popup {
+            bottom: 15px !important;
+            right: 15px !important;
+            left: 15px !important;
+            max-width: calc(100vw - 30px) !important;
+            max-height: 75vh !important;
           }
-          
-          /* CopilotPopup移动端优化 */
-          @media (max-width: 768px) {
-            .mobile-optimized {
-              position: fixed !important;
-              bottom: 10px !important;
-              left: 10px !important;
-              right: 10px !important;
-              width: calc(100vw - 20px) !important;
-              max-width: none !important;
-              max-height: 80vh !important;
-              z-index: 9999 !important;
-            }
-            
-            /* 修复弹窗内容区域 */
-            .mobile-optimized [role="dialog"] {
-              max-height: 80vh !important;
-              width: 100% !important;
-            }
-            
-            /* 修复聊天输入框在移动端的显示 */
-            .mobile-optimized textarea,
-            .mobile-optimized input[type="text"] {
-              font-size: 16px !important;
-              line-height: 1.5 !important;
-              padding: 12px !important;
-              border-radius: 8px !important;
-              border: 1px solid #e2e8f0 !important;
-              background: white !important;
-            }
-            
-            /* 确保聊天消息可滚动 */
-            .mobile-optimized .copilot-chat-messages {
-              max-height: 50vh !important;
-              overflow-y: auto !important;
-              -webkit-overflow-scrolling: touch !important;
-            }
-            
-            /* 优化发送按钮 */
-            .mobile-optimized button[type="submit"],
-            .mobile-optimized .send-button {
-              min-height: 44px !important;
-              min-width: 44px !important;
-              font-size: 16px !important;
-              touch-action: manipulation !important;
-            }
-          }
-          
-          /* 确保弹窗在移动端正确显示 */
-          @media (max-width: 480px) {
-            .mobile-optimized {
-              bottom: 5px !important;
-              left: 5px !important;
-              right: 5px !important;
-              width: calc(100vw - 10px) !important;
-            }
-          }
+        }
+
+        /* 弹窗内容区域样式 */
+        .booking-assistant-popup [role="dialog"] {
+          border-radius: 12px !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+          border: 1px solid #e5e7eb !important;
+        }
+
+        /* 输入框和按钮优化 */
+        .booking-assistant-popup input,
+        .booking-assistant-popup textarea,
+        .booking-assistant-popup button {
+          font-size: 16px !important; /* 防止iOS缩放 */
+          touch-action: manipulation;
+          -webkit-appearance: none;
+          appearance: none;
+        }
+
+        .booking-assistant-popup button {
+          min-height: 44px !important;
+          min-width: 44px !important;
+          padding: 12px !important;
+        }
+
+        /* 聊天消息区域 */
+        .booking-assistant-popup .copilot-chat-messages {
+          -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior: contain;
+        }
+
+        /* 确保弹窗可见性 */
+        .booking-assistant-popup {
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+
+        /* 触发按钮样式 */
+        .booking-assistant-popup button[data-state="closed"] {
+          background-color: #3b82f6 !important;
+          color: white !important;
+          border-radius: 50% !important;
+          width: 60px !important;
+          height: 60px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+                 /* 触发按钮悬浮效果 */
+         .booking-assistant-popup button[data-state="closed"]:hover {
+           background-color: #2563eb !important;
+           transform: scale(1.05) !important;
+           transition: all 0.2s ease !important;
+         }
         `}</style>
-      )}
     </div>
   );
 };
