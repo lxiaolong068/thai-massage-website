@@ -31,7 +31,7 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
   onBookingComplete,
   locale = 'zh'
 }) => {
-  const t = useTranslations('booking');
+  const t = useTranslations('bookingAssistant');
   
   // 状态管理
   const [services, setServices] = useState<Service[]>([]);
@@ -49,7 +49,7 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           setServices(data.data);
         }
       } catch (error) {
-        console.error('获取服务列表失败:', error);
+        console.error('Failed to fetch services:', error);
       }
     };
 
@@ -66,7 +66,7 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           setTherapists(data.data);
         }
       } catch (error) {
-        console.error('获取按摩师列表失败:', error);
+        console.error('Failed to fetch therapists:', error);
       }
     };
 
@@ -75,57 +75,59 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
 
   // 让AI了解可用的服务
   useCopilotReadable({
-    description: "可预约的按摩服务列表，包含服务名称、价格、时长等信息",
+    description: "Available massage services with names, prices, and duration information",
     value: services.map(service => ({
       id: service.id,
       name: service.name,
       description: service.description,
-      price: `${service.price}元`,
-      duration: `${service.duration}分钟`
+      price: `${locale === 'en' ? '$' : ''}${service.price}${locale === 'en' ? '' : (locale === 'ko' ? '원' : '元')}`,
+      duration: `${service.duration}${locale === 'en' ? ' minutes' : (locale === 'ko' ? '분' : '分钟')}`
     }))
   });
 
   // 让AI了解可用的按摩师
   useCopilotReadable({
-    description: "可预约的按摩师列表，包含姓名、专长、工作状态等信息",
+    description: "Available therapists with names, specialties, and work status",
     value: therapists.map(therapist => ({
       id: therapist.id,
       name: therapist.name,
       specialties: therapist.specialties,
-      status: therapist.workStatus === 'AVAILABLE' ? '可预约' : '不可预约'
+      status: therapist.workStatus === 'AVAILABLE' ? 
+        (locale === 'en' ? 'Available' : (locale === 'ko' ? '예약 가능' : '可预约')) : 
+        (locale === 'en' ? 'Unavailable' : (locale === 'ko' ? '예약 불가능' : '不可预约'))
     }))
   });
 
   // 让AI了解当前预约进度
   useCopilotReadable({
-    description: "当前预约表单的填写进度和已选择的信息",
+    description: "Current booking form progress and selected information",
     value: {
-      selectedService: bookingData.serviceName || '未选择',
-      selectedTherapist: bookingData.therapistName || '未选择',
-      selectedDate: bookingData.date || '未选择',
-      selectedTime: bookingData.time || '未选择',
-      customerName: bookingData.name || '未填写',
-      customerPhone: bookingData.phone || '未填写',
-      customerEmail: bookingData.email || '未填写',
-      notes: bookingData.notes || '无备注'
+      selectedService: bookingData.serviceName || (locale === 'en' ? 'Not selected' : (locale === 'ko' ? '선택되지 않음' : '未选择')),
+      selectedTherapist: bookingData.therapistName || (locale === 'en' ? 'Not selected' : (locale === 'ko' ? '선택되지 않음' : '未选择')),
+      selectedDate: bookingData.date || (locale === 'en' ? 'Not selected' : (locale === 'ko' ? '선택되지 않음' : '未选择')),
+      selectedTime: bookingData.time || (locale === 'en' ? 'Not selected' : (locale === 'ko' ? '선택되지 않음' : '未选择')),
+      customerName: bookingData.name || (locale === 'en' ? 'Not filled' : (locale === 'ko' ? '입력되지 않음' : '未填写')),
+      customerPhone: bookingData.phone || (locale === 'en' ? 'Not filled' : (locale === 'ko' ? '입력되지 않음' : '未填写')),
+      customerEmail: bookingData.email || (locale === 'en' ? 'Not filled' : (locale === 'ko' ? '입력되지 않음' : '未填写')),
+      notes: bookingData.notes || (locale === 'en' ? 'No notes' : (locale === 'ko' ? '메모 없음' : '无备注'))
     }
   });
 
   // 选择服务的动作
   useCopilotAction({
     name: "selectService",
-    description: "选择按摩服务",
+    description: "Select massage service",
     parameters: [
       {
         name: "serviceId",
         type: "string",
-        description: "服务ID",
+        description: "Service ID",
         required: true
       },
       {
         name: "serviceName",
         type: "string",
-        description: "服务名称",
+        description: "Service name",
         required: true
       }
     ],
@@ -139,27 +141,31 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           servicePrice: service.price,
           serviceDuration: service.duration
         }));
-        return `已选择服务：${serviceName}，价格：${service.price}元，时长：${service.duration}分钟`;
+        return t('responses.serviceSelected', {
+          serviceName,
+          price: service.price,
+          duration: service.duration
+        });
       }
-      return "服务选择失败，请重新选择";
+      return t('responses.serviceSelectFailed');
     }
   });
 
   // 选择按摩师的动作
   useCopilotAction({
     name: "selectTherapist",
-    description: "选择按摩师",
+    description: "Select therapist",
     parameters: [
       {
         name: "therapistId",
         type: "string",
-        description: "按摩师ID",
+        description: "Therapist ID",
         required: true
       },
       {
         name: "therapistName",
         type: "string",
-        description: "按摩师姓名",
+        description: "Therapist name",
         required: true
       }
     ],
@@ -171,27 +177,27 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           therapistId,
           therapistName
         }));
-        return `已选择按摩师：${therapistName}`;
+        return t('responses.therapistSelected', { therapistName });
       }
-      return "按摩师选择失败或该按摩师不可预约，请重新选择";
+      return t('responses.therapistSelectFailed');
     }
   });
 
   // 设置预约时间的动作
   useCopilotAction({
     name: "setDateTime",
-    description: "设置预约日期和时间",
+    description: "Set appointment date and time",
     parameters: [
       {
         name: "date",
         type: "string",
-        description: "预约日期 (YYYY-MM-DD格式)",
+        description: "Appointment date (YYYY-MM-DD format)",
         required: true
       },
       {
         name: "time",
         type: "string",
-        description: "预约时间 (HH:mm格式)",
+        description: "Appointment time (HH:mm format)",
         required: true
       }
     ],
@@ -201,7 +207,7 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       const timeRegex = /^\d{2}:\d{2}$/;
       
       if (!dateRegex.test(date) || !timeRegex.test(time)) {
-        return "日期或时间格式不正确，请使用YYYY-MM-DD和HH:mm格式";
+        return t('responses.dateTimeFormatError');
       }
 
       // 检查日期是否为未来日期
@@ -210,7 +216,7 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       today.setHours(0, 0, 0, 0);
       
       if (selectedDate < today) {
-        return "不能预约过去的日期，请选择今天或未来的日期";
+        return t('responses.pastDateError');
       }
 
       setBookingData(prev => ({
@@ -220,52 +226,58 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
         dateTime: `${date} ${time}`
       }));
       
-      return `已设置预约时间：${date} ${time}`;
+      return t('responses.dateTimeSet', { date, time });
     }
   });
 
   // 填写客户信息的动作
   useCopilotAction({
     name: "setCustomerInfo",
-    description: "填写客户联系信息",
+    description: "Fill in customer contact information",
     parameters: [
       {
         name: "name",
         type: "string",
-        description: "客户姓名",
+        description: "Customer name",
         required: true
       },
       {
         name: "phone",
         type: "string",
-        description: "客户电话号码",
+        description: "Customer phone number",
         required: true
       },
       {
         name: "email",
         type: "string",
-        description: "客户邮箱地址",
+        description: "Customer email address",
         required: false
       },
       {
         name: "notes",
         type: "string",
-        description: "备注信息",
+        description: "Additional notes",
         required: false
       }
     ],
     handler: ({ name, phone, email, notes }) => {
-      // 验证电话号码格式
-      const phoneRegex = /^1[3-9]\d{9}$/;
+      // 验证电话号码格式（根据语言调整验证规则）
+      let phoneRegex;
+      if (locale === 'zh') {
+        phoneRegex = /^1[3-9]\d{9}$/; // 中国手机号
+      } else {
+        phoneRegex = /^[\+]?[0-9\-\s()]{8,15}$/; // 国际通用格式
+      }
+      
       if (!phoneRegex.test(phone)) {
-        return "电话号码格式不正确，请输入11位手机号码";
+        return t('responses.phoneFormatError');
       }
 
       // 验证邮箱格式（如果提供）
       if (email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-          return "邮箱格式不正确，请重新输入";
+          return t('responses.emailFormatError');
         }
       }
 
@@ -278,14 +290,14 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
         termsAgreed: true
       }));
       
-      return `已保存客户信息：${name}，电话：${phone}`;
+      return t('responses.customerInfoSaved', { name, phone });
     }
   });
 
   // 提交预约的动作
   useCopilotAction({
     name: "submitBooking",
-    description: "提交预约申请",
+    description: "Submit booking request",
     parameters: [],
     handler: async () => {
       // 检查必填信息是否完整
@@ -293,17 +305,8 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       const missing = required.filter(field => !bookingData[field as keyof BookingFormData]);
       
       if (missing.length > 0) {
-        return `预约信息不完整，还需要填写：${missing.map(field => {
-          switch(field) {
-            case 'serviceId': return '服务类型';
-            case 'therapistId': return '按摩师';
-            case 'date': return '预约日期';
-            case 'time': return '预约时间';
-            case 'name': return '姓名';
-            case 'phone': return '电话';
-            default: return field;
-          }
-        }).join('、')}`;
+        const missingNames = missing.map(field => t(`responses.fieldNames.${field}`)).join('、');
+        return t('responses.bookingIncomplete', { missing: missingNames });
       }
 
       setIsLoading(true);
@@ -323,51 +326,27 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           if (onBookingComplete) {
             onBookingComplete(bookingData as BookingFormData);
           }
-          return `预约成功！预约编号：${result.data.id}。我们会尽快联系您确认预约详情。`;
+          return t('responses.bookingSuccess', { bookingId: result.data.id });
         } else {
-          return `预约失败：${result.message || '未知错误'}`;
+          return t('responses.bookingFailed', { error: result.message || 'Unknown error' });
         }
       } catch (error) {
-        console.error('预约提交失败:', error);
-        return "预约提交失败，请稍后重试或联系客服";
+        console.error('Booking submission failed:', error);
+        return t('responses.bookingError');
       } finally {
         setIsLoading(false);
       }
     }
   });
 
-  const instructions = `
-你是一个专业的泰式按摩预约助手。你的任务是帮助客户轻松完成按摩服务预约。
-
-请按照以下步骤引导客户：
-
-1. **了解需求**：询问客户想要什么类型的按摩服务
-2. **推荐服务**：根据可用服务列表为客户推荐合适的服务
-3. **选择按摩师**：帮助客户选择合适的按摩师
-4. **安排时间**：协助客户选择合适的预约日期和时间
-5. **收集信息**：获取客户的联系信息（姓名、电话、邮箱）
-6. **确认预约**：核实所有信息后提交预约
-
-注意事项：
-- 始终保持友好和专业的态度
-- 详细介绍每个服务的特点和价格
-- 确保客户了解预约的所有细节
-- 如果客户有特殊需求，记录在备注中
-- 预约时间必须是未来的日期和时间
-- 电话号码必须是有效的11位手机号
-
-当前语言：${locale === 'zh' ? '中文' : 'English'}
-请用相应语言与客户交流。
-  `;
-
   return (
     <div className="booking-assistant">
       <CopilotSidebar
-        instructions={instructions}
+        instructions={t('instructions')}
         labels={{
-          title: "预约助手",
-          initial: "您好！我是您的专属按摩预约助手。我可以帮您快速完成预约，无需填写复杂的表单。请告诉我您想要什么类型的按摩服务？",
-          placeholder: "请描述您的需求...",
+          title: t('title'),
+          initial: t('initial'),
+          placeholder: t('placeholder'),
         }}
       />
     </div>

@@ -319,5 +319,35 @@
       "scanToChat": "Scan to chat with us",
       "contactUs": "Contact Us"
     }
+  },
+  "bookingAssistant": {
+    "title": "Booking Assistant",
+    "initial": "Hello! I'm your dedicated massage booking assistant. I can help you complete your booking quickly without filling out complex forms. What type of massage service would you like?",
+    "placeholder": "Please describe your requirements...",
+    "instructions": "You are a professional Thai massage booking assistant. Your task is to help clients easily complete massage service bookings.\n\nPlease guide customers through the following steps:\n\n1. **Understand needs**: Ask customers what type of massage service they want\n2. **Recommend services**: Recommend suitable services based on available service list\n3. **Select therapist**: Help customers choose a suitable therapist\n4. **Schedule time**: Assist customers in selecting suitable appointment date and time\n5. **Collect information**: Gather customer contact information (name, phone, email)\n6. **Confirm booking**: Verify all information and submit booking\n\nImportant notes:\n- Always maintain a friendly and professional attitude\n- Describe the features and prices of each service in detail\n- Ensure customers understand all booking details\n- Record any special requirements in notes\n- Appointment time must be in the future\n- Phone number must be a valid mobile number\n\nPlease communicate with customers in English.",
+    "responses": {
+      "serviceSelected": "Service selected: {serviceName}, Price: ${price}, Duration: {duration} minutes",
+      "serviceSelectFailed": "Service selection failed, please select again",
+      "therapistSelected": "Therapist selected: {therapistName}",
+      "therapistSelectFailed": "Therapist selection failed or therapist unavailable, please select another one",
+      "dateTimeSet": "Appointment time set: {date} {time}",
+      "dateTimeFormatError": "Date or time format incorrect, please use YYYY-MM-DD and HH:mm format",
+      "pastDateError": "Cannot book past dates, please select today or future dates",
+      "customerInfoSaved": "Customer information saved: {name}, Phone: {phone}",
+      "phoneFormatError": "Phone number format incorrect, please enter a valid mobile number",
+      "emailFormatError": "Email format incorrect, please re-enter",
+      "bookingIncomplete": "Booking information incomplete, still need to fill in: {missing}",
+      "bookingSuccess": "Booking successful! Booking ID: {bookingId}. We will contact you soon to confirm booking details.",
+      "bookingFailed": "Booking failed: {error}",
+      "bookingError": "Booking submission failed, please try again later or contact customer service",
+      "fieldNames": {
+        "serviceId": "Service Type",
+        "therapistId": "Therapist",
+        "date": "Appointment Date",
+        "time": "Appointment Time",
+        "name": "Name",
+        "phone": "Phone"
+      }
+    }
   }
 }

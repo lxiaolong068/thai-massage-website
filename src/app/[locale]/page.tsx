@@ -26,8 +26,8 @@ export default function HomePage({
           <Services locale={locale} />
         </div>
         
-        {/* AI预约助手 */}
-        <BookingAssistant />
+        {/* AI预约助手 - 传递locale参数 */}
+        <BookingAssistant locale={locale} />
       </main>
     </CopilotKit>
   );
