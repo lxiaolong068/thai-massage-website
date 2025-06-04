@@ -657,53 +657,81 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       
       {/* 预约助手弹窗样式 */}
       <style jsx global>{`
-        /* 预约助手弹窗基础定位 */
+        /* 预约助手弹窗基础定位 - 右侧醒目位置 */
         .booking-assistant-popup {
           position: fixed !important;
-          bottom: 20px !important;
-          right: 20px !important;
-          z-index: 9999 !important;
+          bottom: 80px !important;
+          right: 30px !important;
+          z-index: 999999 !important;
           width: auto !important;
           height: auto !important;
         }
 
-        /* 桌面端样式 */
+        /* 桌面端样式 - 更大更醒目 */
         @media (min-width: 769px) {
           .booking-assistant-popup {
-            bottom: 30px !important;
-            right: 30px !important;
-            max-width: 400px !important;
-            max-height: 600px !important;
+            bottom: 100px !important;
+            right: 40px !important;
+            max-width: 420px !important;
+            max-height: 650px !important;
+          }
+          
+          /* 桌面端触发按钮更大 */
+          .booking-assistant-popup button[data-state="closed"] {
+            width: 70px !important;
+            height: 70px !important;
           }
         }
 
-        /* 移动端样式 */
-        @media (max-width: 768px) {
+        /* 平板端样式 */
+        @media (min-width: 481px) and (max-width: 768px) {
           .booking-assistant-popup {
-            bottom: 20px !important;
-            right: 20px !important;
-            left: 20px !important;
-            max-width: calc(100vw - 40px) !important;
-            max-height: 70vh !important;
+            bottom: 60px !important;
+            right: 25px !important;
+            max-width: 380px !important;
+            max-height: 60vh !important;
           }
         }
 
-        /* 小屏移动端样式 */
+        /* 移动端样式 - 右侧定位但不占满宽 */
         @media (max-width: 480px) {
           .booking-assistant-popup {
-            bottom: 15px !important;
-            right: 15px !important;
-            left: 15px !important;
-            max-width: calc(100vw - 30px) !important;
-            max-height: 75vh !important;
+            bottom: 80px !important;
+            right: 20px !important;
+            max-width: 320px !important;
+            max-height: 70vh !important;
+            /* 移除left定位，保持右侧对齐 */
+          }
+          
+          /* 移动端触发按钮适中大小 */
+          .booking-assistant-popup button[data-state="closed"] {
+            width: 65px !important;
+            height: 65px !important;
           }
         }
 
-        /* 弹窗内容区域样式 */
+        /* 超小屏移动端 */
+        @media (max-width: 375px) {
+          .booking-assistant-popup {
+            bottom: 70px !important;
+            right: 15px !important;
+            max-width: 280px !important;
+            max-height: 65vh !important;
+          }
+          
+          .booking-assistant-popup button[data-state="closed"] {
+            width: 60px !important;
+            height: 60px !important;
+          }
+        }
+
+        /* 弹窗内容区域样式 - 增强视觉效果 */
         .booking-assistant-popup [role="dialog"] {
-          border-radius: 12px !important;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-          border: 1px solid #e5e7eb !important;
+          border-radius: 16px !important;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+          border: 2px solid #e5e7eb !important;
+          backdrop-filter: blur(8px) !important;
+          background: rgba(255, 255, 255, 0.95) !important;
         }
 
         /* 输入框和按钮优化 */
@@ -734,9 +762,9 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           opacity: 1 !important;
         }
 
-        /* 触发按钮样式 */
+        /* 触发按钮样式 - 更醒目的设计 */
         .booking-assistant-popup button[data-state="closed"] {
-          background-color: #3b82f6 !important;
+          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
           color: white !important;
           border-radius: 50% !important;
           width: 60px !important;
@@ -744,15 +772,38 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+          box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4), 0 10px 15px rgba(0, 0, 0, 0.1) !important;
+          border: 3px solid rgba(255, 255, 255, 0.2) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          animation: pulse-ring 2s infinite;
         }
 
-                 /* 触发按钮悬浮效果 */
-         .booking-assistant-popup button[data-state="closed"]:hover {
-           background-color: #2563eb !important;
-           transform: scale(1.05) !important;
-           transition: all 0.2s ease !important;
-         }
+        /* 触发按钮悬浮效果 - 更丰富的交互 */
+        .booking-assistant-popup button[data-state="closed"]:hover {
+          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+          transform: scale(1.1) translateY(-2px) !important;
+          box-shadow: 0 20px 40px rgba(59, 130, 246, 0.5), 0 15px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* 添加脉动动画效果 */
+        @keyframes pulse-ring {
+          0% {
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4), 0 10px 15px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(59, 130, 246, 0.7);
+          }
+          70% {
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4), 0 10px 15px rgba(0, 0, 0, 0.1), 0 0 0 10px rgba(59, 130, 246, 0);
+          }
+          100% {
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4), 0 10px 15px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(59, 130, 246, 0);
+          }
+        }
+
+        /* 触发按钮图标样式 */
+        .booking-assistant-popup button[data-state="closed"] svg {
+          width: 24px !important;
+          height: 24px !important;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
         `}</style>
     </div>
   );

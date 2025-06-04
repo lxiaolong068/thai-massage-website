@@ -2,6 +2,8 @@ import { NextIntlClientProvider } from 'next-intl';
 // 动态导入 i18n/messages/<locale>.json，以加载所有翻译命名空间
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import BookingAssistant from '@/components/BookingAssistant';
+import { CopilotKit } from '@copilotkit/react-core';
 import { Toaster } from 'react-hot-toast';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
@@ -92,12 +94,17 @@ export default async function RootLayout({
       </head>
       <body className="flex min-h-screen flex-col bg-white">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Header locale={locale} />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-          <Toaster position="top-center" />
+          <CopilotKit runtimeUrl="/api/copilotkit">
+            <Header locale={locale} />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <Toaster position="top-center" />
+            
+            {/* 全局预约助手 - 在所有页面显示 */}
+            <BookingAssistant locale={locale} />
+          </CopilotKit>
         </NextIntlClientProvider>
       </body>
     </html>
