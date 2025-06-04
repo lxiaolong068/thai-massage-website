@@ -74,13 +74,48 @@ const ContactQRModal: React.FC<ContactQRModalProps> = ({
           </p>
           
           <div className="relative w-64 h-64 bg-white rounded-lg shadow-md p-4">
-            <Image
-              src={qrCodeUrl}
-              alt={`${contactType} QR Code`}
-              fill
-              className="object-contain"
-              unoptimized={qrCodeUrl.startsWith('data:')}
-            />
+            {qrCodeUrl ? (
+              <Image
+                src={qrCodeUrl}
+                alt={`${contactType} QR Code`}
+                fill
+                className="object-contain"
+                unoptimized={qrCodeUrl.startsWith('data:') || qrCodeUrl.includes('/uploads/')}
+                onError={(e) => {
+                  console.error('QR Code image failed to load:', qrCodeUrl);
+                  // 如果图片加载失败，显示占位符
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+                priority
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full bg-gray-100 rounded">
+                <p className="text-gray-500 text-sm">
+                  {locale === 'en' ? 'QR code not available' : 
+                   locale === 'ko' ? 'QR 코드 없음' : '二维码不可用'}
+                </p>
+              </div>
+            )}
+            
+            {/* 备用显示：如果图片加载失败 */}
+            {qrCodeUrl && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded" 
+                style={{ display: 'none' }}
+                id={`qr-fallback-${contactType}`}
+              >
+                <div className="text-center">
+                  <p className="text-gray-600 text-sm mb-2">
+                    {locale === 'en' ? 'Image loading failed' : 
+                     locale === 'ko' ? '이미지 로딩 실패' : '图片加载失败'}
+                  </p>
+                  <p className="text-xs text-gray-500 break-all px-2">
+                    {qrCodeUrl}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           
           {contactValue && (

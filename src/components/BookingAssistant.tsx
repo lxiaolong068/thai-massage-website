@@ -238,7 +238,15 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       const contactInfo = contactMethods.map(method => {
         const methodName = method.type;
         if (method.type.toLowerCase() === 'line') {
-          const linkUrl = method.value?.startsWith('http') ? method.value : `https://line.me/ti/p/~${method.value}`;
+          // 使用与欢迎消息相同的Line URL生成逻辑
+          let linkUrl = '';
+          if (method.value?.startsWith('http')) {
+            linkUrl = method.value;
+          } else if (method.value?.startsWith('@')) {
+            linkUrl = `https://line.me/ti/p/${method.value}`;
+          } else {
+            linkUrl = `https://line.me/ti/p/@${method.value}`;
+          }
           return locale === 'en'
             ? `📱 ${methodName}: Click here to chat → [${linkUrl}](${linkUrl})`
             : locale === 'ko'
@@ -269,6 +277,40 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       return `${intro}\n\n${contactInfo}${suggestion}`;
     }
   });
+
+  // 监听QR链接点击事件
+  useEffect(() => {
+    const handleQRLinkClick = (event: any) => {
+      // 检查是否是二维码链接
+      const target = event.target;
+      if (target && target.tagName === 'A') {
+        const href = target.getAttribute('href');
+        if (href === '#wechat-qr') {
+          event.preventDefault();
+          const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
+          if (wechatMethod && wechatMethod.qrCode) {
+            setSelectedContact(wechatMethod);
+            setQrModalOpen(true);
+          }
+        } else if (href === '#whatsapp-qr') {
+          event.preventDefault();
+          const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
+          if (whatsappMethod && whatsappMethod.qrCode) {
+            setSelectedContact(whatsappMethod);
+            setQrModalOpen(true);
+          }
+        }
+      }
+    };
+
+    // 添加事件监听器
+    document.addEventListener('click', handleQRLinkClick);
+    
+    // 清理函数
+    return () => {
+      document.removeEventListener('click', handleQRLinkClick);
+    };
+  }, [contactMethods]);
 
   // 显示联系方式二维码的动作
   useCopilotAction({
@@ -307,10 +349,69 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
-  // 处理用户的二维码请求
+  // 快捷显示二维码的动作 - 供用户直接请求使用
+  useCopilotAction({
+    name: "showQRCode",
+    description: "Show QR code for WeChat or WhatsApp when user requests",
+    parameters: [
+      {
+        name: "platform",
+        type: "string",
+        description: "Platform name: 'wechat', 'whatsapp', '微信', 'WeChat', 'WhatsApp'",
+        required: true
+      }
+    ],
+    handler: ({ platform }) => {
+      const platformLower = platform.toLowerCase();
+      
+      if (platformLower.includes('wechat') || platformLower.includes('微信')) {
+        const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
+        if (wechatMethod && wechatMethod.qrCode) {
+          setSelectedContact(wechatMethod);
+          setQrModalOpen(true);
+          return locale === 'en'
+            ? "📱 Showing WeChat QR code. Please scan to add us and start chatting!"
+            : locale === 'ko'
+            ? "📱 WeChat QR 코드를 표시합니다. 스캔하여 추가하고 채팅을 시작하세요!"
+            : "📱 正在显示微信二维码，请扫码添加我们开始聊天！";
+        } else {
+          return locale === 'en'
+            ? "❌ WeChat QR code is not available at the moment."
+            : locale === 'ko'
+            ? "❌ WeChat QR 코드를 현재 사용할 수 없습니다."
+            : "❌ 微信二维码暂不可用。";
+        }
+      } else if (platformLower.includes('whatsapp')) {
+        const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
+        if (whatsappMethod && whatsappMethod.qrCode) {
+          setSelectedContact(whatsappMethod);
+          setQrModalOpen(true);
+          return locale === 'en'
+            ? "📱 Showing WhatsApp QR code. Please scan to start chatting with us!"
+            : locale === 'ko'
+            ? "📱 WhatsApp QR 코드를 표시합니다. 스캔하여 채팅을 시작하세요!"
+            : "📱 正在显示WhatsApp二维码，请扫码开始与我们聊天！";
+        } else {
+          return locale === 'en'
+            ? "❌ WhatsApp QR code is not available at the moment."
+            : locale === 'ko'
+            ? "❌ WhatsApp QR 코드를 현재 사용할 수 없습니다."
+            : "❌ WhatsApp二维码暂不可用。";
+        }
+      } else {
+        return locale === 'en'
+          ? "❓ Please specify 'WeChat' or 'WhatsApp' to view QR code."
+          : locale === 'ko'
+          ? "❓ QR 코드를 보려면 'WeChat' 또는 'WhatsApp'을 지정해주세요."
+          : "❓ 请指定「微信」或「WhatsApp」来查看二维码。";
+      }
+    }
+  });
+
+  // 处理用户的二维码请求 - 改进版，支持更多的表达方式
   useCopilotAction({
     name: "handleQRRequest",
-    description: "Handle user requests for QR codes when they say 'WeChat QR', 'WhatsApp QR', etc.",
+    description: "Handle user requests for QR codes - supports various expressions like 'WeChat QR', 'Show WeChat', '微信二维码', '查看二维码' etc.",
     parameters: [
       {
         name: "userMessage",
@@ -322,7 +423,10 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     handler: ({ userMessage }) => {
       const message = userMessage.toLowerCase();
       
-      if (message.includes('微信') || message.includes('wechat')) {
+      // 微信相关的各种表达方式
+      if (message.includes('微信') || message.includes('wechat') || 
+          (message.includes('二维码') && (message.includes('微') || message.includes('wx'))) ||
+          message.includes('查看二维码')) {
         const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
         if (wechatMethod && wechatMethod.qrCode) {
           setSelectedContact(wechatMethod);
@@ -332,10 +436,18 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
             : locale === 'ko'
             ? "WeChat QR 코드를 표시합니다. 스캔하여 추가하고 채팅을 시작하세요!"
             : "正在显示微信二维码，请扫码添加我们开始聊天！";
+        } else {
+          return locale === 'en'
+            ? "WeChat QR code is not available at the moment."
+            : locale === 'ko'
+            ? "WeChat QR 코드를 현재 사용할 수 없습니다."
+            : "微信二维码暂不可用。";
         }
       }
       
-      if (message.includes('whatsapp')) {
+      // WhatsApp相关的各种表达方式
+      if (message.includes('whatsapp') || message.includes('whatapp') || 
+          message.includes('wa') && message.includes('qr')) {
         const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
         if (whatsappMethod && whatsappMethod.qrCode) {
           setSelectedContact(whatsappMethod);
@@ -345,14 +457,20 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
             : locale === 'ko'
             ? "WhatsApp QR 코드를 표시합니다. 스캔하여 채팅을 시작하세요!"
             : "正在显示WhatsApp二维码，请扫码开始与我们聊天！";
+        } else {
+          return locale === 'en'
+            ? "WhatsApp QR code is not available at the moment."
+            : locale === 'ko'
+            ? "WhatsApp QR 코드를 현재 사용할 수 없습니다."
+            : "WhatsApp二维码暂不可用。";
         }
       }
       
       return locale === 'en'
-        ? "Sorry, I couldn't find the requested QR code. Please try 'WeChat QR' or 'WhatsApp QR'."
+        ? "Sorry, I couldn't find the requested QR code. You can click on 'View QR Code' links above or ask for 'WeChat QR' or 'WhatsApp QR'."
         : locale === 'ko'
-        ? "죄송합니다. 요청하신 QR 코드를 찾을 수 없습니다. 'WeChat QR' 또는 'WhatsApp QR'을 시도해보세요."
-        : "抱歉，找不到您请求的二维码。请尝试输入\"微信二维码\"或\"WhatsApp二维码\"。";
+        ? "죄송합니다. 요청하신 QR 코드를 찾을 수 없습니다. 위의 'QR 코드 보기' 링크를 클릭하거나 'WeChat QR' 또는 'WhatsApp QR'을 요청해보세요."
+        : "抱歉，找不到您请求的二维码。您可以点击上方的「查看二维码」链接，或者询问「微信二维码」或「WhatsApp二维码」。";
     }
   });
 
@@ -664,20 +782,19 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
 
   const styles = isMobile ? mobileStyles : desktopStyles;
 
-  // 动态生成包含真实联系方式的欢迎消息
+  // 生成动态欢迎消息
   const generateWelcomeMessage = () => {
     let baseMessage = "";
-    let contactSection = "";
-
-    // 基础欢迎和服务信息
     if (locale === 'en') {
-      baseMessage = "👋 Welcome to Thai Massage Center!\n\n🌟 **Professional Thai Massage Services**\n• Traditional Thai Massage - Muscle tension relief\n• Oil Massage - Deep relaxation experience\n• Foot Massage - Fatigue relief\n• Expert therapists with rich experience\n\n";
+      baseMessage = "👋 **Welcome to Thai Massage Center!**\n\n🌟 **Professional Thai Massage Services**\n• Traditional Thai Massage - Muscle tension relief\n• Oil Massage - Deep relaxation experience\n• Foot Massage - Fatigue relief\n• Expert therapists with rich experience\n\n";
     } else if (locale === 'ko') {
-      baseMessage = "👋 태국 마사지 센터에 오신 것을 환영합니다!\n\n🌟 **전문 태국 마사지 서비스**\n• 전통 태국 마사지 - 근육 긴장 완화\n• 오일 마사지 - 깊은 휴식 경험\n• 발 마사지 - 피로 해소\n• 풍부한 경험의 전문 테라피스트\n\n";
+      baseMessage = "👋 **태국 마사지 센터에 오신 것을 환영합니다!**\n\n🌟 **전문 태국 마사지 서비스**\n• 전통 태국 마사지 - 근육 긴장 완화\n• 오일 마사지 - 깊은 휴식 경험\n• 발 마사지 - 피로 해소\n• 풍부한 경험을 가진 전문 테라피스트\n\n";
     } else {
-      baseMessage = "👋 欢迎来到泰式按摩中心！\n\n🌟 **专业泰式按摩服务**\n• 传统泰式按摩 - 缓解肌肉紧张\n• 精油按摩 - 深层放松体验\n• 足部按摩 - 舒缓疲劳\n• 专业技师团队，丰富经验\n\n";
+      baseMessage = "👋 **欢迎来到泰式按摩中心！**\n\n🌟 **专业泰式按摩服务**\n• 传统泰式按摩 - 缓解肌肉紧张\n• 精油按摩 - 深度放松体验\n• 足部按摩 - 缓解疲劳\n• 经验丰富的专业技师\n\n";
     }
 
+    let contactSection = "";
+    
     // 动态生成联系方式部分
     if (contactMethods.length > 0) {
       if (locale === 'en') {
@@ -692,13 +809,22 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
         const methodType = method.type;
         
         if (method.type.toLowerCase() === 'line' && method.value) {
-          const lineUrl = `line://ti/p/${method.value}`;
-          if (locale === 'en') {
-            contactSection += `🟢 **Line**: [Click to Contact](${lineUrl}) - Instant booking confirmation\n`;
-          } else if (locale === 'ko') {
-            contactSection += `🟢 **Line**: [클릭하여 연락](${lineUrl}) - 즉시 예약 확인\n`;
+          // 使用与欢迎消息相同的Line URL生成逻辑
+          let linkUrl = '';
+          if (method.value?.startsWith('http')) {
+            linkUrl = method.value;
+          } else if (method.value?.startsWith('@')) {
+            linkUrl = `https://line.me/ti/p/${method.value}`;
           } else {
-            contactSection += `🟢 **Line**: [点击联系](${lineUrl}) - 即时预约确认\n`;
+            linkUrl = `https://line.me/ti/p/@${method.value}`;
+          }
+          
+          if (locale === 'en') {
+            contactSection += `🟢 **Line**: [Click to Contact](${linkUrl}) - Instant booking confirmation\n`;
+          } else if (locale === 'ko') {
+            contactSection += `🟢 **Line**: [클릭하여 연락](${linkUrl}) - 즉시 예약 확인\n`;
+          } else {
+            contactSection += `🟢 **Line**: [点击联系](${linkUrl}) - 即时预约确认\n`;
           }
         } else if (method.type.toLowerCase() === 'telegram' && method.value) {
           const telegramUrl = `https://t.me/${method.value}`;
@@ -709,21 +835,23 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           } else {
             contactSection += `✈️ **Telegram**: [点击联系](${telegramUrl}) - 安全便捷\n`;
           }
-        } else if (method.type.toLowerCase() === 'wechat') {
+        } else if (method.type.toLowerCase() === 'wechat' && method.qrCode) {
+          // 为微信添加可点击的查看二维码链接
           if (locale === 'en') {
-            contactSection += `💬 **WeChat**: Send "WeChat QR" to view - Chinese service\n`;
+            contactSection += `💬 **WeChat**: [View QR Code](#wechat-qr) - Chinese service\n`;
           } else if (locale === 'ko') {
-            contactSection += `💬 **WeChat**: "WeChat QR" 전송하여 보기 - 중국어 서비스\n`;
+            contactSection += `💬 **WeChat**: [QR 코드 보기](#wechat-qr) - 중국어 서비스\n`;
           } else {
-            contactSection += `💬 **微信**: 发送"微信二维码"查看 - 中文服务\n`;
+            contactSection += `💬 **微信**: [查看二维码](#wechat-qr) - 中文服务\n`;
           }
-        } else if (method.type.toLowerCase() === 'whatsapp') {
+        } else if (method.type.toLowerCase() === 'whatsapp' && method.qrCode) {
+          // 为WhatsApp添加可点击的查看二维码链接  
           if (locale === 'en') {
-            contactSection += `📱 **WhatsApp**: Send "WhatsApp QR" to view - Multi-language support\n`;
+            contactSection += `📱 **WhatsApp**: [View QR Code](#whatsapp-qr) - Multi-language support\n`;
           } else if (locale === 'ko') {
-            contactSection += `📱 **WhatsApp**: "WhatsApp QR" 전송하여 보기 - 다국어 지원\n`;
+            contactSection += `📱 **WhatsApp**: [QR 코드 보기](#whatsapp-qr) - 다국어 지원\n`;
           } else {
-            contactSection += `📱 **WhatsApp**: 发送"WhatsApp二维码"查看 - 多语言支持\n`;
+            contactSection += `📱 **WhatsApp**: [查看二维码](#whatsapp-qr) - 多语言支持\n`;
           }
         }
       });
