@@ -2,7 +2,6 @@ import { NextIntlClientProvider } from 'next-intl';
 // 动态导入 i18n/messages/<locale>.json，以加载所有翻译命名空间
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import MobileContactBar from '@/components/MobileContactBar';
 import { Toaster } from 'react-hot-toast';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
@@ -98,7 +97,6 @@ export default async function RootLayout({
             {children}
           </main>
           <Footer />
-          <MobileContactBar />
           <Toaster position="top-center" />
         </NextIntlClientProvider>
       </body>
