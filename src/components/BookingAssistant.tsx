@@ -278,40 +278,6 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
-  // 监听QR链接点击事件
-  useEffect(() => {
-    const handleQRLinkClick = (event: any) => {
-      // 检查是否是二维码链接
-      const target = event.target;
-      if (target && target.tagName === 'A') {
-        const href = target.getAttribute('href');
-        if (href === '#wechat-qr') {
-          event.preventDefault();
-          const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
-          if (wechatMethod && wechatMethod.qrCode) {
-            setSelectedContact(wechatMethod);
-            setQrModalOpen(true);
-          }
-        } else if (href === '#whatsapp-qr') {
-          event.preventDefault();
-          const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
-          if (whatsappMethod && whatsappMethod.qrCode) {
-            setSelectedContact(whatsappMethod);
-            setQrModalOpen(true);
-          }
-        }
-      }
-    };
-
-    // 添加事件监听器
-    document.addEventListener('click', handleQRLinkClick);
-    
-    // 清理函数
-    return () => {
-      document.removeEventListener('click', handleQRLinkClick);
-    };
-  }, [contactMethods]);
-
   // 显示联系方式二维码的动作
   useCopilotAction({
     name: "showContactQR",
@@ -836,22 +802,22 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
             contactSection += `✈️ **Telegram**: [点击联系](${telegramUrl}) - 安全便捷\n`;
           }
         } else if (method.type.toLowerCase() === 'wechat' && method.qrCode) {
-          // 为微信添加可点击的查看二维码链接
+          // 为微信提供明确的指令提示
           if (locale === 'en') {
-            contactSection += `💬 **WeChat**: [View QR Code](#wechat-qr) - Chinese service\n`;
+            contactSection += `💬 **WeChat**: Say "Show WeChat QR" to view QR code - Chinese service\n`;
           } else if (locale === 'ko') {
-            contactSection += `💬 **WeChat**: [QR 코드 보기](#wechat-qr) - 중국어 서비스\n`;
+            contactSection += `💬 **WeChat**: "WeChat QR 보기"라고 말하세요 - 중국어 서비스\n`;
           } else {
-            contactSection += `💬 **微信**: [查看二维码](#wechat-qr) - 中文服务\n`;
+            contactSection += `💬 **微信**: 说"微信二维码"查看二维码 - 中文服务\n`;
           }
         } else if (method.type.toLowerCase() === 'whatsapp' && method.qrCode) {
-          // 为WhatsApp添加可点击的查看二维码链接  
+          // 为WhatsApp提供明确的指令提示
           if (locale === 'en') {
-            contactSection += `📱 **WhatsApp**: [View QR Code](#whatsapp-qr) - Multi-language support\n`;
+            contactSection += `📱 **WhatsApp**: Say "Show WhatsApp QR" to view QR code - Multi-language support\n`;
           } else if (locale === 'ko') {
-            contactSection += `📱 **WhatsApp**: [QR 코드 보기](#whatsapp-qr) - 다국어 지원\n`;
+            contactSection += `📱 **WhatsApp**: "WhatsApp QR 보기"라고 말하세요 - 다국어 지원\n`;
           } else {
-            contactSection += `📱 **WhatsApp**: [查看二维码](#whatsapp-qr) - 多语言支持\n`;
+            contactSection += `📱 **WhatsApp**: 说"WhatsApp二维码"查看二维码 - 多语言支持\n`;
           }
         }
       });
@@ -861,11 +827,35 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     // AI助手说明和结尾
     let aiSection = "";
     if (locale === 'en') {
-      aiSection = "🤖 **AI Booking Assistant**\nI can help you: View services, Check therapist info, Booking consultation\n\nChoose a contact method or tell me what you need!";
+      aiSection = `🤖 **AI Booking Assistant**
+I can help you: View services, Check therapist info, Booking consultation
+
+💡 **Quick Tips:**
+• Say "Show WeChat QR" or "Show WhatsApp QR" to view QR codes
+• Ask about specific services or therapists
+• Get help with booking appointments
+
+Choose a contact method or tell me what you need!`;
     } else if (locale === 'ko') {
-      aiSection = "🤖 **AI 예약 어시스턴트**\n도움 가능한 것: 서비스 보기, 테라피스트 정보, 예약 상담\n\n연락 방법을 선택하거나 필요한 것을 알려주세요!";
+      aiSection = `🤖 **AI 예약 어시스턴트**
+도움 가능한 것: 서비스 보기, 테라피스트 정보, 예약 상담
+
+💡 **빠른 팁:**
+• "WeChat QR 보기" 또는 "WhatsApp QR 보기"라고 말하면 QR 코드를 볼 수 있습니다
+• 특정 서비스나 테라피스트에 대해 문의하세요
+• 예약 관련 도움을 받으세요
+
+연락 방법을 선택하거나 필요한 것을 알려주세요!`;
     } else {
-      aiSection = "🤖 **AI预约助手**\n我可以帮您：查看服务详情、了解技师信息、预约时间咨询\n\n选择联系方式或直接告诉我您的需求！";
+      aiSection = `🤖 **AI预约助手**
+我可以帮您：查看服务详情、了解技师信息、预约时间咨询
+
+💡 **快速提示：**
+• 说"微信二维码"或"WhatsApp二维码"查看二维码
+• 询问特定服务或技师信息
+• 获取预约相关帮助
+
+选择联系方式或直接告诉我您的需求！`;
     }
 
     return baseMessage + contactSection + aiSection;
