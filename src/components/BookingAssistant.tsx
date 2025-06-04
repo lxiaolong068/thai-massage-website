@@ -345,6 +345,73 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
+  // 显示服务概览的动作
+  useCopilotAction({
+    name: "showServiceOverview",
+    description: "Display an overview of all available massage services with prices and descriptions",
+    parameters: [],
+    handler: () => {
+      if (services.length === 0) {
+        return "服务信息加载中，请稍候...";
+      }
+
+      let overview = "🌟 **我们的按摩服务一览：**\n\n";
+      
+      services.forEach((service, index) => {
+        overview += `**${index + 1}. ${service.name}**\n`;
+        overview += `💰 价格：${service.price}元\n`;
+        overview += `⏱️ 时长：${service.duration}分钟\n`;
+        if (service.description) {
+          overview += `📝 介绍：${service.description}\n`;
+        }
+        overview += "\n";
+      });
+
+      overview += "✨ **为什么选择我们？**\n";
+      overview += "• 专业认证按摩师\n";
+      overview += "• 上门服务，舒适便捷\n";
+      overview += "• 使用优质按摩用品\n";
+      overview += "• 灵活预约时间\n\n";
+      overview += "请告诉我您感兴趣的服务，我来为您安排预约！";
+
+      return overview;
+    }
+  });
+
+  // 显示按摩师概览的动作
+  useCopilotAction({
+    name: "showTherapistOverview", 
+    description: "Display an overview of available therapists with their specialties",
+    parameters: [],
+    handler: () => {
+      if (therapists.length === 0) {
+        return "按摩师信息加载中，请稍候...";
+      }
+
+      const availableTherapists = therapists.filter(t => t.workStatus === 'AVAILABLE');
+      
+      if (availableTherapists.length === 0) {
+        return "抱歉，目前没有可预约的按摩师。请稍后再试或联系我们了解详情。";
+      }
+
+      let overview = "👥 **我们的专业按摩师团队：**\n\n";
+      
+      availableTherapists.forEach((therapist, index) => {
+        overview += `**${index + 1}. ${therapist.name}**\n`;
+        if (therapist.specialties && therapist.specialties.length > 0) {
+          overview += `🎯 专长：${therapist.specialties.join('、')}\n`;
+        }
+        overview += `✅ 状态：可预约\n\n`;
+      });
+
+      overview += "💡 **提示：**\n";
+      overview += "所有按摩师都经过专业培训和认证，拥有丰富的按摩经验。\n";
+      overview += "您可以根据喜好选择，也可以让我为您推荐合适的按摩师。";
+
+      return overview;
+    }
+  });
+
   // 选择按摩师的动作
   useCopilotAction({
     name: "selectTherapist",
