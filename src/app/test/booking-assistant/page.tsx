@@ -3,6 +3,7 @@
 import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { CopilotKit } from '@copilotkit/react-core';
+import { NextIntlClientProvider } from 'next-intl';
 
 // 动态导入BookingAssistant以避免SSR问题
 const BookingAssistant = dynamic(() => import('@/components/BookingAssistant'), {
@@ -16,8 +17,19 @@ const BookingAssistant = dynamic(() => import('@/components/BookingAssistant'), 
 });
 
 export default function BookingAssistantTestPage() {
+  // 模拟中文消息数据
+  const messages = {
+    bookingAssistant: {
+      title: "AI预约助手",
+      initial: "您好！我是您的专属按摩预约助手。我可以帮您：\n\n• 了解我们的按摩服务\n• 查看按摩师信息\n• 预约合适的时间\n• 解答相关问题\n\n请告诉我您想了解什么，或者直接说出您的需求！",
+      placeholder: "输入您的问题或需求...",
+      instructions: "你是一位专业的泰式按摩预约助手。你的任务是帮助客户了解服务、选择按摩师、预约时间等。请用友好、专业的语气与客户交流。"
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <NextIntlClientProvider messages={messages} locale="zh">
+      <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -84,5 +96,6 @@ export default function BookingAssistantTestPage() {
         </div>
       </div>
     </div>
+    </NextIntlClientProvider>
   );
 } 
