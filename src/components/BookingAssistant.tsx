@@ -6,7 +6,7 @@ import { CopilotKit, useCopilotAction, useCopilotReadable } from '@copilotkit/re
 import { CopilotSidebar, CopilotPopup, CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { BookingFormData } from './BookingForm';
-import ContactQRModal from './ContactQRModal';
+// ContactQRModal removed - now using URL display
 
 interface Service {
   id: string;
@@ -81,8 +81,7 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
   const [contactMethods, setContactMethods] = useState<ContactMethod[]>([]);
   const [bookingData, setBookingData] = useState<Partial<BookingFormData>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<ContactMethod | null>(null);
+  // QR modal states removed - now using URL display instead
   const [debugInfo, setDebugInfo] = useState<string>('');
 
   // 调试信息更新
@@ -278,10 +277,10 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
-  // 显示联系方式二维码的动作
+  // 显示联系方式二维码的动作 - 返回URL
   useCopilotAction({
     name: "showContactQR",
-    description: "Show QR code for a specific contact method (WeChat or WhatsApp)",
+    description: "Show QR code URL for a specific contact method (WeChat or WhatsApp)",
     parameters: [
       {
         name: "contactType",
@@ -297,28 +296,25 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       
       if (!method || !method.qrCode) {
         return locale === 'en'
-          ? `QR code for ${contactType} is not available.`
+          ? `❌ QR code for ${contactType} is not available.`
           : locale === 'ko'
-          ? `${contactType} QR 코드를 사용할 수 없습니다.`
-          : `${contactType}二维码不可用。`;
+          ? `❌ ${contactType} QR 코드를 사용할 수 없습니다.`
+          : `❌ ${contactType}二维码不可用。`;
       }
 
-      // 显示二维码弹窗
-      setSelectedContact(method);
-      setQrModalOpen(true);
-
+      // 返回二维码URL和使用说明
       return locale === 'en'
-        ? `Displaying ${contactType} QR code. Please scan with your phone to contact us.`
+        ? `📱 **${contactType} QR Code:**\n${method.qrCode}\n\n📱 **Quick Access:**\n• Copy the URL above\n• Open in browser to view QR code\n• Scan with your phone\n• Start chatting!`
         : locale === 'ko'
-        ? `${contactType} QR 코드를 표시합니다. 휴대폰으로 스캔하여 연락해주세요.`
-        : `正在显示${contactType}二维码，请用手机扫码联系我们。`;
+        ? `📱 **${contactType} QR 코드:**\n${method.qrCode}\n\n📱 **빠른 액세스:**\n• 위 URL을 복사하세요\n• 브라우저에서 열어 QR 코드를 확인하세요\n• 휴대폰으로 스캔하세요\n• 채팅을 시작하세요!`
+        : `📱 **${contactType}二维码：**\n${method.qrCode}\n\n📱 **快速使用：**\n• 复制上方链接\n• 在浏览器中打开查看二维码\n• 用手机扫描\n• 开始聊天！`;
     }
   });
 
-  // 快捷显示二维码的动作 - 供用户直接请求使用
+  // 快捷显示二维码的动作 - 返回二维码URL
   useCopilotAction({
     name: "showQRCode",
-    description: "Show QR code for WeChat or WhatsApp when user requests",
+    description: "Show QR code URL for WeChat or WhatsApp when user requests",
     parameters: [
       {
         name: "platform",
@@ -333,13 +329,11 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       if (platformLower.includes('wechat') || platformLower.includes('微信')) {
         const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
         if (wechatMethod && wechatMethod.qrCode) {
-          setSelectedContact(wechatMethod);
-          setQrModalOpen(true);
           return locale === 'en'
-            ? "📱 Showing WeChat QR code. Please scan to add us and start chatting!"
+            ? `📱 **WeChat QR Code:**\n${wechatMethod.qrCode}\n\n📋 **How to use:**\n1. Copy the URL above\n2. Open it in your browser\n3. Scan with your phone to add us\n4. Start chatting in Chinese!`
             : locale === 'ko'
-            ? "📱 WeChat QR 코드를 표시합니다. 스캔하여 추가하고 채팅을 시작하세요!"
-            : "📱 正在显示微信二维码，请扫码添加我们开始聊天！";
+            ? `📱 **WeChat QR 코드:**\n${wechatMethod.qrCode}\n\n📋 **사용 방법:**\n1. 위 URL을 복사하세요\n2. 브라우저에서 열어주세요\n3. 휴대폰으로 스캔하여 추가하세요\n4. 중국어로 채팅을 시작하세요!`
+            : `📱 **微信二维码：**\n${wechatMethod.qrCode}\n\n📋 **使用方法：**\n1. 复制上方链接\n2. 在浏览器中打开\n3. 用手机扫码添加\n4. 开始中文聊天！`;
         } else {
           return locale === 'en'
             ? "❌ WeChat QR code is not available at the moment."
@@ -350,13 +344,11 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       } else if (platformLower.includes('whatsapp')) {
         const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
         if (whatsappMethod && whatsappMethod.qrCode) {
-          setSelectedContact(whatsappMethod);
-          setQrModalOpen(true);
           return locale === 'en'
-            ? "📱 Showing WhatsApp QR code. Please scan to start chatting with us!"
+            ? `📱 **WhatsApp QR Code:**\n${whatsappMethod.qrCode}\n\n📋 **How to use:**\n1. Copy the URL above\n2. Open it in your browser\n3. Scan with your phone to add us\n4. Start chatting in your preferred language!`
             : locale === 'ko'
-            ? "📱 WhatsApp QR 코드를 표시합니다. 스캔하여 채팅을 시작하세요!"
-            : "📱 正在显示WhatsApp二维码，请扫码开始与我们聊天！";
+            ? `📱 **WhatsApp QR 코드:**\n${whatsappMethod.qrCode}\n\n📋 **사용 방법:**\n1. 위 URL을 복사하세요\n2. 브라우저에서 열어주세요\n3. 휴대폰으로 스캔하여 추가하세요\n4. 원하는 언어로 채팅을 시작하세요!`
+            : `📱 **WhatsApp二维码：**\n${whatsappMethod.qrCode}\n\n📋 **使用方法：**\n1. 复制上方链接\n2. 在浏览器中打开\n3. 用手机扫码添加\n4. 开始多语言聊天！`;
         } else {
           return locale === 'en'
             ? "❌ WhatsApp QR code is not available at the moment."
@@ -374,10 +366,10 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
-  // 处理用户的二维码请求 - 改进版，支持更多的表达方式
+  // 处理用户的二维码请求 - 改进版，支持更多的表达方式，返回URL
   useCopilotAction({
     name: "handleQRRequest",
-    description: "Handle user requests for QR codes - supports various expressions like 'WeChat QR', 'Show WeChat', '微信二维码', '查看二维码' etc.",
+    description: "Handle user requests for QR codes - supports various expressions and returns QR code URLs",
     parameters: [
       {
         name: "userMessage",
@@ -395,19 +387,17 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           message.includes('查看二维码')) {
         const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
         if (wechatMethod && wechatMethod.qrCode) {
-          setSelectedContact(wechatMethod);
-          setQrModalOpen(true);
           return locale === 'en'
-            ? "Showing WeChat QR code. Please scan to add us and start chatting!"
+            ? `📱 **WeChat QR Code (Chinese Service):**\n${wechatMethod.qrCode}\n\n📋 **Step-by-step guide:**\n1. Long press to copy the URL above\n2. Open in your mobile browser\n3. Screenshot or scan the QR code\n4. Add us on WeChat and chat in Chinese!\n\n💡 Contact ID: ${wechatMethod.value || 'Available via QR code'}`
             : locale === 'ko'
-            ? "WeChat QR 코드를 표시합니다. 스캔하여 추가하고 채팅을 시작하세요!"
-            : "正在显示微信二维码，请扫码添加我们开始聊天！";
+            ? `📱 **WeChat QR 코드 (중국어 서비스):**\n${wechatMethod.qrCode}\n\n📋 **단계별 가이드:**\n1. 위 URL을 길게 눌러 복사하세요\n2. 모바일 브라우저에서 열어주세요\n3. QR 코드를 스크린샷하거나 스캔하세요\n4. WeChat에서 저희를 추가하고 중국어로 채팅하세요!\n\n💡 연락처 ID: ${wechatMethod.value || 'QR 코드로 확인 가능'}`
+            : `📱 **微信二维码 (中文服务)：**\n${wechatMethod.qrCode}\n\n📋 **详细步骤：**\n1. 长按复制上方链接\n2. 在手机浏览器中打开\n3. 截图或直接扫描二维码\n4. 添加我们的微信开始中文对话！\n\n💡 联系ID：${wechatMethod.value || '通过二维码获取'}`;
         } else {
           return locale === 'en'
-            ? "WeChat QR code is not available at the moment."
+            ? "❌ WeChat QR code is not available at the moment. Please try other contact methods."
             : locale === 'ko'
-            ? "WeChat QR 코드를 현재 사용할 수 없습니다."
-            : "微信二维码暂不可用。";
+            ? "❌ WeChat QR 코드를 현재 사용할 수 없습니다. 다른 연락 방법을 시도해보세요."
+            : "❌ 微信二维码暂不可用，请尝试其他联系方式。";
         }
       }
       
@@ -416,27 +406,25 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           message.includes('wa') && message.includes('qr')) {
         const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
         if (whatsappMethod && whatsappMethod.qrCode) {
-          setSelectedContact(whatsappMethod);
-          setQrModalOpen(true);
           return locale === 'en'
-            ? "Showing WhatsApp QR code. Please scan to start chatting with us!"
+            ? `📱 **WhatsApp QR Code (Multi-language Support):**\n${whatsappMethod.qrCode}\n\n📋 **Step-by-step guide:**\n1. Long press to copy the URL above\n2. Open in your mobile browser\n3. Screenshot or scan the QR code\n4. Add us on WhatsApp and chat in your preferred language!\n\n💡 We support: English, Chinese, Thai, Korean`
             : locale === 'ko'
-            ? "WhatsApp QR 코드를 표시합니다. 스캔하여 채팅을 시작하세요!"
-            : "正在显示WhatsApp二维码，请扫码开始与我们聊天！";
+            ? `📱 **WhatsApp QR 코드 (다국어 지원):**\n${whatsappMethod.qrCode}\n\n📋 **단계별 가이드:**\n1. 위 URL을 길게 눌러 복사하세요\n2. 모바일 브라우저에서 열어주세요\n3. QR 코드를 스크린샷하거나 스캔하세요\n4. WhatsApp에서 저희를 추가하고 원하는 언어로 채팅하세요!\n\n💡 지원 언어: 영어, 중국어, 태국어, 한국어`
+            : `📱 **WhatsApp二维码 (多语言支持)：**\n${whatsappMethod.qrCode}\n\n📋 **详细步骤：**\n1. 长按复制上方链接\n2. 在手机浏览器中打开\n3. 截图或直接扫描二维码\n4. 添加我们的WhatsApp用您喜欢的语言聊天！\n\n💡 支持语言：英文、中文、泰文、韩文`;
         } else {
           return locale === 'en'
-            ? "WhatsApp QR code is not available at the moment."
+            ? "❌ WhatsApp QR code is not available at the moment. Please try other contact methods."
             : locale === 'ko'
-            ? "WhatsApp QR 코드를 현재 사용할 수 없습니다."
-            : "WhatsApp二维码暂不可用。";
+            ? "❌ WhatsApp QR 코드를 현재 사용할 수 없습니다. 다른 연락 방법을 시도해보세요."
+            : "❌ WhatsApp二维码暂不可用，请尝试其他联系方式。";
         }
       }
       
       return locale === 'en'
-        ? "Sorry, I couldn't find the requested QR code. You can click on 'View QR Code' links above or ask for 'WeChat QR' or 'WhatsApp QR'."
+        ? "ℹ️ I can help you get QR codes! Try saying:\n• \"WeChat QR\" or \"微信二维码\"\n• \"WhatsApp QR\"\n• \"Show me QR codes\"\n\nOr scroll up to see all contact methods in the welcome message."
         : locale === 'ko'
-        ? "죄송합니다. 요청하신 QR 코드를 찾을 수 없습니다. 위의 'QR 코드 보기' 링크를 클릭하거나 'WeChat QR' 또는 'WhatsApp QR'을 요청해보세요."
-        : "抱歉，找不到您请求的二维码。您可以点击上方的「查看二维码」链接，或者询问「微信二维码」或「WhatsApp二维码」。";
+        ? "ℹ️ QR 코드를 도와드릴 수 있습니다! 다음과 같이 말해보세요:\n• \"WeChat QR\" 또는 \"미시늄 QR\"\n• \"WhatsApp QR\"\n• \"QR 코드 보여줘\"\n\n또는 위로 스크롤하여 환영 메시지에서 모든 연락 방법을 확인하세요."
+        : "ℹ️ 我可以帮您获取二维码！您可以说：\n• \"微信二维码\" 或 \"WeChat QR\"\n• \"WhatsApp二维码\"\n• \"显示二维码\"\n\n或者向上滚动查看欢迎消息中的所有联系方式。";
     }
   });
 
@@ -802,22 +790,22 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
             contactSection += `✈️ **Telegram**: [点击联系](${telegramUrl}) - 安全便捷\n`;
           }
         } else if (method.type.toLowerCase() === 'wechat' && method.qrCode) {
-          // 为微信提供明确的指令提示
+          // 为微信直接显示二维码URL
           if (locale === 'en') {
-            contactSection += `💬 **WeChat**: Say "Show WeChat QR" to view QR code - Chinese service\n`;
+            contactSection += `💬 **WeChat** (Chinese service):\n   QR Code: ${method.qrCode}\n   📋 Copy this link and open in browser to scan\n`;
           } else if (locale === 'ko') {
-            contactSection += `💬 **WeChat**: "WeChat QR 보기"라고 말하세요 - 중국어 서비스\n`;
+            contactSection += `💬 **WeChat** (중국어 서비스):\n   QR 코드: ${method.qrCode}\n   📋 이 링크를 복사하여 브라우저에서 열어 스캔하세요\n`;
           } else {
-            contactSection += `💬 **微信**: 说"微信二维码"查看二维码 - 中文服务\n`;
+            contactSection += `💬 **微信** (中文服务):\n   二维码: ${method.qrCode}\n   📋 复制链接在浏览器中打开扫码添加\n`;
           }
         } else if (method.type.toLowerCase() === 'whatsapp' && method.qrCode) {
-          // 为WhatsApp提供明确的指令提示
+          // 为WhatsApp直接显示二维码URL
           if (locale === 'en') {
-            contactSection += `📱 **WhatsApp**: Say "Show WhatsApp QR" to view QR code - Multi-language support\n`;
+            contactSection += `📱 **WhatsApp** (Multi-language support):\n   QR Code: ${method.qrCode}\n   📋 Copy this link and open in browser to scan\n`;
           } else if (locale === 'ko') {
-            contactSection += `📱 **WhatsApp**: "WhatsApp QR 보기"라고 말하세요 - 다국어 지원\n`;
+            contactSection += `📱 **WhatsApp** (다국어 지원):\n   QR 코드: ${method.qrCode}\n   📋 이 링크를 복사하여 브라우저에서 열어 스캔하세요\n`;
           } else {
-            contactSection += `📱 **WhatsApp**: 说"WhatsApp二维码"查看二维码 - 多语言支持\n`;
+            contactSection += `📱 **WhatsApp** (多语言支持):\n   二维码: ${method.qrCode}\n   📋 复制链接在浏览器中打开扫码添加\n`;
           }
         }
       });
@@ -830,32 +818,50 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       aiSection = `🤖 **AI Booking Assistant**
 I can help you: View services, Check therapist info, Booking consultation
 
-💡 **Quick Tips:**
-• Say "Show WeChat QR" or "Show WhatsApp QR" to view QR codes
-• Ask about specific services or therapists
-• Get help with booking appointments
+💡 **How to use QR codes:**
+• Copy the QR code URL above and open in your browser
+• Scan the QR code with your phone to add us
+• Or ask me to show specific QR codes again
 
-Choose a contact method or tell me what you need!`;
+🔧 **What I can help with:**
+• Service information and pricing
+• Therapist availability and specialties  
+• Booking appointments and time slots
+• Contact method assistance
+
+Just tell me what you need!`;
     } else if (locale === 'ko') {
       aiSection = `🤖 **AI 예약 어시스턴트**
 도움 가능한 것: 서비스 보기, 테라피스트 정보, 예약 상담
 
-💡 **빠른 팁:**
-• "WeChat QR 보기" 또는 "WhatsApp QR 보기"라고 말하면 QR 코드를 볼 수 있습니다
-• 특정 서비스나 테라피스트에 대해 문의하세요
-• 예약 관련 도움을 받으세요
+💡 **QR 코드 사용법:**
+• 위의 QR 코드 URL을 복사하여 브라우저에서 열기
+• 휴대폰으로 QR 코드를 스캔하여 추가
+• 또는 특정 QR 코드를 다시 보여달라고 요청
 
-연락 방법을 선택하거나 필요한 것을 알려주세요!`;
+🔧 **도움 가능한 것들:**
+• 서비스 정보 및 가격
+• 테라피스트 가용성 및 전문 분야
+• 예약 및 시간대
+• 연락 방법 지원
+
+필요한 것을 말씀해 주세요!`;
     } else {
       aiSection = `🤖 **AI预约助手**
 我可以帮您：查看服务详情、了解技师信息、预约时间咨询
 
-💡 **快速提示：**
-• 说"微信二维码"或"WhatsApp二维码"查看二维码
-• 询问特定服务或技师信息
-• 获取预约相关帮助
+💡 **二维码使用方法：**
+• 复制上方二维码链接，在浏览器中打开
+• 用手机扫描二维码即可添加我们  
+• 或者直接问我显示特定的二维码
 
-选择联系方式或直接告诉我您的需求！`;
+🔧 **我能协助的内容：**
+• 服务项目信息和价格
+• 技师档期和专业特长
+• 预约时间安排
+• 联系方式帮助
+
+直接告诉我您的需求！`;
     }
 
     return baseMessage + contactSection + aiSection;
@@ -886,20 +892,7 @@ Choose a contact method or tell me what you need!`;
     <div className={styles.container}>
       {renderCopilotUI()}
       
-      {/* 联系方式二维码弹窗 */}
-      {selectedContact && (
-        <ContactQRModal
-          isOpen={qrModalOpen}
-          onClose={() => {
-            setQrModalOpen(false);
-            setSelectedContact(null);
-          }}
-          contactType={selectedContact.type}
-          qrCodeUrl={selectedContact.qrCode || ''}
-          contactValue={selectedContact.value || undefined}
-          locale={locale}
-        />
-      )}
+      {/* QR modal removed - now using URL display in chat */}
       
       {/* 预约助手弹窗样式 */}
       <style jsx global>{`
