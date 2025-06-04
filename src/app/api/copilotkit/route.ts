@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // 初始化Google Generative AI客户端
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
 // 创建CopilotKit运行时
