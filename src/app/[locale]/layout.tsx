@@ -95,12 +95,12 @@ export default async function RootLayout({
       <body className="flex min-h-screen flex-col bg-white">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CopilotKit runtimeUrl="/api/copilotkit">
-            <Header locale={locale} />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-            <Toaster position="top-center" />
+          <Header locale={locale} />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <Toaster position="top-center" />
             
             {/* 全局预约助手 - 在所有页面显示 */}
             <BookingAssistant locale={locale} />

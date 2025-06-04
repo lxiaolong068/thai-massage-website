@@ -10,18 +10,18 @@ export default function HomePage({
   params: { locale: string }
 }) {
   return (
-    <main className="relative">
-      {/* Hero组件接收locale参数用于国际化 */}
-      <Hero locale={locale} />
-      
-      <div className="relative z-10">
-        {/* 静态组件不需要locale参数 */}
-        <About />
+      <main className="relative">
+        {/* Hero组件接收locale参数用于国际化 */}
+        <Hero locale={locale} />
         
-        {/* 其他组件 */}
-        <Introduction locale={locale} />
-        <Services locale={locale} />
-      </div>
-    </main>
+        <div className="relative z-10">
+          {/* 静态组件不需要locale参数 */}
+          <About />
+          
+          {/* 其他组件 */}
+          <Introduction locale={locale} />
+          <Services locale={locale} />
+        </div>
+      </main>
   );
 }
