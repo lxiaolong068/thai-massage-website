@@ -225,7 +225,7 @@ const copilotKit = new CopilotRuntime({
           }
         },
       },
-    ];
+    ] as const;
   },
 });
 
