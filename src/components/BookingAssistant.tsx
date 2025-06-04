@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { CopilotKit, useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
-import { CopilotSidebar } from '@copilotkit/react-ui';
+import { CopilotSidebar, CopilotPopup, CopilotChat } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { BookingFormData } from './BookingForm';
 import ContactQRModal from './ContactQRModal';
@@ -35,11 +35,45 @@ interface BookingAssistantProps {
   locale?: string;
 }
 
+// 检测设备类型的hook
+const useDeviceType = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkDeviceType = () => {
+      // 确保在浏览器环境中运行
+      if (typeof window === 'undefined') return;
+      
+      // 检测屏幕宽度
+      const screenWidth = window.innerWidth;
+      // 检测触摸设备
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      // 检测用户代理
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      setIsMobile(screenWidth < 768 || isTouchDevice || isMobileUA);
+    };
+
+    // 初始检测
+    checkDeviceType();
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', checkDeviceType);
+    
+    return () => {
+      window.removeEventListener('resize', checkDeviceType);
+    };
+  }, []);
+
+  return isMobile;
+};
+
 const BookingAssistant: React.FC<BookingAssistantProps> = ({ 
   onBookingComplete,
   locale = 'zh'
 }) => {
   const t = useTranslations('bookingAssistant');
+  const isMobile = useDeviceType();
   
   // 状态管理
   const [services, setServices] = useState<Service[]>([]);
@@ -49,6 +83,23 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<ContactMethod | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('');
+
+  // 调试信息更新
+  useEffect(() => {
+    // 确保在浏览器环境中运行
+    if (typeof window === 'undefined') return;
+    
+    const info = {
+      isMobile,
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+      userAgent: navigator.userAgent.substring(0, 50) + '...',
+      touchPoints: navigator.maxTouchPoints,
+      hasTouch: 'ontouchstart' in window
+    };
+    setDebugInfo(JSON.stringify(info, null, 2));
+  }, [isMobile]);
 
   // 获取服务列表
   useEffect(() => {
@@ -482,16 +533,57 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
+  // 移动端优化的样式
+  const mobileStyles = {
+    container: "booking-assistant fixed bottom-0 left-0 right-0 z-50 md:relative md:bottom-auto md:left-auto md:right-auto md:z-auto",
+    chatWrapper: "h-screen max-h-[70vh] md:h-auto md:max-h-none",
+    popup: "bottom-4 right-4 md:bottom-8 md:right-8"
+  };
+
+  const desktopStyles = {
+    container: "booking-assistant",
+    chatWrapper: "",
+    popup: ""
+  };
+
+  const styles = isMobile ? mobileStyles : desktopStyles;
+
+  // 渲染不同的UI组件
+  const renderCopilotUI = () => {
+    const commonProps = {
+      instructions: t('instructions'),
+      labels: {
+        title: t('title'),
+        initial: t('initial'),
+        placeholder: t('placeholder'),
+      }
+    };
+
+    if (isMobile) {
+      // 移动端使用弹窗界面
+      return (
+        <div className={styles.chatWrapper}>
+          <CopilotPopup
+            {...commonProps}
+            className="mobile-optimized"
+            defaultOpen={false}
+          />
+        </div>
+      );
+    } else {
+      // 桌面端使用侧边栏
+      return (
+        <CopilotSidebar
+          {...commonProps}
+          defaultOpen={false}
+        />
+      );
+    }
+  };
+
   return (
-    <div className="booking-assistant">
-      <CopilotSidebar
-        instructions={t('instructions')}
-        labels={{
-          title: t('title'),
-          initial: t('initial'),
-          placeholder: t('placeholder'),
-        }}
-      />
+    <div className={styles.container}>
+      {renderCopilotUI()}
       
       {/* 联系方式二维码弹窗 */}
       {selectedContact && (
@@ -507,18 +599,96 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           locale={locale}
         />
       )}
+      
+      {/* 移动端专用样式 */}
+      {isMobile && (
+        <style jsx global>{`
+          .mobile-optimized {
+            /* 确保移动端触摸交互正常 */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+          }
+          
+          .mobile-optimized input,
+          .mobile-optimized textarea,
+          .mobile-optimized button {
+            /* 移动端表单元素优化 */
+            font-size: 16px !important; /* 防止iOS缩放 */
+            touch-action: manipulation;
+            -webkit-appearance: none;
+            appearance: none;
+          }
+          
+          .mobile-optimized button {
+            /* 确保按钮在移动端可点击 */
+            min-height: 44px;
+            min-width: 44px;
+            padding: 12px;
+          }
+          
+          /* CopilotPopup移动端优化 */
+          @media (max-width: 768px) {
+            .mobile-optimized {
+              position: fixed !important;
+              bottom: 10px !important;
+              left: 10px !important;
+              right: 10px !important;
+              width: calc(100vw - 20px) !important;
+              max-width: none !important;
+              max-height: 80vh !important;
+              z-index: 9999 !important;
+            }
+            
+            /* 修复弹窗内容区域 */
+            .mobile-optimized [role="dialog"] {
+              max-height: 80vh !important;
+              width: 100% !important;
+            }
+            
+            /* 修复聊天输入框在移动端的显示 */
+            .mobile-optimized textarea,
+            .mobile-optimized input[type="text"] {
+              font-size: 16px !important;
+              line-height: 1.5 !important;
+              padding: 12px !important;
+              border-radius: 8px !important;
+              border: 1px solid #e2e8f0 !important;
+              background: white !important;
+            }
+            
+            /* 确保聊天消息可滚动 */
+            .mobile-optimized .copilot-chat-messages {
+              max-height: 50vh !important;
+              overflow-y: auto !important;
+              -webkit-overflow-scrolling: touch !important;
+            }
+            
+            /* 优化发送按钮 */
+            .mobile-optimized button[type="submit"],
+            .mobile-optimized .send-button {
+              min-height: 44px !important;
+              min-width: 44px !important;
+              font-size: 16px !important;
+              touch-action: manipulation !important;
+            }
+          }
+          
+          /* 确保弹窗在移动端正确显示 */
+          @media (max-width: 480px) {
+            .mobile-optimized {
+              bottom: 5px !important;
+              left: 5px !important;
+              right: 5px !important;
+              width: calc(100vw - 10px) !important;
+            }
+          }
+        `}</style>
+      )}
     </div>
   );
 };
 
-// 包装组件，提供CopilotKit上下文
-const BookingAssistantWrapper: React.FC<BookingAssistantProps> = (props) => {
-  return (
-    <CopilotKit runtimeUrl="/api/copilotkit">
-      <BookingAssistant {...props} />
-    </CopilotKit>
-  );
-};
-
-export default BookingAssistantWrapper;
+// 不再提供包装组件，直接导出主组件
+// 由页面级别统一管理CopilotKit上下文
+export default BookingAssistant;
 export { BookingAssistant };

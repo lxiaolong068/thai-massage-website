@@ -2,7 +2,7 @@ import Hero from '@/components/Hero';
 import About from '@/components/About';
 import Introduction from '@/components/Introduction';
 import Services from '@/components/Services';
-import { BookingAssistant } from '@/components/BookingAssistant';
+import BookingAssistant from '@/components/BookingAssistant';
 import { CopilotKit } from '@copilotkit/react-core';
 
 // 首页组件

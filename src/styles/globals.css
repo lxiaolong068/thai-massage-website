@@ -60,4 +60,76 @@ img {
   footer {
     padding-bottom: 4rem;
   }
+  
+  /* 确保弹窗在移动端正确定位 */
+  .copilot-popup {
+    position: fixed !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    max-height: 80vh !important;
+    z-index: 9999 !important;
+  }
+  
+  /* 优化聊天界面在移动端的显示 */
+  .copilot-popup .copilot-chat {
+    height: auto !important;
+    max-height: 70vh !important;
+  }
+  
+  /* 移动端输入框优化 */
+  .copilot-popup input,
+  .copilot-popup textarea {
+    font-size: 16px !important; /* 防止iOS自动缩放 */
+    line-height: 1.5 !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+    touch-action: manipulation !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  
+  /* 移动端按钮优化 */
+  .copilot-popup button {
+    min-height: 44px !important; /* iOS推荐的最小触摸目标 */
+    min-width: 44px !important;
+    font-size: 16px !important;
+    touch-action: manipulation !important;
+    padding: 12px !important;
+  }
+  
+  /* 聊天消息区域滚动优化 */
+  .copilot-popup [role="log"],
+  .copilot-popup .copilot-messages {
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    max-height: 50vh !important;
+  }
+  
+  /* 修复键盘弹出时的布局问题 */
+  .copilot-popup {
+    /* 使用viewport单位避免键盘影响 */
+    height: auto !important;
+    max-height: 80dvh !important; /* 动态视口高度 */
+  }
+}
+
+@media (max-width: 480px) {
+  .copilot-popup {
+    bottom: 5px !important;
+    left: 5px !important;
+    right: 5px !important;
+    width: calc(100vw - 10px) !important;
+  }
+}
+
+/* 确保触摸设备上的交互正常 */
+@media (pointer: coarse) {
+  .copilot-popup button,
+  .copilot-popup input,
+  .copilot-popup textarea {
+    touch-action: manipulation !important;
+  }
 }
