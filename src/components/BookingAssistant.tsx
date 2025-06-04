@@ -6,6 +6,7 @@ import { CopilotKit, useCopilotAction, useCopilotReadable } from '@copilotkit/re
 import { CopilotSidebar } from '@copilotkit/react-ui';
 import '@copilotkit/react-ui/styles.css';
 import { BookingFormData } from './BookingForm';
+import ContactQRModal from './ContactQRModal';
 
 interface Service {
   id: string;
@@ -22,6 +23,13 @@ interface Therapist {
   workStatus: string;
 }
 
+interface ContactMethod {
+  id: string;
+  type: string;
+  value: string | null;
+  qrCode: string | null;
+}
+
 interface BookingAssistantProps {
   onBookingComplete?: (bookingData: BookingFormData) => void;
   locale?: string;
@@ -36,8 +44,11 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
   // 状态管理
   const [services, setServices] = useState<Service[]>([]);
   const [therapists, setTherapists] = useState<Therapist[]>([]);
+  const [contactMethods, setContactMethods] = useState<ContactMethod[]>([]);
   const [bookingData, setBookingData] = useState<Partial<BookingFormData>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<ContactMethod | null>(null);
 
   // 获取服务列表
   useEffect(() => {
@@ -73,6 +84,23 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     fetchTherapists();
   }, []);
 
+  // 获取联系方式列表
+  useEffect(() => {
+    const fetchContactMethods = async () => {
+      try {
+        const response = await fetch('/api/v1/public/contact-methods');
+        const data = await response.json();
+        if (data.success) {
+          setContactMethods(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch contact methods:', error);
+      }
+    };
+
+    fetchContactMethods();
+  }, []);
+
   // 让AI了解可用的服务
   useCopilotReadable({
     description: "Available massage services with names, prices, and duration information",
@@ -98,6 +126,22 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }))
   });
 
+  // 让AI了解可用的联系方式
+  useCopilotReadable({
+    description: "Available contact methods for customer support and booking assistance",
+    value: contactMethods.map(method => ({
+      type: method.type,
+      value: method.value,
+      canDirectLink: method.type.toLowerCase() === 'line' || method.type.toLowerCase() === 'telegram',
+      hasQrCode: !!method.qrCode,
+      description: locale === 'en' 
+        ? `${method.type} - ${method.type.toLowerCase() === 'line' || method.type.toLowerCase() === 'telegram' ? 'Direct link available' : 'QR code available'}`
+        : locale === 'ko' 
+        ? `${method.type} - ${method.type.toLowerCase() === 'line' || method.type.toLowerCase() === 'telegram' ? '직접 링크 가능' : 'QR 코드 제공'}`
+        : `${method.type} - ${method.type.toLowerCase() === 'line' || method.type.toLowerCase() === 'telegram' ? '可直接链接' : '提供二维码'}`
+    }))
+  });
+
   // 让AI了解当前预约进度
   useCopilotReadable({
     description: "Current booking form progress and selected information",
@@ -110,6 +154,105 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
       customerPhone: bookingData.phone || (locale === 'en' ? 'Not filled' : (locale === 'ko' ? '입력되지 않음' : '未填写')),
       customerEmail: bookingData.email || (locale === 'en' ? 'Not filled' : (locale === 'ko' ? '입력되지 않음' : '未填写')),
       notes: bookingData.notes || (locale === 'en' ? 'No notes' : (locale === 'ko' ? '메모 없음' : '无备注'))
+    }
+  });
+
+  // 推荐联系方式的动作
+  useCopilotAction({
+    name: "recommendContactMethods",
+    description: "Recommend contact methods to the user for further assistance or booking confirmation",
+    parameters: [
+      {
+        name: "situation",
+        type: "string",
+        description: "The situation context for recommending contact methods (e.g., 'after_inquiry', 'booking_complete', 'need_help')",
+        required: false
+      }
+    ],
+    handler: ({ situation }) => {
+      if (contactMethods.length === 0) {
+        return locale === 'en' 
+          ? "Sorry, contact methods are not available at the moment."
+          : locale === 'ko'
+          ? "죄송합니다. 현재 연락처 정보를 사용할 수 없습니다."
+          : "抱歉，目前联系方式不可用。";
+      }
+
+      const intro = locale === 'en' 
+        ? "For further assistance or to confirm your booking, you can contact us through the following methods:"
+        : locale === 'ko'
+        ? "추가 도움이나 예약 확인을 위해 다음 방법으로 연락하실 수 있습니다:"
+        : "如需进一步帮助或确认预约，您可以通过以下方式联系我们：";
+
+      const contactInfo = contactMethods.map(method => {
+        const methodName = method.type;
+        if (method.type.toLowerCase() === 'line') {
+          const linkUrl = method.value?.startsWith('http') ? method.value : `https://line.me/ti/p/~${method.value}`;
+          return locale === 'en'
+            ? `📱 ${methodName}: Click here to chat → [${linkUrl}](${linkUrl})`
+            : locale === 'ko'
+            ? `📱 ${methodName}: 채팅하려면 클릭 → [${linkUrl}](${linkUrl})`
+            : `📱 ${methodName}：点击链接直接聊天 → [${linkUrl}](${linkUrl})`;
+        } else if (method.type.toLowerCase() === 'telegram') {
+          const linkUrl = `https://t.me/${method.value}`;
+          return locale === 'en'
+            ? `📱 ${methodName}: Click here to chat → [${linkUrl}](${linkUrl})`
+            : locale === 'ko'
+            ? `📱 ${methodName}: 채팅하려면 클릭 → [${linkUrl}](${linkUrl})`
+            : `📱 ${methodName}：点击链接直接聊天 → [${linkUrl}](${linkUrl})`;
+        } else {
+          return locale === 'en'
+            ? `📱 ${methodName}: Click "Show QR Code" button to view and scan`
+            : locale === 'ko'
+            ? `📱 ${methodName}: "QR 코드 보기" 버튼을 클릭하여 확인하고 스캔하세요`
+            : `📱 ${methodName}：点击"显示二维码"按钮查看并扫描`;
+        }
+      }).join('\n');
+
+      const suggestion = locale === 'en'
+        ? "\n💡 Tip: When contacting us, please mention your booking details for faster assistance."
+        : locale === 'ko'
+        ? "\n💡 팁: 연락하실 때 예약 세부 정보를 말씀해 주시면 더 빠른 도움을 받으실 수 있습니다."
+        : "\n💡 小贴士：联系时请提及您的预约详情，以便我们更快地为您提供帮助。";
+
+      return `${intro}\n\n${contactInfo}${suggestion}`;
+    }
+  });
+
+  // 显示联系方式二维码的动作
+  useCopilotAction({
+    name: "showContactQR",
+    description: "Show QR code for a specific contact method (WeChat or WhatsApp)",
+    parameters: [
+      {
+        name: "contactType",
+        type: "string",
+        description: "The type of contact method (WeChat, WhatsApp)",
+        required: true
+      }
+    ],
+    handler: ({ contactType }) => {
+      const method = contactMethods.find(
+        m => m.type.toLowerCase() === contactType.toLowerCase()
+      );
+      
+      if (!method || !method.qrCode) {
+        return locale === 'en'
+          ? `QR code for ${contactType} is not available.`
+          : locale === 'ko'
+          ? `${contactType} QR 코드를 사용할 수 없습니다.`
+          : `${contactType}二维码不可用。`;
+      }
+
+      // 显示二维码弹窗
+      setSelectedContact(method);
+      setQrModalOpen(true);
+
+      return locale === 'en'
+        ? `Displaying ${contactType} QR code. Please scan with your phone to contact us.`
+        : locale === 'ko'
+        ? `${contactType} QR 코드를 표시합니다. 휴대폰으로 스캔하여 연락해주세요.`
+        : `正在显示${contactType}二维码，请用手机扫码联系我们。`;
     }
   });
 
@@ -349,6 +492,21 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
           placeholder: t('placeholder'),
         }}
       />
+      
+      {/* 联系方式二维码弹窗 */}
+      {selectedContact && (
+        <ContactQRModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setSelectedContact(null);
+          }}
+          contactType={selectedContact.type}
+          qrCodeUrl={selectedContact.qrCode || ''}
+          contactValue={selectedContact.value || undefined}
+          locale={locale}
+        />
+      )}
     </div>
   );
 };
@@ -363,4 +521,4 @@ const BookingAssistantWrapper: React.FC<BookingAssistantProps> = (props) => {
 };
 
 export default BookingAssistantWrapper;
-export { BookingAssistantWrapper as BookingAssistant };
+export { BookingAssistant };
