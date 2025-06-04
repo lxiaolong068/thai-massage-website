@@ -307,6 +307,55 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
     }
   });
 
+  // 处理用户的二维码请求
+  useCopilotAction({
+    name: "handleQRRequest",
+    description: "Handle user requests for QR codes when they say 'WeChat QR', 'WhatsApp QR', etc.",
+    parameters: [
+      {
+        name: "userMessage",
+        type: "string", 
+        description: "User's original message requesting QR code",
+        required: true
+      }
+    ],
+    handler: ({ userMessage }) => {
+      const message = userMessage.toLowerCase();
+      
+      if (message.includes('微信') || message.includes('wechat')) {
+        const wechatMethod = contactMethods.find(m => m.type.toLowerCase() === 'wechat');
+        if (wechatMethod && wechatMethod.qrCode) {
+          setSelectedContact(wechatMethod);
+          setQrModalOpen(true);
+          return locale === 'en'
+            ? "Showing WeChat QR code. Please scan to add us and start chatting!"
+            : locale === 'ko'
+            ? "WeChat QR 코드를 표시합니다. 스캔하여 추가하고 채팅을 시작하세요!"
+            : "正在显示微信二维码，请扫码添加我们开始聊天！";
+        }
+      }
+      
+      if (message.includes('whatsapp')) {
+        const whatsappMethod = contactMethods.find(m => m.type.toLowerCase() === 'whatsapp');
+        if (whatsappMethod && whatsappMethod.qrCode) {
+          setSelectedContact(whatsappMethod);
+          setQrModalOpen(true);
+          return locale === 'en'
+            ? "Showing WhatsApp QR code. Please scan to start chatting with us!"
+            : locale === 'ko'
+            ? "WhatsApp QR 코드를 표시합니다. 스캔하여 채팅을 시작하세요!"
+            : "正在显示WhatsApp二维码，请扫码开始与我们聊天！";
+        }
+      }
+      
+      return locale === 'en'
+        ? "Sorry, I couldn't find the requested QR code. Please try 'WeChat QR' or 'WhatsApp QR'."
+        : locale === 'ko'
+        ? "죄송합니다. 요청하신 QR 코드를 찾을 수 없습니다. 'WeChat QR' 또는 'WhatsApp QR'을 시도해보세요."
+        : "抱歉，找不到您请求的二维码。请尝试输入\"微信二维码\"或\"WhatsApp二维码\"。";
+    }
+  });
+
   // 选择服务的动作
   useCopilotAction({
     name: "selectService",
@@ -615,13 +664,92 @@ const BookingAssistant: React.FC<BookingAssistantProps> = ({
 
   const styles = isMobile ? mobileStyles : desktopStyles;
 
+  // 动态生成包含真实联系方式的欢迎消息
+  const generateWelcomeMessage = () => {
+    let baseMessage = "";
+    let contactSection = "";
+
+    // 基础欢迎和服务信息
+    if (locale === 'en') {
+      baseMessage = "👋 Welcome to Thai Massage Center!\n\n🌟 **Professional Thai Massage Services**\n• Traditional Thai Massage - Muscle tension relief\n• Oil Massage - Deep relaxation experience\n• Foot Massage - Fatigue relief\n• Expert therapists with rich experience\n\n";
+    } else if (locale === 'ko') {
+      baseMessage = "👋 태국 마사지 센터에 오신 것을 환영합니다!\n\n🌟 **전문 태국 마사지 서비스**\n• 전통 태국 마사지 - 근육 긴장 완화\n• 오일 마사지 - 깊은 휴식 경험\n• 발 마사지 - 피로 해소\n• 풍부한 경험의 전문 테라피스트\n\n";
+    } else {
+      baseMessage = "👋 欢迎来到泰式按摩中心！\n\n🌟 **专业泰式按摩服务**\n• 传统泰式按摩 - 缓解肌肉紧张\n• 精油按摩 - 深层放松体验\n• 足部按摩 - 舒缓疲劳\n• 专业技师团队，丰富经验\n\n";
+    }
+
+    // 动态生成联系方式部分
+    if (contactMethods.length > 0) {
+      if (locale === 'en') {
+        contactSection = "📞 **Direct Contact**\n";
+      } else if (locale === 'ko') {
+        contactSection = "📞 **직접 연락**\n";
+      } else {
+        contactSection = "📞 **直接联系方式**\n";
+      }
+
+      contactMethods.forEach(method => {
+        const methodType = method.type;
+        
+        if (method.type.toLowerCase() === 'line' && method.value) {
+          const lineUrl = `line://ti/p/${method.value}`;
+          if (locale === 'en') {
+            contactSection += `🟢 **Line**: [Click to Contact](${lineUrl}) - Instant booking confirmation\n`;
+          } else if (locale === 'ko') {
+            contactSection += `🟢 **Line**: [클릭하여 연락](${lineUrl}) - 즉시 예약 확인\n`;
+          } else {
+            contactSection += `🟢 **Line**: [点击联系](${lineUrl}) - 即时预约确认\n`;
+          }
+        } else if (method.type.toLowerCase() === 'telegram' && method.value) {
+          const telegramUrl = `https://t.me/${method.value}`;
+          if (locale === 'en') {
+            contactSection += `✈️ **Telegram**: [Click to Contact](${telegramUrl}) - Secure & convenient\n`;
+          } else if (locale === 'ko') {
+            contactSection += `✈️ **Telegram**: [클릭하여 연락](${telegramUrl}) - 안전하고 편리\n`;
+          } else {
+            contactSection += `✈️ **Telegram**: [点击联系](${telegramUrl}) - 安全便捷\n`;
+          }
+        } else if (method.type.toLowerCase() === 'wechat') {
+          if (locale === 'en') {
+            contactSection += `💬 **WeChat**: Send "WeChat QR" to view - Chinese service\n`;
+          } else if (locale === 'ko') {
+            contactSection += `💬 **WeChat**: "WeChat QR" 전송하여 보기 - 중국어 서비스\n`;
+          } else {
+            contactSection += `💬 **微信**: 发送"微信二维码"查看 - 中文服务\n`;
+          }
+        } else if (method.type.toLowerCase() === 'whatsapp') {
+          if (locale === 'en') {
+            contactSection += `📱 **WhatsApp**: Send "WhatsApp QR" to view - Multi-language support\n`;
+          } else if (locale === 'ko') {
+            contactSection += `📱 **WhatsApp**: "WhatsApp QR" 전송하여 보기 - 다국어 지원\n`;
+          } else {
+            contactSection += `📱 **WhatsApp**: 发送"WhatsApp二维码"查看 - 多语言支持\n`;
+          }
+        }
+      });
+      contactSection += "\n";
+    }
+
+    // AI助手说明和结尾
+    let aiSection = "";
+    if (locale === 'en') {
+      aiSection = "🤖 **AI Booking Assistant**\nI can help you: View services, Check therapist info, Booking consultation\n\nChoose a contact method or tell me what you need!";
+    } else if (locale === 'ko') {
+      aiSection = "🤖 **AI 예약 어시스턴트**\n도움 가능한 것: 서비스 보기, 테라피스트 정보, 예약 상담\n\n연락 방법을 선택하거나 필요한 것을 알려주세요!";
+    } else {
+      aiSection = "🤖 **AI预约助手**\n我可以帮您：查看服务详情、了解技师信息、预约时间咨询\n\n选择联系方式或直接告诉我您的需求！";
+    }
+
+    return baseMessage + contactSection + aiSection;
+  };
+
   // 渲染不同的UI组件
   const renderCopilotUI = () => {
     const commonProps = {
       instructions: t('instructions'),
       labels: {
         title: t('title'),
-        initial: t('initial'),
+        initial: generateWelcomeMessage(),
         placeholder: t('placeholder'),
       }
     };

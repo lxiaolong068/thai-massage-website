@@ -349,5 +349,8 @@
         "phone": "Phone"
       }
     }
+  },
+  "copilotkit": {
+    "initialMessage": "👋 Welcome to Thai Massage Center!\n\n🌟 **Professional Thai Massage Services**\n• Traditional Thai Massage - Muscle tension relief\n• Oil Massage - Deep relaxation experience\n• Foot Massage - Fatigue relief\n• Expert therapists with rich experience\n\n📞 **Direct Contact**\n🟢 **Line**: [Click to Contact](line://ti/p/YOUR_LINE_ID) - Instant booking confirmation\n✈️ **Telegram**: [Click to Contact](https://t.me/YOUR_TELEGRAM) - Secure & convenient\n💬 **WeChat**: Send \"WeChat QR\" to view - Chinese service\n📱 **WhatsApp**: Send \"WhatsApp QR\" to view - Multi-language support\n\n🤖 **AI Booking Assistant**\nI can help you: View services, Check therapist info, Booking consultation\n\nChoose a contact method or tell me what you need!"
   }
 }
