@@ -32,7 +32,7 @@ export async function GET() {
        .map(method => ({
          id: method.id,
          type: method.type,
-         value: method.value, // Include value in the result
+         value: method.value || '', // Ensure value is never null
          qrCode: method.qrCode
        }));
 

@@ -42,7 +42,7 @@ const MobileContactBar: React.FC = () => {
   };
 
   const getContactLink = (method: ContactMethod): string => {
-    const value = method.value.trim();
+    const value = (method.value || '').trim();
     switch (method.type.toLowerCase()) {
       case 'line':
         // 确保只取 ID 部分
