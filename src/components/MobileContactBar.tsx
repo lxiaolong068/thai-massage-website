@@ -1,14 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Phone, X } from 'lucide-react';
 import Link from 'next/link';
 
+interface ContactMethod {
+  id: string;
+  type: string;
+  value: string;
+  qrCode: string;
+}
+
 const MobileContactBar: React.FC = () => {
   const t = useTranslations('booking');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [methods, setMethods] = useState<ContactMethod[]>([]);
+
+  useEffect(() => {
+    const fetchContactMethods = async () => {
+      try {
+        const response = await fetch('/api/v1/public/contact-methods');
+        if (!response.ok) {
+          throw new Error('Failed to fetch contact methods');
+        }
+        const data = await response.json();
+        if (data.success) {
+          setMethods(data.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchContactMethods();
+  }, []);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
