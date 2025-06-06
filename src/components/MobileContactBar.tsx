@@ -15,7 +15,7 @@ const MobileContactBar: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-14 left-0 right-0 z-50 md:hidden bg-transparent pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-transparent pointer-events-none">
       {isExpanded ? (
         <div className="pointer-events-auto bg-white/75 rounded-t-lg shadow-lg p-3 animate-slide-up">
           <div className="flex justify-between items-center mb-2">

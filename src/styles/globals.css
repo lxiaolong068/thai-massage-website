@@ -61,15 +61,15 @@ img {
     padding-bottom: 4rem;
   }
   
-  /* 确保弹窗在移动端正确定位 */
+  /* 确保弹窗在移动端正确定位 - 留出底部联系栏空间 */
   .copilot-popup {
     position: fixed !important;
-    bottom: 10px !important;
+    bottom: 70px !important; /* 提高到联系栏上方 */
     left: 10px !important;
     right: 10px !important;
     width: calc(100vw - 20px) !important;
     max-width: none !important;
-    max-height: 80vh !important;
+    max-height: 60vh !important; /* 减少高度为联系栏留空间 */
     z-index: 9999 !important;
   }
   
@@ -118,7 +118,7 @@ img {
 
 @media (max-width: 480px) {
   .copilot-popup {
-    bottom: 5px !important;
+    bottom: 65px !important; /* 在小屏幕上也留出联系栏空间 */
     left: 5px !important;
     right: 5px !important;
     width: calc(100vw - 10px) !important;

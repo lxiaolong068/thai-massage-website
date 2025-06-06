@@ -932,13 +932,13 @@ Just tell me what you need!`;
           }
         }
 
-        /* 移动端样式 - 右侧定位但不占满宽 */
+        /* 移动端样式 - 右侧定位但不占满宽，留出底部联系栏空间 */
         @media (max-width: 480px) {
           .booking-assistant-popup {
-            bottom: 80px !important;
+            bottom: 70px !important; /* 在联系栏上方 */
             right: 20px !important;
             max-width: 320px !important;
-            max-height: 70vh !important;
+            max-height: 60vh !important; /* 减少高度为联系栏留空间 */
             /* 移除left定位，保持右侧对齐 */
           }
           
@@ -952,10 +952,10 @@ Just tell me what you need!`;
         /* 超小屏移动端 */
         @media (max-width: 375px) {
           .booking-assistant-popup {
-            bottom: 70px !important;
+            bottom: 65px !important; /* 在联系栏上方 */
             right: 15px !important;
             max-width: 280px !important;
-            max-height: 65vh !important;
+            max-height: 55vh !important; /* 进一步减少高度 */
           }
           
           .booking-assistant-popup button[data-state="closed"] {
