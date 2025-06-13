@@ -197,7 +197,7 @@ const MobileContactBar: React.FC = () => {
       {/* QR Code Modal */}
       {showQRModal && selectedMethod && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 pointer-events-auto"
           onClick={closeQRModal}
         >
           <div 
@@ -205,11 +205,7 @@ const MobileContactBar: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                closeQRModal();
-              }}
+              onClick={closeQRModal}
               className="absolute top-3 right-3 p-1 rounded-full bg-gray-100 hover:bg-gray-200 z-10"
             >
               <X size={20} />
